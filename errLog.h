@@ -5,7 +5,8 @@
 #include <fstream>
 #include <codecvt>			// utf8 로 변환
 
-enum errId {
+enum errId 
+{
 	debug = 0,
 	info,
 	userAction,
@@ -23,6 +24,5 @@ private:
 	static std::wstring path;		// 저장경로
 	static CRITICAL_SECTION cs;		// sync
 	static errLog *instance;
-	static void format(const std::wstring data, ...);
 
 };

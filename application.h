@@ -4,7 +4,7 @@
 class application
 {
 public:
-	application(HINSTANCE instance, std::wstring programName);
+	application(HINSTANCE instance);
 	~application();
 	bool initialize();
 	void run();
@@ -12,8 +12,11 @@ public:
 
 private:
 	HINSTANCE instance;
+	HWND window;
 	std::wstring programName;
+	HANDLE timer;
 
-	bool isAlreadyRunning();
+	bool isAlreadyRunning(std::wstring programName);
+	bool createWindow(HINSTANCE instance, std::wstring programName, HWND *window);
 
 };

@@ -15,9 +15,11 @@ static std::map<int, std::wstring> errIds =
 
 errLog *errLog::getInstance()
 {
-	if (instance == nullptr) {
+	if (instance == nullptr) 
+	{
 		instance = new errLog();
-		if ((instance == nullptr) || (instance->initialize() == false)) {
+		if ((instance == nullptr) || (instance->initialize() == false)) 
+		{
 			safeDelete(instance);
 			return nullptr;
 		}
@@ -30,7 +32,8 @@ bool errLog::initialize()
 	// log 파일경로
 	// https://docs.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shgetknownfolderpath
 	wchar_t *profile = nullptr;
-	if (FAILED(::SHGetKnownFolderPath(FOLDERID_Profile, 0, nullptr, &profile))) {
+	if (FAILED(::SHGetKnownFolderPath(FOLDERID_Profile, 0, nullptr, &profile))) 
+	{
 		return false;
 	}
 
@@ -72,9 +75,11 @@ void errLog::write(errId id, std::wstring message, ...)
 	std::wofstream stream;
 	stream.imbue(std::locale(stream.getloc(), new std::codecvt_utf8<wchar_t, 0x10ffff, std::consume_header>));
 	stream.open(filePath, std::ios::app);
-	if (stream.is_open() == true) {
+	if (stream.is_open() == true) 
+	{
 		std::map<int, std::wstring>::iterator iter = errIds.find(id);
-		if (iter != errIds.end()) {
+		if (iter != errIds.end()) 
+		{
 
 			// 가변인자 포함한 문자열 만들기
 			va_list args;

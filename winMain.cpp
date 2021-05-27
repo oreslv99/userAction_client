@@ -7,8 +7,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	UNREFERENCED_PARAMETER(pCmdLine);
 	UNREFERENCED_PARAMETER(nCmdShow);
 
-	application *app = new application(hInstance, L"uaWatch");
-	if (app->initialize() == false) {
+	application *app = new application(hInstance);
+	if (app->initialize() == false) 
+	{
 		log->write(errId::error, L"Failed to initialize application.");
 		return -1;
 	}
