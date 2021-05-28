@@ -21,11 +21,49 @@
   <ItemGroup>
     <ClInclude Include="application.h" />
     <ClInclude Include="errLog.h" />
+    <ClInclude Include="extern\rapidJson\allocators.h" />
+    <ClInclude Include="extern\rapidJson\cursorstreamwrapper.h" />
+    <ClInclude Include="extern\rapidJson\document.h" />
+    <ClInclude Include="extern\rapidJson\encodedstream.h" />
+    <ClInclude Include="extern\rapidJson\encodings.h" />
+    <ClInclude Include="extern\rapidJson\error\en.h" />
+    <ClInclude Include="extern\rapidJson\error\error.h" />
+    <ClInclude Include="extern\rapidJson\filereadstream.h" />
+    <ClInclude Include="extern\rapidJson\filewritestream.h" />
+    <ClInclude Include="extern\rapidJson\fwd.h" />
+    <ClInclude Include="extern\rapidJson\internal\biginteger.h" />
+    <ClInclude Include="extern\rapidJson\internal\diyfp.h" />
+    <ClInclude Include="extern\rapidJson\internal\dtoa.h" />
+    <ClInclude Include="extern\rapidJson\internal\ieee754.h" />
+    <ClInclude Include="extern\rapidJson\internal\itoa.h" />
+    <ClInclude Include="extern\rapidJson\internal\meta.h" />
+    <ClInclude Include="extern\rapidJson\internal\pow10.h" />
+    <ClInclude Include="extern\rapidJson\internal\regex.h" />
+    <ClInclude Include="extern\rapidJson\internal\stack.h" />
+    <ClInclude Include="extern\rapidJson\internal\strfunc.h" />
+    <ClInclude Include="extern\rapidJson\internal\strtod.h" />
+    <ClInclude Include="extern\rapidJson\internal\swap.h" />
+    <ClInclude Include="extern\rapidJson\istreamwrapper.h" />
+    <ClInclude Include="extern\rapidJson\memorybuffer.h" />
+    <ClInclude Include="extern\rapidJson\memorystream.h" />
+    <ClInclude Include="extern\rapidJson\msinttypes\inttypes.h" />
+    <ClInclude Include="extern\rapidJson\msinttypes\stdint.h" />
+    <ClInclude Include="extern\rapidJson\ostreamwrapper.h" />
+    <ClInclude Include="extern\rapidJson\pointer.h" />
+    <ClInclude Include="extern\rapidJson\prettywriter.h" />
+    <ClInclude Include="extern\rapidJson\rapidjson.h" />
+    <ClInclude Include="extern\rapidJson\reader.h" />
+    <ClInclude Include="extern\rapidJson\schema.h" />
+    <ClInclude Include="extern\rapidJson\stream.h" />
+    <ClInclude Include="extern\rapidJson\stringbuffer.h" />
+    <ClInclude Include="extern\rapidJson\writer.h" />
+    <ClInclude Include="extern\tinyxml2\tinyxml2.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="application.cpp" />
     <ClCompile Include="errLog.cpp" />
+    <ClCompile Include="extern\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="winMain.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
