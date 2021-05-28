@@ -156,6 +156,24 @@
     <ClInclude Include="errLog.h">
       <Filter>Source Files\helper</Filter>
     </ClInclude>
+    <ClInclude Include="rapidJson.h">
+      <Filter>Source Files\contexts</Filter>
+    </ClInclude>
+    <ClInclude Include="tinyXml.h">
+      <Filter>Source Files\contexts</Filter>
+    </ClInclude>
+    <ClInclude Include="winSock.h">
+      <Filter>Source Files\contexts</Filter>
+    </ClInclude>
+    <ClInclude Include="context.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rule.h">
+      <Filter>Source Files\contexts</Filter>
+    </ClInclude>
+    <ClInclude Include="awayFromKeyboard.h">
+      <Filter>Source Files\features</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="winMain.cpp" />
@@ -167,6 +185,24 @@
     </ClCompile>
     <ClCompile Include="errLog.cpp">
       <Filter>Source Files\helper</Filter>
+    </ClCompile>
+    <ClCompile Include="rapidJson.cpp">
+      <Filter>Source Files\contexts</Filter>
+    </ClCompile>
+    <ClCompile Include="tinyXml.cpp">
+      <Filter>Source Files\contexts</Filter>
+    </ClCompile>
+    <ClCompile Include="winSock.cpp">
+      <Filter>Source Files\contexts</Filter>
+    </ClCompile>
+    <ClCompile Include="context.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="rule.cpp">
+      <Filter>Source Files\contexts</Filter>
+    </ClCompile>
+    <ClCompile Include="awayFromKeyboard.cpp">
+      <Filter>Source Files\features</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

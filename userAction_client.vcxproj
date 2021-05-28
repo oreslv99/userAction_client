@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
+    <ClInclude Include="awayFromKeyboard.h" />
+    <ClInclude Include="context.h" />
     <ClInclude Include="errLog.h" />
     <ClInclude Include="extern\rapidJson\allocators.h" />
     <ClInclude Include="extern\rapidJson\cursorstreamwrapper.h" />
@@ -58,13 +60,23 @@
     <ClInclude Include="extern\rapidJson\stringbuffer.h" />
     <ClInclude Include="extern\rapidJson\writer.h" />
     <ClInclude Include="extern\tinyxml2\tinyxml2.h" />
+    <ClInclude Include="rapidJson.h" />
+    <ClInclude Include="rule.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="tinyXml.h" />
+    <ClInclude Include="winSock.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="application.cpp" />
+    <ClCompile Include="awayFromKeyboard.cpp" />
+    <ClCompile Include="context.cpp" />
     <ClCompile Include="errLog.cpp" />
     <ClCompile Include="extern\tinyxml2\tinyxml2.cpp" />
+    <ClCompile Include="rapidJson.cpp" />
+    <ClCompile Include="rule.cpp" />
+    <ClCompile Include="tinyXml.cpp" />
     <ClCompile Include="winMain.cpp" />
+    <ClCompile Include="winSock.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

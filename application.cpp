@@ -1,23 +1,17 @@
 #include "application.h"
 
-//
-// static
-//
-LRESULT CALLBACK wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	// file io watch 를 위함
-	return ::DefWindowProcW(hWnd, uMsg, wParam, lParam);
-}
+const std::wstring SECTION_SERVER = L"Server";
 
 //
 // public
 //
 application::application(HINSTANCE instance)
-	:instance(instance), window(nullptr), programName(), timer(INVALID_HANDLE_VALUE)
+	:instance(instance), programName(), appContext(nullptr)
 {
 }
 application::~application()
 {
+	// release() 에서 해제함
 }
 bool application::initialize()
 {
@@ -36,8 +30,16 @@ bool application::initialize()
 		return false;
 	}
 
+	// 컨텍스트 생성
+	this->appContext = new context();
+	if (this->appContext == nullptr)
+	{
+		log->write(errId::error, L"[%s:%03d] Failed to create application context.", __FUNCTIONW__, __LINE__);
+		return false;
+	}
+
 	// window 생성
-	if (createWindow(this->instance, this->programName, &this->window) == false)
+	if (createWindow(this->instance, this->programName, this->appContext) == false)
 	{
 		log->write(errId::error, L"[%s:%03d] createWindow is Failed.", __FUNCTIONW__, __LINE__);
 		return false;
@@ -51,52 +53,36 @@ bool application::initialize()
 		return false;
 	}
 
-	// 정책 확인
+	// 환경 파일
+	std::wstring ip;
+	std::wstring port;
+	if (readEnvironmet(this->appContext) == false)
+	{
+		log->write(errId::error, L"[%s:%03d] readEnvironmet is Failed.", __FUNCTIONW__, __LINE__);
+		return false;
+	}
 
-	return true; 
+	// 컨텍스트 초기화
+	if (this->appContext->initialize() == false)
+	{
+		log->write(errId::error, L"[%s:%03d] Failed to create application context.", __FUNCTIONW__, __LINE__);
+		return false;
+	}
+
+	return true;
 }
-void application::run() 
+void application::run()
 {
-	// 타이머 설정
-	LARGE_INTEGER dueTime;
-	dueTime.QuadPart = 0;
-
-	this->timer = ::CreateWaitableTimerW(nullptr, FALSE, nullptr);
-	if (::SetWaitableTimer(this->timer, &dueTime, 2999, nullptr, nullptr, FALSE) == FALSE) // 임시 3000 ms
-	{
-		errLog::getInstance()->write(errId::error, L"[%s:%03d] code[%d] SetWaitableTimer is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
-		return;
-	}
-
-	// 메시지 루프
-	MSG message;
-	while (::PeekMessageW(&message, nullptr, 0, 0, PM_NOREMOVE) == TRUE)
-	{
-		::TranslateMessage(&message);
-		::DispatchMessageW(&message);
-
-		if (message.message == WM_QUIT)
-		{
-			log->write(errId::info, L"[%s:%03d] message == wm_quit.", __FUNCTIONW__, __LINE__);
-			break;
-		}
-
-		if (::WaitForSingleObject(this->timer, 1) == WAIT_OBJECT_0)
-		{
-			// do something
-		}
-	}
-	
+	this->appContext->tickTock();
 }
 int application::release()
 {
-	if (this->timer != INVALID_HANDLE_VALUE)
-	{
-		::CancelWaitableTimer(this->timer);
-		safeCloseHandle(this->timer);
-	}
+	safeDelete(this->appContext);
 
 	::CoUninitialize();
+
+	log->write(errId::info, L"End of application.");
+	log->release();
 
 	return 0;
 }
@@ -109,13 +95,13 @@ bool application::isAlreadyRunning(std::wstring programName)
 	HANDLE mutex = ::CreateMutexW(nullptr, FALSE, programName.c_str());
 	return ((::GetLastError() == ERROR_ALREADY_EXISTS) ? true : false);
 }
-bool application::createWindow(HINSTANCE instance, std::wstring programName, HWND *window)
+bool application::createWindow(HINSTANCE instance, std::wstring programName, context *appContext)
 {
 	// 클래스 등록
 	WNDCLASSW wndClass;
 	::memset(&wndClass, 0x00, sizeof(WNDCLASSW));
 	wndClass.hInstance = instance;
-	wndClass.lpfnWndProc = wndProc;
+	wndClass.lpfnWndProc = appContext->getWndProc();
 	wndClass.lpszClassName = programName.c_str();
 	if (::RegisterClassW(&wndClass) == 0)
 	{
@@ -124,12 +110,37 @@ bool application::createWindow(HINSTANCE instance, std::wstring programName, HWN
 	}
 
 	// 윈도우 생성
-	*window = ::CreateWindowExW(0, wndClass.lpszClassName, wndClass.lpszClassName, 0, 0, 0, 0, 0, nullptr, nullptr, wndClass.hInstance, nullptr);
-	if (*window == nullptr)
+	appContext->setWindow(::CreateWindowExW(0, wndClass.lpszClassName, wndClass.lpszClassName, 0, 0, 0, 0, 0, nullptr, nullptr, wndClass.hInstance, nullptr));
+
+	return true;
+}
+bool application::readEnvironmet(context *appContext)
+{
+	// ini 파일경로
+	// https://docs.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shgetknownfolderpath
+	wchar_t *profile = nullptr;
+	if (FAILED(::SHGetKnownFolderPath(FOLDERID_Profile, 0, nullptr, &profile)))
 	{
-		log->write(errId::error, L"[%s:%03d] err[%05d] CreateWindowExW is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 		return false;
 	}
+
+	std::wstring iniFilePath;
+	iniFilePath += profile;
+	iniFilePath += L"\\.userAction\\settings.ini";
+
+	// SHGetKnownFolderPath 로 확인한 wchar_t buffer 는 CoTaskMemFree 로 release
+	safeCoTaskMemFree(profile);
+
+	std::wstring ip;
+	std::wstring port;
+	ip.resize(16);
+	port.resize(5);
+	::GetPrivateProfileStringW(SECTION_SERVER.c_str(), L"ip", nullptr, const_cast<wchar_t*>(ip.data()), ip.length(), iniFilePath.c_str());
+	::GetPrivateProfileStringW(SECTION_SERVER.c_str(), L"port", nullptr, const_cast<wchar_t*>(port.data()), port.length(), iniFilePath.c_str());
+	int retryInterval = ::GetPrivateProfileIntW(SECTION_SERVER.c_str(), L"retryInterval", 0, iniFilePath.c_str());
+
+	// context 에 설정
+	appContext->setSocket(ip, port, retryInterval);
 
 	return true;
 }

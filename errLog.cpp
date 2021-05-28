@@ -3,7 +3,7 @@
 std::wstring errLog::path = {};
 CRITICAL_SECTION errLog::cs = {};
 errLog *errLog::instance = nullptr;
-const std::wstring DATE_FORMAT_ERROR = L"%02d:%02d:%02d";
+const std::wstring DATE_FORMAT_ERROR = L"%02d:%02d:%02d.%03d";
 
 #define makeString(x) { x, L#x }
 static std::map<int, std::wstring> errIds =
@@ -102,8 +102,8 @@ void errLog::write(errId id, std::wstring message, ...)
 
 			// 파일 기록
 			std::wstring timestamp;
-			timestamp.resize(15);
-			::wsprintfW(const_cast<wchar_t*>(timestamp.data()), DATE_FORMAT_ERROR.c_str(), localTime.wHour, localTime.wMinute, localTime.wSecond);
+			timestamp.resize(12);
+			::wsprintfW(const_cast<wchar_t*>(timestamp.data()), DATE_FORMAT_ERROR.c_str(), localTime.wHour, localTime.wMinute, localTime.wSecond, localTime.wMilliseconds);
 			stream << timestamp + L"\t";
 			stream << iter->second + L"\t\t";
 			stream << buffer;
