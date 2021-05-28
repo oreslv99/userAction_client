@@ -30,13 +30,16 @@
     <Filter Include="Source Files\extern\rapidJson\msinttypes">
       <UniqueIdentifier>{7a60055a-37c0-4660-97d1-315662279310}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\contexts">
+      <UniqueIdentifier>{30517dd8-123b-4c76-88c1-decb1b043ecc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\helper">
+      <UniqueIdentifier>{20bbba45-0071-495f-a265-fe47ae2020e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="application.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="errLog.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="extern\tinyxml2\tinyxml2.h">
@@ -150,17 +153,20 @@
     <ClInclude Include="extern\rapidJson\writer.h">
       <Filter>Source Files\extern\rapidJson</Filter>
     </ClInclude>
+    <ClInclude Include="errLog.h">
+      <Filter>Source Files\helper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="winMain.cpp" />
     <ClCompile Include="application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="errLog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="extern\tinyxml2\tinyxml2.cpp">
       <Filter>Source Files\extern\tinyxml2</Filter>
+    </ClCompile>
+    <ClCompile Include="errLog.cpp">
+      <Filter>Source Files\helper</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

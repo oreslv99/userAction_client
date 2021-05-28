@@ -9,10 +9,11 @@ enum errId
 {
 	debug = 0,
 	info,
+	warning,
 	userAction,
 	error,
 };
-static class errLog 
+static class errLog
 {
 public:
 	static errLog *getInstance();

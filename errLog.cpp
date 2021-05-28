@@ -3,22 +3,28 @@
 std::wstring errLog::path = {};
 CRITICAL_SECTION errLog::cs = {};
 errLog *errLog::instance = nullptr;
-const std::wstring DATE_FORMAT = L"%02d/%02d/%04d %02d:%02d:%02d";
+const std::wstring DATE_FORMAT_ERROR = L"%02d:%02d:%02d";
+
 #define makeString(x) { x, L#x }
 static std::map<int, std::wstring> errIds =
 {
 	makeString(debug),
 	makeString(info),
+	makeString(warning),
 	makeString(userAction),
 	makeString(error),
 };
 
+//
+// public
+//
 errLog *errLog::getInstance()
 {
-	if (instance == nullptr) 
+	// single-ton pattern
+	if (instance == nullptr)
 	{
 		instance = new errLog();
-		if ((instance == nullptr) || (instance->initialize() == false)) 
+		if ((instance == nullptr) || (instance->initialize() == false))
 		{
 			safeDelete(instance);
 			return nullptr;
@@ -29,10 +35,10 @@ errLog *errLog::getInstance()
 }
 bool errLog::initialize()
 {
-	// log 파일경로
+	// errLog 파일경로
 	// https://docs.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shgetknownfolderpath
 	wchar_t *profile = nullptr;
-	if (FAILED(::SHGetKnownFolderPath(FOLDERID_Profile, 0, nullptr, &profile))) 
+	if (FAILED(::SHGetKnownFolderPath(FOLDERID_Profile, 0, nullptr, &profile)))
 	{
 		return false;
 	}
@@ -66,7 +72,7 @@ void errLog::write(errId id, std::wstring message, ...)
 	::memset(&localTime, 0x00, sizeof(SYSTEMTIME));
 	::GetLocalTime(&localTime);
 
-	// 파일명 (path + \\%04d%02d%02d.log)
+	// 파일명 (path + \\%04d%02d%02d.errLog)
 	std::wstring filePath;
 	filePath.resize(path.length() + 12);
 	::wsprintfW(const_cast<wchar_t*>(filePath.data()), L"%s\\%04d%02d%02d.log", path.c_str(), localTime.wYear, localTime.wMonth, localTime.wDay);
@@ -75,10 +81,10 @@ void errLog::write(errId id, std::wstring message, ...)
 	std::wofstream stream;
 	stream.imbue(std::locale(stream.getloc(), new std::codecvt_utf8<wchar_t, 0x10ffff, std::consume_header>));
 	stream.open(filePath, std::ios::app);
-	if (stream.is_open() == true) 
+	if (stream.is_open() == true)
 	{
 		std::map<int, std::wstring>::iterator iter = errIds.find(id);
-		if (iter != errIds.end()) 
+		if (iter != errIds.end())
 		{
 
 			// 가변인자 포함한 문자열 만들기
@@ -95,9 +101,11 @@ void errLog::write(errId id, std::wstring message, ...)
 			va_end(args);
 
 			// 파일 기록
-			stream << std::to_wstring(localTime.wDay) + std::to_wstring(localTime.wMonth) + std::to_wstring(localTime.wYear);
-			stream << std::to_wstring(localTime.wHour) + std::to_wstring(localTime.wMinute) + std::to_wstring(localTime.wSecond) + L"\t";
-			stream << iter->second + L"\t";
+			std::wstring timestamp;
+			timestamp.resize(15);
+			::wsprintfW(const_cast<wchar_t*>(timestamp.data()), DATE_FORMAT_ERROR.c_str(), localTime.wHour, localTime.wMinute, localTime.wSecond);
+			stream << timestamp + L"\t";
+			stream << iter->second + L"\t\t";
 			stream << buffer;
 			stream << std::endl;
 		}
@@ -105,4 +113,3 @@ void errLog::write(errId id, std::wstring message, ...)
 
 	::LeaveCriticalSection(&cs);
 }
-

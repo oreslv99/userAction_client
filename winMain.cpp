@@ -14,6 +14,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		return -1;
 	}
 
+	log->write(errId::debug, L"Start application.");
 	app->run();
 
 	return app->release();
