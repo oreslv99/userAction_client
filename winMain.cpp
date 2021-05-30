@@ -7,6 +7,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	UNREFERENCED_PARAMETER(pCmdLine);
 	UNREFERENCED_PARAMETER(nCmdShow);
 
+	log->write(errId::debug, L"Start application.");
+
 	application *app = new application(hInstance);
 	if (app->initialize() == false) 
 	{
@@ -14,7 +16,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		return -1;
 	}
 
-	log->write(errId::debug, L"Start application.");
 	app->run();
 
 	return app->release();

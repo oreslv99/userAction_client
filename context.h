@@ -30,8 +30,12 @@ private:
 	std::wstring ip;
 	std::wstring port;
 	int retryInterval;
-	winSock *server;
+	winSock *socket;
+	bool isOnLine;
 	void retryConnect(HANDLE timer);
+
+	// rule
+	void loadRule(bool isOnline, winSock *socket);
 
 	// watch
 	

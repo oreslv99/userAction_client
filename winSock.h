@@ -15,6 +15,5 @@ private:
 	std::wstring ip;
 	std::wstring port;
 	addrinfoW *addrInfo;
-	bool onLine;
 
 };

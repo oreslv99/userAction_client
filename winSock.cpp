@@ -1,7 +1,7 @@
 #include "winSock.h"
 
 winSock::winSock(std::wstring ip, std::wstring port)
-	: addrInfo(nullptr), ip(ip), port(port), onLine(false)
+	: addrInfo(nullptr), ip(ip), port(port)
 {
 }
 winSock::~winSock()
@@ -64,5 +64,7 @@ bool winSock::initialize()
 		return false;
 	}
 
-	return (this->onLine = (::closesocket(socket) == 0));
+	::closesocket(socket);
+
+	return true;
 }
