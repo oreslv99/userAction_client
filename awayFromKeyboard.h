@@ -1,4 +1,6 @@
 #pragma once
+#include "stdafx.h"
+#include <functional>
 
 class awayFromKeyboard
 {
@@ -8,6 +10,6 @@ public:
 	bool inAFK();
 
 private:
-
+	HANDLE event;
 
 };

@@ -11,7 +11,7 @@ static std::map<int, std::wstring> errIds =
 	makeString(debug),
 	makeString(info),
 	makeString(warning),
-	makeString(userAction),
+	makeString(user),
 	makeString(error),
 };
 

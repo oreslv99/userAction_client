@@ -4,6 +4,7 @@
 #include "tinyXml.h"
 #include "winSock.h"
 #include "rule.h"
+#include "awayFromKeyboard.h"
 
 class context
 {
@@ -38,6 +39,6 @@ private:
 	void loadRule(bool isOnline, winSock *socket);
 
 	// watch
-	
+	awayFromKeyboard *afk;
 
 };

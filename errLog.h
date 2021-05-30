@@ -10,7 +10,7 @@ enum errId
 	debug = 0,
 	info,
 	warning,
-	userAction,
+	user,
 	error,
 };
 static class errLog

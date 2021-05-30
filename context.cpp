@@ -10,7 +10,7 @@ static LRESULT CALLBACK wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 // public
 //
 context::context()
-	:json(nullptr), xml(nullptr), socket(nullptr), isOnLine(false), callback(wndProc)
+	:json(nullptr), xml(nullptr), socket(nullptr), isOnLine(false), callback(wndProc), afk(nullptr)
 {
 }
 context::~context()
@@ -43,6 +43,9 @@ bool context::initialize()
 
 	// 정책 확인
 	loadRule(this->isOnLine, this->socket);
+
+	//
+	this->afk = new awayFromKeyboard();
 
 	return true;
 }
@@ -94,10 +97,7 @@ void context::watch(HANDLE timer)
 {
 	if (::WaitForSingleObject(timer, 1) == WAIT_OBJECT_0)
 	{
-		
-
-
-
+		this->afk->inAFK();
 		log->write(errId::info, L"[%s:%03d] do something", __FUNCTIONW__, __LINE__);
 	}
 }
@@ -108,7 +108,7 @@ void context::retryConnect(HANDLE timer)
 		if (this->isOnLine == false)
 		{
 			log->write(errId::info, L"[%s:%03d] retry connection", __FUNCTIONW__, __LINE__);
-			this->isOnLine = this->server->initialize();
+			this->isOnLine = this->socket->initialize();
 		}
 	}
 }
@@ -135,7 +135,8 @@ void context::loadRule(bool isOnline, winSock *socket)
 			safeCoTaskMemFree(profile);
 
 			// 정책파일 있으면 읽음
-			FILE *file = ::_wfopen(ruleFilePath.c_str(), L"r");
+			FILE *file = nullptr;
+			::_wfopen_s(&file, ruleFilePath.c_str(), L"r");
 			if (file != nullptr)
 			{
 				::fclose(file);
