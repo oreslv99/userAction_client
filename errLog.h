@@ -13,7 +13,7 @@ enum errId
 	user,
 	error,
 };
-static class errLog
+class errLog
 {
 public:
 	static errLog *getInstance();

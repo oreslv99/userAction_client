@@ -1,13 +1,74 @@
 #include "printing.h"
 
-const std::wstring EVENTVIEWR_PATH = L"Microsoft-Windows-PrintService/Operational";
+const std::wstring REGISTRY_PATH = L"SYSTEM\\CurrentControlSet\\Services\\EventLog\\";
+const std::wstring EVENTVIEWER_CHANNEL_PATH = L"Microsoft-Windows-PrintService/Operational";
+const std::wstring QUERY = L"Event/System[EventID=307]";
 
 //
 // public
 //
+printing::printing()
+{
+
+}
+printing::~printing()
+{
+
+}
+
 bool printing::initialize()
 {
+	// 이벤트 뷰어에서 프린트 서비스를 따로 볼 수있게 다음 항목을 등록
+	const std::wstring path = REGISTRY_PATH + EVENTVIEWER_CHANNEL_PATH;
+	setRegistryKey(HKEY_LOCAL_MACHINE, path);
+
+	// 기존 로그삭제 
+	//	: 기존에 얼마나 출력한 로그가 쌓여있는지 알 수 없고,
+	//	: 그 양에 따라서 EvtNext 사용되는 EVT_HANDLE 의 크기를 가늠할 수 없음.
+	if (::EvtClearLog(nullptr, EVENTVIEWER_CHANNEL_PATH.c_str(), nullptr, 0) == FALSE)
+	{
+		log->write(errId::warning, L"[%s:%03d] code[%d] EvtClearLog is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+		//return false;
+	}
+
 	return true;
+}
+void printing::watch()
+{
+	// 출력시 발생되는 이벤트 id 순서 
+	//	: 800 >> 801 >> 842 >> 812 >> 805 >> 307
+	// 특정 조건: L"Event/System[EventID=xxx]"
+	// 전체		: L"Event/System"
+
+	// https://docs.microsoft.com/en-us/windows/win32/api/winevt/ne-winevt-evt_query_flags
+	// EvtQueryReverseDirection : 가장 오래전 기록된 레코드
+	// EvtQueryForwardDirection : 가장 최근 기록된 레코드
+	DWORD flags = EvtQueryChannelPath | EvtQueryForwardDirection;
+	EVT_HANDLE result = ::EvtQuery(nullptr, EVENTVIEWER_CHANNEL_PATH.c_str(), QUERY.c_str(), flags);
+	if (result != nullptr)
+	{
+		seekEvent(result);
+
+		// release
+		::EvtClose(result);
+		result = nullptr;
+	}
+	else
+	{
+		DWORD err = ::GetLastError();
+		switch (err)
+		{
+		case ERROR_EVT_CHANNEL_NOT_FOUND:
+			log->write(errId::error, L"[%s:%03d] code[%d] The channel is not found.", __FUNCTIONW__, __LINE__, err);
+			break;
+		case ERROR_EVT_INVALID_QUERY:
+			log->write(errId::error, L"[%s:%03d] code[%d] The query is invalid.", __FUNCTIONW__, __LINE__, err);
+			break;
+		default:
+			log->write(errId::error, L"[%s:%03d] code[%d] The query is invalid.", __FUNCTIONW__, __LINE__, err);
+			break;
+		}
+	}
 }
 
 //
@@ -40,4 +101,123 @@ void printing::getRegistryValue(HKEY hive, std::wstring subKey, std::wstring nam
 	}
 
 	::RegCloseKey(result);
+}
+void printing::parseDocument(tinyxml2::XMLDocument *document)
+{
+	////// system
+	////struct 
+	////{
+	////	// provider
+	////	// event id
+	////	// version
+	////	// level
+	////	// task
+	////	// opcode
+	////	// keywords
+	////	// time created
+	////	// event record id
+	////	// correlation
+	////	// execution
+	////	// channel
+	////	// computer
+	////	// security
+	////};
+	////// user data >> document printed
+	////struct 
+	////{
+	////	// param1 : job id
+	////	// param2 : 이벤트 이름
+	////	// param3 : 로그온 이름
+	////	// param4 : 컴퓨터 이름
+	////	// param5 : 프린터 이름
+	////	// param6 : 파일 경로
+	////	// param7 : 파일 크기
+	////	// param8 : 출력 부수
+	////};
+
+	/*
+	
+	예시)
+
+	<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event">
+	  <System>
+		<Provider Name="Microsoft-Windows-PrintService" Guid="{747ef6fd-e535-4d16-b510-42c90f6873a1}" />
+		<EventID>307</EventID>
+		<Version>0</Version>
+		<Level>4</Level>
+		<Task>26</Task>
+		<Opcode>11</Opcode>
+		<Keywords>0x4000000000000840</Keywords>
+		<TimeCreated SystemTime="2020-10-08T09:40:50.007040200Z" />
+		<EventRecordID>635</EventRecordID>
+		<Correlation />
+		<Execution ProcessID="3860" ThreadID="21552" />
+		<Channel>Microsoft-Windows-PrintService/Operational</Channel>
+		<Computer>DESKTOP-SGSJTLH</Computer>
+		<Security UserID="S-1-5-21-3060918736-165454301-2844304238-1001" />
+	  </System>
+	  <UserData>
+		<DocumentPrinted xmlns="http://manifests.microsoft.com/win/2005/08/windows/printing/spooler/core/events">
+		  <Param1>45</Param1>
+		  <Param2>문서 인쇄</Param2>
+		  <Param3>orseL</Param3>
+		  <Param4>\\DESKTOP-SGSJTLH</Param4>
+		  <Param5>Microsoft Print to PDF</Param5>
+		  <Param6>F:\02 업무\_release\zzz.pdf</Param6>
+		  <Param7>110128</Param7>
+		  <Param8>2</Param8>
+		</DocumentPrinted>
+	  </UserData>
+	</Event>
+
+	*/
+
+}
+void printing::renderEvent(EVT_HANDLE fragment)
+{
+	// 버퍼 크기확인
+	DWORD bufferSize;
+	DWORD propertyCount;
+	::EvtRender(nullptr, fragment, EvtRenderEventXml, 0, nullptr, &bufferSize, &propertyCount);
+	
+	// 버퍼 크기할당 후 데이터 확인
+	std::string buffer;
+	buffer.resize(bufferSize);
+	::EvtRender(nullptr, fragment, EvtRenderEventXml, bufferSize, const_cast<char*>(buffer.data()), &bufferSize, &propertyCount);
+	if (buffer.length() > 0)
+	{
+		// xml 파싱
+		tinyxml2::XMLDocument document;
+		tinyxml2::XMLError error = document.Parse(buffer.c_str());
+		if (error == tinyxml2::XMLError::XML_SUCCESS)
+		{
+			parseDocument(&document);
+		}
+	}
+}
+void printing::seekEvent(EVT_HANDLE queryResult)
+{
+	// queryResult 의 가장 마지막 record 로 이동
+	::EvtSeek(queryResult, 0, nullptr, 0, EvtSeekRelativeToLast);
+
+	// 마지막 record 확인
+	EVT_HANDLE evtHandle[1];
+	DWORD returned = 0;
+	if (::EvtNext(queryResult, _countof(evtHandle), evtHandle, INFINITE, 0, &returned) == TRUE)
+	{
+		for (DWORD i = 0; i < returned; i++)
+		{
+			renderEvent(evtHandle[i]);
+		}
+	}
+
+	// 해제
+	for (DWORD i = 0; i < _countof(evtHandle); i++)
+	{
+		if (evtHandle[i] != nullptr)
+		{
+			::EvtClose(evtHandle[i]);
+			evtHandle[i] = nullptr;
+		}
+	}
 }
