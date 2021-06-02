@@ -4,7 +4,8 @@
 #include "tinyXml.h"
 #include "winSock.h"
 #include "rule.h"
-#include "awayFromKeyboard.h"
+#include "awayFromKeyboard.h"	// feature
+#include "printing.h"			// feature
 
 class context
 {
@@ -40,5 +41,6 @@ private:
 
 	// watch
 	awayFromKeyboard *afk;
+	printing *print;
 
 };

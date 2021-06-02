@@ -97,8 +97,11 @@ void context::watch(HANDLE timer)
 {
 	if (::WaitForSingleObject(timer, 1) == WAIT_OBJECT_0)
 	{
-		this->afk->inAFK();
-		log->write(errId::info, L"[%s:%03d] do something", __FUNCTIONW__, __LINE__);
+		if (this->afk->inAFK() == false) 
+		{
+			
+		}
+		//log->write(errId::info, L"[%s:%03d] do something", __FUNCTIONW__, __LINE__);
 	}
 }
 void context::retryConnect(HANDLE timer)
