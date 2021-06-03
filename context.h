@@ -3,10 +3,9 @@
 #include "rapidJson.h"
 #include "tinyXml.h"
 #include "winSock.h"
-#include <list>
-#include "awayFromKeyboard.h"	// feature
-#include "printing.h"			// feature
-#include "process.h"			// feature
+#include "featureAFK.h"
+#include "featurePrint.h"
+#include "featureProcess.h"
 
 class context
 {

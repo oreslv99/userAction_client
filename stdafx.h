@@ -3,6 +3,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <string>
+#include <list>
 
 // safe ÇÔ¼ö
 #define safeFree(x)					if (x) { ::free(x); (x) = nullptr; }

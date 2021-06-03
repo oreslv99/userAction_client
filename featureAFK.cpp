@@ -1,19 +1,20 @@
-#include "awayFromKeyboard.h"
+#include "featureAFK.h"
 
 //
 // public
 //
-awayFromKeyboard::awayFromKeyboard()
+featureAFK::featureAFK()
+{
+}
+featureAFK::~featureAFK()
+{
+}
+bool featureAFK::initialize(rule *featureRule)
 {
 	this->event = ::CreateEventW(nullptr, FALSE, FALSE, nullptr);
-}
-awayFromKeyboard::~awayFromKeyboard()
-{}
-bool awayFromKeyboard::initialize()
-{
 	return true;
 }
-bool awayFromKeyboard::watch()
+bool featureAFK::watch()
 {
 	::Sleep(1);
 
@@ -76,7 +77,7 @@ bool awayFromKeyboard::watch()
 
 	return result;
 }
-bool awayFromKeyboard::isHighPriority()
+bool featureAFK::isHighPriority()
 {
 	// 가장 먼저 호출되어야 함
 	return true;

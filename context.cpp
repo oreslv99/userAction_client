@@ -45,17 +45,17 @@ bool context::initialize()
 	loadRule(this->isOnLine, this->socket);
 	
 	// 임시 (정책구조체를 initialize 에서 받을 것 - model)
-	feature *afk = new awayFromKeyboard();	// 반드시 처음 리스트에 포함
+	feature *afk = new featureAFK();	// 반드시 처음 리스트에 포함
 	if ((afk != nullptr) && (afk->initialize() == true))
 	{
 		this->features.push_back(afk);
 	}
-	feature *proc = new process();
+	feature *proc = new featureProcess();
 	if ((proc != nullptr) && (proc->initialize() == true))
 	{
 		this->features.push_back(proc);
 	}
-	feature *prn = new printing();
+	feature *prn = new featurePrint();
 	if ((prn != nullptr) && (prn->initialize() == true))
 	{
 		this->features.push_back(prn);

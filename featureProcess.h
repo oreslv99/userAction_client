@@ -2,12 +2,12 @@
 #include "stdafx.h"
 #include "feature.h"
 
-class process : public feature
+class featureProcess : public feature
 {
 public:
-	process();
-	~process();
-	bool initialize() final;
+	featureProcess();
+	~featureProcess();
+	bool initialize(rule *featureRule) final;
 	bool watch() final;
 	bool isHighPriority() final;
 

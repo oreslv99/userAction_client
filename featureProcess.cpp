@@ -1,17 +1,19 @@
-#include "process.h"
+#include "featureProcess.h"
 
-process::process()
+featureProcess::featureProcess()
 {}
-process::~process()
+featureProcess::~featureProcess()
 {}
-bool process::initialize()
+bool featureProcess::initialize(rule *featureRule)
 {
 	return true;
 }
-bool process::watch()
+bool featureProcess::watch()
 {
 	while (true)
 	{
+		::Sleep(1);
+
 		// 마우스 위치 확인
 		POINT mousePos;
 		::GetCursorPos(&mousePos);
@@ -34,13 +36,11 @@ bool process::watch()
 		{
 			break;
 		}
-
-		
 	}
 
 	return true;
 }
-bool process::isHighPriority()
+bool featureProcess::isHighPriority()
 {
 	return false;
 }

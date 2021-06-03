@@ -1,18 +1,20 @@
 #pragma once
 #include "stdafx.h"
 #include "feature.h"
+#include "ruleAFK.h"
 #include <functional>
 
-class awayFromKeyboard : public feature
+class featureAFK : public feature
 {
 public:
-	awayFromKeyboard();
-	~awayFromKeyboard();
-	bool initialize() final;
+	featureAFK();
+	~featureAFK();
+	bool initialize(rule *featureRule) final;
 	bool watch() final;
 	bool isHighPriority() final;
 
 private:
 	HANDLE event;
+	ruleAFK rules;
 
 };

@@ -1,4 +1,4 @@
-#include "printing.h"
+#include "featurePrint.h"
 
 const std::wstring REGISTRY_PATH = L"SYSTEM\\CurrentControlSet\\Services\\EventLog\\";
 const std::wstring EVENTVIEWER_CHANNEL_PATH = L"Microsoft-Windows-PrintService/Operational";
@@ -7,16 +7,16 @@ const std::wstring QUERY = L"Event/System[EventID=307]";
 //
 // public
 //
-printing::printing()
+featurePrint::featurePrint()
 {
 
 }
-printing::~printing()
+featurePrint::~featurePrint()
 {
 
 }
 
-bool printing::initialize()
+bool featurePrint::initialize(rule *featureRule)
 {
 	// 이벤트 뷰어에서 프린트 서비스를 따로 볼 수있게 다음 항목을 등록
 	const std::wstring path = REGISTRY_PATH + EVENTVIEWER_CHANNEL_PATH;
@@ -33,8 +33,10 @@ bool printing::initialize()
 
 	return true;
 }
-bool printing::watch()
+bool featurePrint::watch()
 {
+	::Sleep(1);
+
 	// 출력시 발생되는 이벤트 id 순서 
 	//	: 800 >> 801 >> 842 >> 812 >> 805 >> 307
 	// 특정 조건: L"Event/System[EventID=xxx]"
@@ -74,7 +76,7 @@ bool printing::watch()
 
 	return true;
 }
-bool printing::isHighPriority()
+bool featurePrint::isHighPriority()
 {
 	return false;
 }
@@ -82,7 +84,7 @@ bool printing::isHighPriority()
 //
 // private
 //
-void printing::setRegistryKey(HKEY hive, std::wstring path)
+void featurePrint::setRegistryKey(HKEY hive, std::wstring path)
 {
 	HKEY result = nullptr;
 	::RegOpenKeyExW(hive, path.c_str(), 0, KEY_WRITE, &result);
@@ -100,7 +102,7 @@ void printing::setRegistryKey(HKEY hive, std::wstring path)
 
 	::RegCloseKey(result);
 }
-void printing::getRegistryValue(HKEY hive, std::wstring subKey, std::wstring name, DWORD valueType, void* value, DWORD valueSize)
+void featurePrint::getRegistryValue(HKEY hive, std::wstring subKey, std::wstring name, DWORD valueType, void* value, DWORD valueSize)
 {
 	HKEY result = nullptr;
 	if (::RegOpenKeyExW(hive, subKey.c_str(), 0, KEY_QUERY_VALUE, &result) == ERROR_SUCCESS)
@@ -110,7 +112,7 @@ void printing::getRegistryValue(HKEY hive, std::wstring subKey, std::wstring nam
 
 	::RegCloseKey(result);
 }
-void printing::parseDocument(tinyxml2::XMLDocument *document)
+void featurePrint::parseDocument(tinyxml2::XMLDocument *document)
 {
 	/*
 	
@@ -199,7 +201,7 @@ void printing::parseDocument(tinyxml2::XMLDocument *document)
 		log->write(errId::warning, L"[%s:%03d] code[%d] EvtClearLog is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 	}
 }
-void printing::renderEvent(EVT_HANDLE fragment)
+void featurePrint::renderEvent(EVT_HANDLE fragment)
 {
 	// 버퍼 크기확인
 	DWORD bufferSize;
@@ -224,7 +226,7 @@ void printing::renderEvent(EVT_HANDLE fragment)
 		}
 	}
 }
-void printing::seekEvent(EVT_HANDLE queryResult)
+void featurePrint::seekEvent(EVT_HANDLE queryResult)
 {
 	// queryResult 의 가장 마지막 record 로 이동
 	::EvtSeek(queryResult, 0, nullptr, 0, EvtSeekRelativeToLast);

@@ -6,12 +6,12 @@
 #pragma comment(lib, "wevtapi.lib")		// ÀÌº¥Æ® ºä¾î
 #include <functional>
 
-class printing : public feature
+class featurePrint : public feature
 {
 public:
-	printing();
-	~printing();
-	bool initialize() final;
+	featurePrint();
+	~featurePrint();
+	bool initialize(rule *featureRule) final;
 	bool watch() final;
 	bool isHighPriority() final;
 

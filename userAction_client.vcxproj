@@ -20,7 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application.h" />
-    <ClInclude Include="awayFromKeyboard.h" />
+    <ClInclude Include="featureAFK.h" />
     <ClInclude Include="context.h" />
     <ClInclude Include="errLog.h" />
     <ClInclude Include="extern\rapidJson\allocators.h" />
@@ -61,21 +61,22 @@
     <ClInclude Include="extern\rapidJson\writer.h" />
     <ClInclude Include="extern\tinyxml2\tinyxml2.h" />
     <ClInclude Include="feature.h" />
-    <ClInclude Include="printing.h" />
-    <ClInclude Include="process.h" />
+    <ClInclude Include="featurePrint.h" />
+    <ClInclude Include="featureProcess.h" />
     <ClInclude Include="rapidJson.h" />
+    <ClInclude Include="rule.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="tinyXml.h" />
     <ClInclude Include="winSock.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="application.cpp" />
-    <ClCompile Include="awayFromKeyboard.cpp" />
+    <ClCompile Include="featureAFK.cpp" />
     <ClCompile Include="context.cpp" />
     <ClCompile Include="errLog.cpp" />
     <ClCompile Include="extern\tinyxml2\tinyxml2.cpp" />
-    <ClCompile Include="printing.cpp" />
-    <ClCompile Include="process.cpp" />
+    <ClCompile Include="featurePrint.cpp" />
+    <ClCompile Include="featureProcess.cpp" />
     <ClCompile Include="rapidJson.cpp" />
     <ClCompile Include="tinyXml.cpp" />
     <ClCompile Include="winMain.cpp" />

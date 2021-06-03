@@ -60,7 +60,24 @@ bool winSock::initialize()
 	// ¿¬°á
 	if (::connect(socket, addrInfo->ai_addr, static_cast<int>(addrInfo->ai_addrlen)) == SOCKET_ERROR)
 	{
-		log->write(errId::error, L"[%s:%03d] code[%d] connect is failed.", __FUNCTIONW__, __LINE__, ::WSAGetLastError());
+		int err = ::WSAGetLastError();
+		std::wstring errMessage = L"";
+		switch (err)
+		{
+		case WSAECONNREFUSED: 
+			errMessage += L"The attempt to connect was forcefully rejected."; 
+			break;
+		case WSAETIMEDOUT: 
+			errMessage += L"An attempt to connect timed out without establishing a connection";
+			break;
+		default:
+			errMessage += L"code[";
+			errMessage += std::to_wstring(err);
+			errMessage += L"] connect is failed.";
+			break;
+		}
+
+		log->write(errId::error, L"[%s:%03d] %s", __FUNCTIONW__, __LINE__, errMessage.c_str());
 		return false;
 	}
 
