@@ -13,6 +13,11 @@ rules::~rules()
 void rules::initialize(bool isOnline, winSock *socket)
 {
 	bool result = false;
+
+	this->afk = new ruleAFK;
+	this->process = new ruleProcess;
+	this->print = new rulePrint;
+
 	if (isOnline == true)
 	{
 		//socket->
@@ -45,6 +50,17 @@ void rules::initialize(bool isOnline, winSock *socket)
 	if (result == false)
 	{
 		// 모두 실패시 기본값 적용
+		this->afk->enabled = true;
+		this->afk->timeInAFK = 5000;
+		this->afk->timeAwakeAFK = 3000;
+
+		this->process->enabled = true;
+		this->process->excludes = { L"", L"", L"", };
+		this->process->browsers = { L"", L"", L"", };
+		this->process->privates = { L"", L"", L"", };
+		this->process->duplicates = { L"", L"", L"", };
+
+		this->print->enabled = true;
 	}
 }
 ruleAFK *rules::getAFKRule() 

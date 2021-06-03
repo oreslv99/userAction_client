@@ -19,7 +19,7 @@ featurePrint::~featurePrint()
 bool featurePrint::initialize(rules *rule)
 {
 	this->rule = rule->getPrintRule();
-	if (this->rule == nullptr)
+	if (this->rule->enabled == false)
 	{
 		// 해당 기능사용 안함
 		log->write(errId::warning, L"[%s:%03d] Feature print is disabled.", __FUNCTIONW__, __LINE__);

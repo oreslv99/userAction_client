@@ -15,7 +15,7 @@ featureAFK::~featureAFK()
 bool featureAFK::initialize(rules *rule)
 {
 	this->rule = rule->getAFKRule();
-	if (this->rule == nullptr)
+	if (this->rule->enabled == false)
 	{
 		// 해당 기능사용 안함
 		log->write(errId::warning, L"[%s:%03d] Feature afk is disabled.", __FUNCTIONW__, __LINE__);
@@ -66,7 +66,7 @@ bool featureAFK::watch()
 		// non-blocking
 		//	: event signal 을 통해 non-blocking 으로 만들어서
 		//	: 스케쥴에 의해 동작하는 로그전송이 방해받지 않게 변경함
-		if (lastInputTime > startAfkTime + 3000)
+		if (lastInputTime > startAfkTime + this->rule->timeAwakeAFK)
 		{
 			::SetEvent(this->event);
 		}
@@ -82,7 +82,7 @@ bool featureAFK::watch()
 	}
 	else
 	{
-		if ((::GetTickCount() - getLastInputTime()) >= 3000 /* 임시 3초 */)
+		if ((::GetTickCount() - getLastInputTime()) >= this->rule->timeInAFK /* 임시 3초 */)
 		{
 			startAfkTime = ::GetTickCount();
 

@@ -3,6 +3,7 @@
 
 struct ruleAFK
 {
+	bool enabled;
 	int timeInAFK;
 	int timeAwakeAFK;
 };

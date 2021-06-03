@@ -3,4 +3,5 @@
 
 struct rulePrint
 {
+	bool enabled;
 };
