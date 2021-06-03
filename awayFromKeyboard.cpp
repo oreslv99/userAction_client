@@ -9,7 +9,11 @@ awayFromKeyboard::awayFromKeyboard()
 }
 awayFromKeyboard::~awayFromKeyboard()
 {}
-bool awayFromKeyboard::inAFK()
+bool awayFromKeyboard::initialize()
+{
+	return true;
+}
+bool awayFromKeyboard::watch()
 {
 	::Sleep(1);
 
@@ -71,4 +75,8 @@ bool awayFromKeyboard::inAFK()
 	}
 
 	return result;
+}
+featureType awayFromKeyboard::getType()
+{
+	return featureType::afk;
 }

@@ -3,9 +3,10 @@
 #include "rapidJson.h"
 #include "tinyXml.h"
 #include "winSock.h"
-#include "rule.h"
+#include <list>
 #include "awayFromKeyboard.h"	// feature
 #include "printing.h"			// feature
+#include "process.h"			// feature
 
 class context
 {
@@ -40,7 +41,7 @@ private:
 	void loadRule(bool isOnline, winSock *socket);
 
 	// watch
-	awayFromKeyboard *afk;
-	printing *print;
+	std::list<IFeature*> features;
+	std::list<IFeature*>::iterator iter;
 
 };

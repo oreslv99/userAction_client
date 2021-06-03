@@ -10,7 +10,7 @@ static LRESULT CALLBACK wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 // public
 //
 context::context()
-	:json(nullptr), xml(nullptr), socket(nullptr), isOnLine(false), callback(wndProc), afk(nullptr)
+	:json(nullptr), xml(nullptr), socket(nullptr), isOnLine(false), callback(wndProc), features(), iter()
 {
 }
 context::~context()
@@ -43,11 +43,23 @@ bool context::initialize()
 
 	// 정책 확인
 	loadRule(this->isOnLine, this->socket);
-
-	//
-	this->afk = new awayFromKeyboard();
-	this->print = new printing();
-	this->print->initialize();
+	
+	// 임시 (정책구조체를 initialize 에서 받을 것 - model)
+	IFeature *afk = new awayFromKeyboard();	// 반드시 처음 리스트에 포함
+	if ((afk != nullptr) && (afk->initialize() == true))
+	{
+		this->features.push_back(afk);
+	}
+	IFeature *proc = new process();
+	if ((proc != nullptr) && (proc->initialize() == true))
+	{
+		this->features.push_back(proc);
+	}
+	IFeature *prn = new printing();
+	if ((prn != nullptr) && (prn->initialize() == true))
+	{
+		this->features.push_back(prn);
+	}
 
 	return true;
 }
@@ -99,9 +111,22 @@ void context::watch(HANDLE timer)
 {
 	if (::WaitForSingleObject(timer, 1) == WAIT_OBJECT_0)
 	{
-		if (this->afk->inAFK() == false) 
+		bool inAfk = false;
+		for (this->iter = this->features.begin(); this->iter != this->features.end(); this->iter++)
 		{
-			this->print->watch();
+			switch ((*this->iter)->getType())
+			{
+			case featureType::afk:
+				inAfk = (*this->iter)->watch();
+				break;
+			default:
+				if (inAfk == false)
+				{
+					(*this->iter)->watch();
+				}
+				break;
+			}
+
 		}
 	}
 }

@@ -36,6 +36,9 @@
     <Filter Include="Source Files\helper">
       <UniqueIdentifier>{20bbba45-0071-495f-a265-fe47ae2020e8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\model">
+      <UniqueIdentifier>{2c009444-8052-49f8-9cc5-15081448a7b7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
@@ -168,13 +171,16 @@
     <ClInclude Include="context.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="rule.h">
-      <Filter>Source Files\contexts</Filter>
-    </ClInclude>
     <ClInclude Include="awayFromKeyboard.h">
       <Filter>Source Files\features</Filter>
     </ClInclude>
     <ClInclude Include="printing.h">
+      <Filter>Source Files\features</Filter>
+    </ClInclude>
+    <ClInclude Include="process.h">
+      <Filter>Source Files\features</Filter>
+    </ClInclude>
+    <ClInclude Include="IFeature.h">
       <Filter>Source Files\features</Filter>
     </ClInclude>
   </ItemGroup>
@@ -201,13 +207,13 @@
     <ClCompile Include="context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="rule.cpp">
-      <Filter>Source Files\contexts</Filter>
-    </ClCompile>
     <ClCompile Include="awayFromKeyboard.cpp">
       <Filter>Source Files\features</Filter>
     </ClCompile>
     <ClCompile Include="printing.cpp">
+      <Filter>Source Files\features</Filter>
+    </ClCompile>
+    <ClCompile Include="process.cpp">
       <Filter>Source Files\features</Filter>
     </ClCompile>
   </ItemGroup>

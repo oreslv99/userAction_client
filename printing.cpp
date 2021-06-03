@@ -33,7 +33,7 @@ bool printing::initialize()
 
 	return true;
 }
-void printing::watch()
+bool printing::watch()
 {
 	// 출력시 발생되는 이벤트 id 순서 
 	//	: 800 >> 801 >> 842 >> 812 >> 805 >> 307
@@ -68,7 +68,15 @@ void printing::watch()
 			log->write(errId::error, L"[%s:%03d] code[%d] The query is invalid.", __FUNCTIONW__, __LINE__, err);
 			break;
 		}
+
+		return false;
 	}
+
+	return true;
+}
+featureType printing::getType()
+{
+	return featureType::prn;
 }
 
 //
