@@ -147,15 +147,49 @@ void printing::parseDocument(tinyxml2::XMLDocument *document)
 
 	*/
 
+	// event >> system >> timeCreated
 	std::string eventTime = document->FirstChildElement("Event")->FirstChildElement("System")->FirstChildElement("TimeCreated")->Attribute("SystemTime");
-	std::string printerName = document->FirstChildElement("Event")->FirstChildElement("UserData")->FirstChildElement("DocumentPrinted")->FirstChildElement("Param5")->GetText();
-	std::string filePath = document->FirstChildElement("Event")->FirstChildElement("UserData")->FirstChildElement("DocumentPrinted")->FirstChildElement("Param6")->GetText();
-	std::string fileSize = document->FirstChildElement("Event")->FirstChildElement("UserData")->FirstChildElement("DocumentPrinted")->FirstChildElement("Param7")->GetText();
-	std::string copies = document->FirstChildElement("Event")->FirstChildElement("UserData")->FirstChildElement("DocumentPrinted")->FirstChildElement("Param8")->GetText();
-	std::string logFormat = eventTime + "_" + printerName + "_" + copies + "_" + filePath + "(" + fileSize + ")";
-	std::string logFormatW;
-	logFormatW.assign(logFormat.begin(), logFormat.end());
-	log->write(errId::user, L"print %s", logFormatW.c_str());
+	
+	// event >> userData >> documentPrinted
+	tinyxml2::XMLElement *documentPrinted = document->FirstChildElement("Event")->FirstChildElement("UserData")->FirstChildElement("DocumentPrinted");
+	std::string printerName = documentPrinted->FirstChildElement("Param5")->GetText();
+	std::string filePath = documentPrinted->FirstChildElement("Param6")->GetText();
+	std::string copies = documentPrinted->FirstChildElement("Param8")->GetText();
+	
+	// 로그형태
+	std::string logFormat;
+	logFormat.resize(1024);
+
+	// jsondata 에서는 \ >> \\ 로 변경해야함 (경로)
+	size_t startPos = 0;
+	while ((startPos = filePath.find("\\", startPos)) != std::string::npos)
+	{
+		filePath.replace(startPos, 1, "\\\\");
+		startPos += 2;
+	}
+
+	// jsondata 포맷
+	::wsprintfA(const_cast<char*>(logFormat.data()), "{\"eventTime\":\"%s\", \"printerName\":\"%s\", \"filePath\":\"%s\", \"copies\":%s}", 
+		eventTime.c_str(), printerName.c_str(), filePath.c_str(), copies.c_str());
+
+	//// 아래와 같이 c++ string 클래스를 이용한 변환시 깨져서 기록됨
+	//std::string logFormatW;
+	//logFormatW.assign(logFormat.begin(), logFormat.end());
+
+	// 2021-06-03 : c 스타일로 변환하여 출력
+	size_t length = ::MultiByteToWideChar(CP_ACP, 0, logFormat.c_str(), -1, nullptr, 0);
+	length++;
+	wchar_t *logFormatW = (wchar_t*)::calloc(length, sizeof(wchar_t*));
+	::MultiByteToWideChar(CP_ACP, 0, logFormat.c_str(), -1, logFormatW, length);
+	
+	log->write(errId::user, L"printEvent %s", logFormatW);
+	safeFree(logFormatW);
+
+	// 기록이 완료됬으면 이전 이벤트 뷰어 데이터 삭제
+	if (::EvtClearLog(nullptr, EVENTVIEWER_CHANNEL_PATH.c_str(), nullptr, 0) == FALSE)
+	{
+		log->write(errId::warning, L"[%s:%03d] code[%d] EvtClearLog is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+	}
 }
 void printing::renderEvent(EVT_HANDLE fragment)
 {
@@ -165,14 +199,17 @@ void printing::renderEvent(EVT_HANDLE fragment)
 	::EvtRender(nullptr, fragment, EvtRenderEventXml, 0, nullptr, &bufferSize, &propertyCount);
 	
 	// 버퍼 크기할당 후 데이터 확인
-	std::string buffer;
+	std::wstring buffer;
 	buffer.resize(bufferSize);
-	::EvtRender(nullptr, fragment, EvtRenderEventXml, bufferSize, const_cast<char*>(buffer.data()), &bufferSize, &propertyCount);
+	::EvtRender(nullptr, fragment, EvtRenderEventXml, bufferSize, const_cast<wchar_t*>(buffer.data()), &bufferSize, &propertyCount);
 	if (buffer.length() > 0)
 	{
+		std::string bufferA;
+		bufferA.assign(buffer.begin(), buffer.end());
+
 		// xml 파싱
 		tinyxml2::XMLDocument document;
-		tinyxml2::XMLError error = document.Parse(buffer.c_str());
+		tinyxml2::XMLError error = document.Parse(bufferA.c_str());
 		if (error == tinyxml2::XMLError::XML_SUCCESS)
 		{
 			parseDocument(&document);
