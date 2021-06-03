@@ -1,16 +1,18 @@
 #pragma once
 #include "stdafx.h"
-#include "IFeature.h"
+#include "feature.h"
 
-class process : public IFeature
+class process : public feature
 {
 public:
 	process();
 	~process();
-	bool initialize();
-	bool watch();
-	featureType getType();
+	bool initialize() final;
+	bool watch() final;
+	bool isHighPriority() final;
 
 private:
+	void getFullProcessName();
+	void getPureProcessName();
 
 };

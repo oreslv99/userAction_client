@@ -1,16 +1,16 @@
 #pragma once
 #include "stdafx.h"
-#include "IFeature.h"
+#include "feature.h"
 #include <functional>
 
-class awayFromKeyboard : public IFeature
+class awayFromKeyboard : public feature
 {
 public:
 	awayFromKeyboard();
 	~awayFromKeyboard();
-	bool initialize();
-	bool watch();
-	featureType getType();
+	bool initialize() final;
+	bool watch() final;
+	bool isHighPriority() final;
 
 private:
 	HANDLE event;

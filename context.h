@@ -41,7 +41,7 @@ private:
 	void loadRule(bool isOnline, winSock *socket);
 
 	// watch
-	std::list<IFeature*> features;
-	std::list<IFeature*>::iterator iter;
+	std::list<feature*> features;
+	std::list<feature*>::iterator iter;
 
 };

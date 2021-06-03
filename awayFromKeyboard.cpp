@@ -76,7 +76,8 @@ bool awayFromKeyboard::watch()
 
 	return result;
 }
-featureType awayFromKeyboard::getType()
+bool awayFromKeyboard::isHighPriority()
 {
-	return featureType::afk;
+	// 가장 먼저 호출되어야 함
+	return true;
 }

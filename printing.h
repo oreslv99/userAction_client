@@ -1,19 +1,19 @@
 #pragma once
 #include "stdafx.h"
-#include "IFeature.h"
+#include "feature.h"
 #include "tinyXml.h"
 #include <winevt.h>						// 이벤트 뷰어
 #pragma comment(lib, "wevtapi.lib")		// 이벤트 뷰어
 #include <functional>
 
-class printing : public IFeature
+class printing : public feature
 {
 public:
 	printing();
 	~printing();
-	bool initialize();
-	bool watch();
-	featureType getType();
+	bool initialize() final;
+	bool watch() final;
+	bool isHighPriority() final;
 
 private:
 	// 레지스트리

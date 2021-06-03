@@ -74,9 +74,9 @@ bool printing::watch()
 
 	return true;
 }
-featureType printing::getType()
+bool printing::isHighPriority()
 {
-	return featureType::prn;
+	return false;
 }
 
 //

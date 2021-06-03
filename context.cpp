@@ -45,17 +45,17 @@ bool context::initialize()
 	loadRule(this->isOnLine, this->socket);
 	
 	// 임시 (정책구조체를 initialize 에서 받을 것 - model)
-	IFeature *afk = new awayFromKeyboard();	// 반드시 처음 리스트에 포함
+	feature *afk = new awayFromKeyboard();	// 반드시 처음 리스트에 포함
 	if ((afk != nullptr) && (afk->initialize() == true))
 	{
 		this->features.push_back(afk);
 	}
-	IFeature *proc = new process();
+	feature *proc = new process();
 	if ((proc != nullptr) && (proc->initialize() == true))
 	{
 		this->features.push_back(proc);
 	}
-	IFeature *prn = new printing();
+	feature *prn = new printing();
 	if ((prn != nullptr) && (prn->initialize() == true))
 	{
 		this->features.push_back(prn);
@@ -114,19 +114,17 @@ void context::watch(HANDLE timer)
 		bool inAfk = false;
 		for (this->iter = this->features.begin(); this->iter != this->features.end(); this->iter++)
 		{
-			switch ((*this->iter)->getType())
+			// 자리비움 feature 는 high priority
+			if ((*this->iter)->isHighPriority() == true)
 			{
-			case featureType::afk:
 				inAfk = (*this->iter)->watch();
-				break;
-			default:
-				if (inAfk == false)
-				{
-					(*this->iter)->watch();
-				}
-				break;
 			}
-
+			
+			// 자리비움 중이 아닌 경우에만 감시
+			if (inAfk == false) 
+			{
+				(*this->iter)->watch();
+			}
 		}
 	}
 }
