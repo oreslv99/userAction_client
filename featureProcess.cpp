@@ -1,11 +1,23 @@
 #include "featureProcess.h"
 
 featureProcess::featureProcess()
-{}
-featureProcess::~featureProcess()
-{}
-bool featureProcess::initialize(rule *featureRule)
+	:rule(nullptr)
 {
+}
+featureProcess::~featureProcess()
+{
+	safeDelete(this->rule);
+}
+bool featureProcess::initialize(rules *rule)
+{
+	this->rule = rule->getProcessRule();
+	if (this->rule == nullptr)
+	{
+		// 해당 기능사용 안함
+		log->write(errId::warning, L"[%s:%03d] Feature process is disabled.", __FUNCTIONW__, __LINE__);
+		return true;
+	}
+
 	return true;
 }
 bool featureProcess::watch()

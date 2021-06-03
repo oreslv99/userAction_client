@@ -3,6 +3,7 @@
 #include "rapidJson.h"
 #include "tinyXml.h"
 #include "winSock.h"
+#include "rules.h"
 #include "featureAFK.h"
 #include "featurePrint.h"
 #include "featureProcess.h"
@@ -35,9 +36,6 @@ private:
 	winSock *socket;
 	bool isOnLine;
 	void retryConnect(HANDLE timer);
-
-	// rule
-	void loadRule(bool isOnline, winSock *socket);
 
 	// watch
 	std::list<feature*> features;

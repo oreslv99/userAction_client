@@ -42,21 +42,22 @@ bool context::initialize()
 	this->isOnLine = this->socket->initialize();
 
 	// 정책 확인
-	loadRule(this->isOnLine, this->socket);
+	rules *rule = new rules;
+	rule->initialize(this->isOnLine, this->socket);
 	
 	// 임시 (정책구조체를 initialize 에서 받을 것 - model)
 	feature *afk = new featureAFK();	// 반드시 처음 리스트에 포함
-	if ((afk != nullptr) && (afk->initialize() == true))
+	if ((afk != nullptr) && (afk->initialize(rule) == true))
 	{
 		this->features.push_back(afk);
 	}
 	feature *proc = new featureProcess();
-	if ((proc != nullptr) && (proc->initialize() == true))
+	if ((proc != nullptr) && (proc->initialize(rule) == true))
 	{
 		this->features.push_back(proc);
 	}
 	feature *prn = new featurePrint();
-	if ((prn != nullptr) && (prn->initialize() == true))
+	if ((prn != nullptr) && (prn->initialize(rule) == true))
 	{
 		this->features.push_back(prn);
 	}
@@ -137,42 +138,5 @@ void context::retryConnect(HANDLE timer)
 			log->write(errId::info, L"[%s:%03d] retry connection", __FUNCTIONW__, __LINE__);
 			this->isOnLine = this->socket->initialize();
 		}
-	}
-}
-void context::loadRule(bool isOnline, winSock *socket)
-{
-	bool result = false;
-	if (isOnLine == true)
-	{
-		//socket->
-	}
-	else
-	{
-
-		// ini 파일경로
-		// https://docs.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shgetknownfolderpath
-		wchar_t *profile = nullptr;
-		if (SUCCEEDED(::SHGetKnownFolderPath(FOLDERID_Profile, 0, nullptr, &profile)))
-		{
-			std::wstring ruleFilePath;
-			ruleFilePath += profile;
-			ruleFilePath += L"\\.userAction\\rule.json";
-
-			// SHGetKnownFolderPath 로 확인한 wchar_t buffer 는 CoTaskMemFree 로 release
-			safeCoTaskMemFree(profile);
-
-			// 정책파일 있으면 읽음
-			FILE *file = nullptr;
-			::_wfopen_s(&file, ruleFilePath.c_str(), L"r");
-			if (file != nullptr)
-			{
-				::fclose(file);
-			}
-		}
-	}
-
-	if (result == false)
-	{
-		// 모두 실패시 기본값 적용
 	}
 }

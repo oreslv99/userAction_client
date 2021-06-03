@@ -8,16 +8,24 @@ const std::wstring QUERY = L"Event/System[EventID=307]";
 // public
 //
 featurePrint::featurePrint()
+	:rule(nullptr)
 {
-
 }
 featurePrint::~featurePrint()
 {
-
+	safeDelete(this->rule);
 }
 
-bool featurePrint::initialize(rule *featureRule)
+bool featurePrint::initialize(rules *rule)
 {
+	this->rule = rule->getPrintRule();
+	if (this->rule == nullptr)
+	{
+		// 해당 기능사용 안함
+		log->write(errId::warning, L"[%s:%03d] Feature print is disabled.", __FUNCTIONW__, __LINE__);
+		return true;
+	}
+
 	// 이벤트 뷰어에서 프린트 서비스를 따로 볼 수있게 다음 항목을 등록
 	const std::wstring path = REGISTRY_PATH + EVENTVIEWER_CHANNEL_PATH;
 	setRegistryKey(HKEY_LOCAL_MACHINE, path);

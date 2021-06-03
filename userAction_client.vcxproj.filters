@@ -183,8 +183,17 @@
     <ClInclude Include="featureProcess.h">
       <Filter>Source Files\contexts\features</Filter>
     </ClInclude>
-    <ClInclude Include="rule.h">
+    <ClInclude Include="ruleAFK.h">
       <Filter>Source Files\contexts\model</Filter>
+    </ClInclude>
+    <ClInclude Include="rulePrint.h">
+      <Filter>Source Files\contexts\model</Filter>
+    </ClInclude>
+    <ClInclude Include="ruleProcess.h">
+      <Filter>Source Files\contexts\model</Filter>
+    </ClInclude>
+    <ClInclude Include="rules.h">
+      <Filter>Source Files\contexts\features</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -217,6 +226,9 @@
       <Filter>Source Files\contexts\features</Filter>
     </ClCompile>
     <ClCompile Include="featureProcess.cpp">
+      <Filter>Source Files\contexts\features</Filter>
+    </ClCompile>
+    <ClCompile Include="rules.cpp">
       <Filter>Source Files\contexts\features</Filter>
     </ClCompile>
   </ItemGroup>

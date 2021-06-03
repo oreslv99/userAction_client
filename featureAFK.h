@@ -9,12 +9,12 @@ class featureAFK : public feature
 public:
 	featureAFK();
 	~featureAFK();
-	bool initialize(rule *featureRule) final;
+	bool initialize(rules *rule) final;
 	bool watch() final;
 	bool isHighPriority() final;
 
 private:
+	ruleAFK *rule;
 	HANDLE event;
-	ruleAFK rules;
 
 };

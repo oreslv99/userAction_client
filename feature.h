@@ -1,10 +1,10 @@
 #pragma once
-#include "rule.h"
+#include "rules.h"
 
 class feature
 {
 public:
-	virtual bool initialize(rule *featureRule) = 0;
+	virtual bool initialize(rules *rule) = 0;
 	virtual bool watch() = 0;
 	virtual bool isHighPriority() = 0;
 protected:

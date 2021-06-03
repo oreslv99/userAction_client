@@ -4,14 +4,31 @@
 // public
 //
 featureAFK::featureAFK()
+	:rule(nullptr), event(INVALID_HANDLE_VALUE)
 {
 }
 featureAFK::~featureAFK()
 {
+	safeCloseHandle(this->event);
+	safeDelete(this->rule);
 }
-bool featureAFK::initialize(rule *featureRule)
+bool featureAFK::initialize(rules *rule)
 {
+	this->rule = rule->getAFKRule();
+	if (this->rule == nullptr)
+	{
+		// 해당 기능사용 안함
+		log->write(errId::warning, L"[%s:%03d] Feature afk is disabled.", __FUNCTIONW__, __LINE__);
+		return true;
+	}
+
 	this->event = ::CreateEventW(nullptr, FALSE, FALSE, nullptr);
+	if (this->event == INVALID_HANDLE_VALUE)
+	{
+		log->write(errId::warning, L"[%s:%03d] code[%d] CreateEventW is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+		return false;
+	}
+
 	return true;
 }
 bool featureAFK::watch()
