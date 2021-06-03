@@ -3,6 +3,7 @@
 #include "tinyXml.h"
 #include <winevt.h>						// 이벤트 뷰어
 #pragma comment(lib, "wevtapi.lib")		// 이벤트 뷰어
+#include <functional>
 
 class printing {
 public:

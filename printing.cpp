@@ -104,37 +104,6 @@ void printing::getRegistryValue(HKEY hive, std::wstring subKey, std::wstring nam
 }
 void printing::parseDocument(tinyxml2::XMLDocument *document)
 {
-	////// system
-	////struct 
-	////{
-	////	// provider
-	////	// event id
-	////	// version
-	////	// level
-	////	// task
-	////	// opcode
-	////	// keywords
-	////	// time created
-	////	// event record id
-	////	// correlation
-	////	// execution
-	////	// channel
-	////	// computer
-	////	// security
-	////};
-	////// user data >> document printed
-	////struct 
-	////{
-	////	// param1 : job id
-	////	// param2 : 이벤트 이름
-	////	// param3 : 로그온 이름
-	////	// param4 : 컴퓨터 이름
-	////	// param5 : 프린터 이름
-	////	// param6 : 파일 경로
-	////	// param7 : 파일 크기
-	////	// param8 : 출력 부수
-	////};
-
 	/*
 	
 	예시)
@@ -170,8 +139,23 @@ void printing::parseDocument(tinyxml2::XMLDocument *document)
 	  </UserData>
 	</Event>
 
+	time created (TODO : add 9 hours because it's GMT)
+	param5 : 프린터 이름
+	param6 : 파일 경로
+	param7 : 파일 크기
+	param8 : 출력 부수
+
 	*/
 
+	std::string eventTime = document->FirstChildElement("Event")->FirstChildElement("System")->FirstChildElement("TimeCreated")->Attribute("SystemTime");
+	std::string printerName = document->FirstChildElement("Event")->FirstChildElement("UserData")->FirstChildElement("DocumentPrinted")->FirstChildElement("Param5")->GetText();
+	std::string filePath = document->FirstChildElement("Event")->FirstChildElement("UserData")->FirstChildElement("DocumentPrinted")->FirstChildElement("Param6")->GetText();
+	std::string fileSize = document->FirstChildElement("Event")->FirstChildElement("UserData")->FirstChildElement("DocumentPrinted")->FirstChildElement("Param7")->GetText();
+	std::string copies = document->FirstChildElement("Event")->FirstChildElement("UserData")->FirstChildElement("DocumentPrinted")->FirstChildElement("Param8")->GetText();
+	std::string logFormat = eventTime + "_" + printerName + "_" + copies + "_" + filePath + "(" + fileSize + ")";
+	std::string logFormatW;
+	logFormatW.assign(logFormat.begin(), logFormat.end());
+	log->write(errId::user, L"print %s", logFormatW.c_str());
 }
 void printing::renderEvent(EVT_HANDLE fragment)
 {

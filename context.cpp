@@ -46,6 +46,8 @@ bool context::initialize()
 
 	//
 	this->afk = new awayFromKeyboard();
+	this->print = new printing();
+	this->print->initialize();
 
 	return true;
 }
@@ -99,9 +101,8 @@ void context::watch(HANDLE timer)
 	{
 		if (this->afk->inAFK() == false) 
 		{
-			
+			this->print->watch();
 		}
-		//log->write(errId::info, L"[%s:%03d] do something", __FUNCTIONW__, __LINE__);
 	}
 }
 void context::retryConnect(HANDLE timer)
