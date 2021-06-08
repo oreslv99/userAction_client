@@ -54,8 +54,6 @@ bool application::initialize()
 	}
 
 	// 환경 파일
-	std::wstring ip;
-	std::wstring port;
 	if (readEnvironmet(this->appContext) == false)
 	{
 		log->write(errId::error, L"[%s:%03d] readEnvironmet is Failed.", __FUNCTIONW__, __LINE__);

@@ -195,6 +195,12 @@
     <ClInclude Include="rules.h">
       <Filter>Source Files\contexts\features</Filter>
     </ClInclude>
+    <ClInclude Include="featureFileIo.h">
+      <Filter>Source Files\contexts\features</Filter>
+    </ClInclude>
+    <ClInclude Include="ruleFileIo.h">
+      <Filter>Source Files\contexts\model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="winMain.cpp" />
@@ -229,6 +235,9 @@
       <Filter>Source Files\contexts\features</Filter>
     </ClCompile>
     <ClCompile Include="rules.cpp">
+      <Filter>Source Files\contexts\features</Filter>
+    </ClCompile>
+    <ClCompile Include="featureFileIo.cpp">
       <Filter>Source Files\contexts\features</Filter>
     </ClCompile>
   </ItemGroup>

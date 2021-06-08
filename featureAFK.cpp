@@ -12,9 +12,9 @@ featureAFK::~featureAFK()
 	safeCloseHandle(this->event);
 	safeDelete(this->rule);
 }
-bool featureAFK::initialize(rules *rule)
+bool featureAFK::initialize(void *rule, void *extra, DWORD extraSize)
 {
-	this->rule = rule->getAFKRule();
+	this->rule = reinterpret_cast<rules*>(rule)->getAFKRule();
 	if (this->rule->enabled == false)
 	{
 		// 해당 기능사용 안함
@@ -66,7 +66,7 @@ bool featureAFK::watch()
 		// non-blocking
 		//	: event signal 을 통해 non-blocking 으로 만들어서
 		//	: 스케쥴에 의해 동작하는 로그전송이 방해받지 않게 변경함
-		if (lastInputTime > startAfkTime + this->rule->timeAwakeAFK)
+		if (lastInputTime > startAfkTime + this->rule->awake)
 		{
 			::SetEvent(this->event);
 		}
@@ -82,7 +82,7 @@ bool featureAFK::watch()
 	}
 	else
 	{
-		if ((::GetTickCount() - getLastInputTime()) >= this->rule->timeInAFK /* 임시 3초 */)
+		if ((::GetTickCount() - getLastInputTime()) >= this->rule->in /* 임시 3초 */)
 		{
 			startAfkTime = ::GetTickCount();
 

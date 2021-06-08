@@ -16,8 +16,14 @@ featurePrint::~featurePrint()
 	safeDelete(this->rule);
 }
 
-bool featurePrint::initialize(rules *rule)
+bool featurePrint::initialize(void *value, DWORD size)
 {
+	if (size != sizeof(rules))
+	{
+		return false;
+	}
+
+	rules *rule = reinterpret_cast<rules*>(value);
 	this->rule = rule->getPrintRule();
 	if (this->rule->enabled == false)
 	{

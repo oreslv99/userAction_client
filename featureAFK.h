@@ -9,7 +9,7 @@ class featureAFK : public feature
 public:
 	featureAFK();
 	~featureAFK();
-	bool initialize(rules *rule) final;
+	bool initialize(void *rule, void *extra = nullptr, DWORD extraSize = 0) final;
 	bool watch() final;
 	bool isHighPriority() final;
 

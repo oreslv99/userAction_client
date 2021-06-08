@@ -8,8 +8,14 @@ featureProcess::~featureProcess()
 {
 	safeDelete(this->rule);
 }
-bool featureProcess::initialize(rules *rule)
+bool featureProcess::initialize(void *value, DWORD size)
 {
+	if (size != sizeof(rules))
+	{
+		return false;
+	}
+
+	rules *rule = reinterpret_cast<rules*>(value);
 	this->rule = rule->getProcessRule();
 	if (this->rule->enabled == false)
 	{

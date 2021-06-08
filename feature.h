@@ -4,7 +4,7 @@
 class feature
 {
 public:
-	virtual bool initialize(rules *rule) = 0;
+	virtual bool initialize(void *rule, void *extra, DWORD extraSize) = 0;
 	virtual bool watch() = 0;
 	virtual bool isHighPriority() = 0;
 protected:

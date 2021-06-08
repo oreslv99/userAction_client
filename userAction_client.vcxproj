@@ -61,9 +61,11 @@
     <ClInclude Include="extern\rapidJson\writer.h" />
     <ClInclude Include="extern\tinyxml2\tinyxml2.h" />
     <ClInclude Include="feature.h" />
+    <ClInclude Include="featureFileIo.h" />
     <ClInclude Include="featurePrint.h" />
     <ClInclude Include="featureProcess.h" />
     <ClInclude Include="rapidJson.h" />
+    <ClInclude Include="ruleFileIo.h" />
     <ClInclude Include="rules.h" />
     <ClInclude Include="ruleAFK.h" />
     <ClInclude Include="rulePrint.h" />
@@ -78,6 +80,7 @@
     <ClCompile Include="context.cpp" />
     <ClCompile Include="errLog.cpp" />
     <ClCompile Include="extern\tinyxml2\tinyxml2.cpp" />
+    <ClCompile Include="featureFileIo.cpp" />
     <ClCompile Include="featurePrint.cpp" />
     <ClCompile Include="featureProcess.cpp" />
     <ClCompile Include="rapidJson.cpp" />

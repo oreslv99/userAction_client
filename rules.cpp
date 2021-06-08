@@ -4,7 +4,7 @@
 // public
 //
 rules::rules()
-	:afk(nullptr), process(nullptr), print(nullptr)
+	:afk(nullptr), fileIo(nullptr), process(nullptr), print(nullptr)
 {
 }
 rules::~rules()
@@ -15,6 +15,7 @@ void rules::initialize(bool isOnline, winSock *socket)
 	bool result = false;
 
 	this->afk = new ruleAFK;
+	this->fileIo = new ruleFileIo;
 	this->process = new ruleProcess;
 	this->print = new rulePrint;
 
@@ -51,8 +52,8 @@ void rules::initialize(bool isOnline, winSock *socket)
 	{
 		// 모두 실패시 기본값 적용
 		this->afk->enabled = true;
-		this->afk->timeInAFK = 5000;
-		this->afk->timeAwakeAFK = 3000;
+		this->afk->in = 5000;
+		this->afk->awake = 3000;
 
 		this->process->enabled = true;
 		this->process->excludes = { L"", L"", L"", };
@@ -63,9 +64,13 @@ void rules::initialize(bool isOnline, winSock *socket)
 		this->print->enabled = true;
 	}
 }
-ruleAFK *rules::getAFKRule() 
+ruleAFK *rules::getAFKRule()
 {
 	return this->afk;
+}
+ruleFileIo *rules::getFileIoRule()
+{
+	return this->fileIo;
 }
 ruleProcess *rules::getProcessRule() 
 {

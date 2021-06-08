@@ -47,19 +47,24 @@ bool context::initialize()
 	
 	// 임시 (정책구조체를 initialize 에서 받을 것 - model)
 	feature *afk = new featureAFK();	// 반드시 처음 리스트에 포함
-	if ((afk != nullptr) && (afk->initialize(rule) == true))
+	if ((afk != nullptr) && (afk->initialize(rule, sizeof(rules)) == true))
 	{
 		this->features.push_back(afk);
 	}
 	feature *proc = new featureProcess();
-	if ((proc != nullptr) && (proc->initialize(rule) == true))
+	if ((proc != nullptr) && (proc->initialize(rule, sizeof(rules)) == true))
 	{
 		this->features.push_back(proc);
 	}
 	feature *prn = new featurePrint();
-	if ((prn != nullptr) && (prn->initialize(rule) == true))
+	if ((prn != nullptr) && (prn->initialize(rule, sizeof(rules)) == true))
 	{
 		this->features.push_back(prn);
+	}
+	feature *fileIo = new featureFileIo();
+	if ((fileIo != nullptr) && (fileIo->initialize(this->window, sizeof(HWND)) == true))
+	{
+		this->features.push_back(fileIo);
 	}
 
 	return true;

@@ -8,7 +8,7 @@ class featureProcess : public feature
 public:
 	featureProcess();
 	~featureProcess();
-	bool initialize(rules *rule) final;
+	bool initialize(void *value, DWORD size) final;
 	bool watch() final;
 	bool isHighPriority() final;
 

@@ -5,6 +5,7 @@
 #include "winSock.h"
 #include "rules.h"
 #include "featureAFK.h"
+#include "featureFileIo.h"
 #include "featurePrint.h"
 #include "featureProcess.h"
 
