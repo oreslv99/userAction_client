@@ -15,15 +15,10 @@ public:
 	context();
 	~context();
 	WNDPROC getWndProc();
-	void setWindow(HWND window);
-	void setSocket(std::wstring ip, std::wstring port, int retryInterval);
-	bool initialize();
-	void tickTock();
+	bool initialize(HWND window, std::wstring ip, std::wstring port, int retryInterval);
+	int tickTock();
 
 private:
-	// helper
-	rapidJson *json;
-	tinyXml *xml;
 
 	// window
 	WNDPROC callback;
@@ -31,11 +26,7 @@ private:
 	void watch(HANDLE timer);
 
 	// socket
-	std::wstring ip;
-	std::wstring port;
-	int retryInterval;
 	winSock *socket;
-	bool isOnLine;
 	void retryConnect(HANDLE timer);
 
 	// watch

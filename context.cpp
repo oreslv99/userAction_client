@@ -10,36 +10,31 @@ static LRESULT CALLBACK wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 // public
 //
 context::context()
-	:json(nullptr), xml(nullptr), socket(nullptr), isOnLine(false), callback(wndProc), features(), iter()
+	:socket(nullptr), callback(wndProc), features(), iter()
 {
 }
 context::~context()
 {
 	safeDelete(this->socket);
-	safeDelete(this->xml);
-	safeDelete(this->json);
 }
 WNDPROC context::getWndProc()
 {
 	return this->callback;
 }
-void context::setWindow(HWND window)
-{
-	this->window = window;
-}
-void context::setSocket(std::wstring ip, std::wstring port, int retryInterval)
-{
-	this->ip = ip;
-	this->port = port;
-	this->retryInterval = retryInterval * 60 * 1000;	// 분
-}
-bool context::initialize()
+bool context::initialize(HWND window, std::wstring ip, std::wstring port, int retryInterval)
 {
 	// parser 확인
 
 	// 소켓 확인
-	this->socket = new winSock(this->ip, this->port);
-	this->isOnLine = this->socket->initialize();
+	if (this->socket == nullptr)
+	{
+		this->socket = new winSock(ip, port);
+		if (this->socket->initialize() == false) 
+		{
+			safeDelete(this->socket);
+			log->write(errId::warning, L"[%s:%03d] Failed to initialize winSock.", __FUNCTIONW__, __LINE__);
+		}
+	}
 
 	// 정책 확인
 	rules *rule = new rules;
@@ -69,7 +64,7 @@ bool context::initialize()
 
 	return true;
 }
-void context::tickTock()
+int context::tickTock()
 {
 	LARGE_INTEGER dueTime;
 	dueTime.QuadPart = 0;
@@ -79,7 +74,7 @@ void context::tickTock()
 	if (::SetWaitableTimer(watchTimer, &dueTime, 3000, nullptr, nullptr, FALSE) == FALSE) // 임시 3000 ms
 	{
 		log->write(errId::error, L"[%s:%03d] code[%d] SetWaitableTimer is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
-		return;
+		return -1;
 	}
 
 	// 소켓 재연결은 정책에 있는경우에만
@@ -90,7 +85,7 @@ void context::tickTock()
 		if (::SetWaitableTimer(retryTimer, &dueTime, 5000, nullptr, nullptr, FALSE) == FALSE) // 임시 3000 ms
 		{
 			log->write(errId::error, L"[%s:%03d] code[%d] SetWaitableTimer is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
-			return;
+			return -1;
 		}
 	}
 
@@ -106,7 +101,9 @@ void context::tickTock()
 	}
 
 	// release
+	::CancelWaitableTimer(retryTimer);
 	::CancelWaitableTimer(watchTimer);
+	safeCloseHandle(retryTimer);
 	safeCloseHandle(watchTimer);
 }
 
@@ -138,10 +135,10 @@ void context::retryConnect(HANDLE timer)
 {
 	if (::WaitForSingleObject(timer, 1) == WAIT_OBJECT_0)
 	{
-		if (this->isOnLine == false)
+		if (this->socket == nullptr)
 		{
 			log->write(errId::info, L"[%s:%03d] retry connection", __FUNCTIONW__, __LINE__);
-			this->isOnLine = this->socket->initialize();
+			this->socket = this->socket->initialize();
 		}
 	}
 }

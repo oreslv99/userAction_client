@@ -5,41 +5,34 @@ const std::wstring SECTION_SERVER = L"Server";
 //
 // public
 //
-application::application(HINSTANCE instance)
-	:instance(instance), programName(), appContext(nullptr)
+application::application()
+	:appContext()
 {
 }
 application::~application()
 {
-	// release() 에서 해제함
-}
-bool application::initialize()
-{
-	bool result = false;
+	::CoUninitialize();
 
+	log->write(errId::info, L"End of application.");
+	log->release();
+}
+bool application::initialize(HINSTANCE instance)
+{
 	// 프로그램 이름
 	size_t size = MAX_PATH;
-	this->programName.resize(size);
-	::GetModuleFileNameW(nullptr, const_cast<wchar_t*>(this->programName.data()), size);
-	this->programName = this->programName.substr(this->programName.rfind('\\') + 1);	// userAction_client.exe
+	std::wstring programName;
+	::GetModuleFileNameW(nullptr, const_cast<wchar_t*>(programName.data()), size);
+	programName = programName.substr(programName.rfind('\\') + 1);	// userAction_client.exe
 
 	// 현재 실행중이라면 종료
-	if (isAlreadyRunning(this->programName) == true)
+	if (isAlreadyRunning(programName) == true)
 	{
 		log->write(errId::error, L"[%s:%03d] Application is already running now.", __FUNCTIONW__, __LINE__);
 		return false;
 	}
 
-	// 컨텍스트 생성
-	this->appContext = new context();
-	if (this->appContext == nullptr)
-	{
-		log->write(errId::error, L"[%s:%03d] Failed to create application context.", __FUNCTIONW__, __LINE__);
-		return false;
-	}
-
 	// window 생성
-	if (createWindow(this->instance, this->programName, this->appContext) == false)
+	if (createWindow(instance, programName, &this->appContext) == false)
 	{
 		log->write(errId::error, L"[%s:%03d] createWindow is Failed.", __FUNCTIONW__, __LINE__);
 		return false;
@@ -54,14 +47,14 @@ bool application::initialize()
 	}
 
 	// 환경 파일
-	if (readEnvironmet(this->appContext) == false)
+	if (readEnvironmet(&this->appContext) == false)
 	{
 		log->write(errId::error, L"[%s:%03d] readEnvironmet is Failed.", __FUNCTIONW__, __LINE__);
 		return false;
 	}
 
 	// 컨텍스트 초기화
-	if (this->appContext->initialize() == false)
+	if (this->appContext.initialize() == false)
 	{
 		log->write(errId::error, L"[%s:%03d] Failed to create application context.", __FUNCTIONW__, __LINE__);
 		return false;
@@ -69,20 +62,9 @@ bool application::initialize()
 
 	return true;
 }
-void application::run()
+int application::run()
 {
-	this->appContext->tickTock();
-}
-int application::release()
-{
-	safeDelete(this->appContext);
-
-	::CoUninitialize();
-
-	log->write(errId::info, L"End of application.");
-	log->release();
-
-	return 0;
+	return this->appContext.tickTock();
 }
 
 //

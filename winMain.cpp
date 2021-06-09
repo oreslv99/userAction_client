@@ -9,14 +9,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 	log->write(errId::debug, L"Start application.");
 
-	application *app = new application(hInstance);
-	if (app->initialize() == false) 
+	application app;
+	if (app.initialize(hInstance) == false)
 	{
 		log->write(errId::error, L"Failed to initialize application.");
 		return -1;
 	}
 
-	app->run();
-
-	return app->release();
+	return app.run();
 }

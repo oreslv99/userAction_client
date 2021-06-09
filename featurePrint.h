@@ -18,6 +18,7 @@ public:
 
 private:
 	rulePrint *rule;
+	tinyXml *xml;
 
 	// 레지스트리
 	void setRegistryKey(HKEY hive, std::wstring path);

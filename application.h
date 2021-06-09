@@ -5,16 +5,13 @@
 class application
 {
 public:
-	application(HINSTANCE instance);
+	application();
 	~application();
-	bool initialize();
-	void run();
-	int release();
+	bool initialize(HINSTANCE instance);
+	int run();
 
 private:
-	HINSTANCE instance;
-	std::wstring programName;
-	context *appContext;
+	context appContext;
 
 	bool isAlreadyRunning(std::wstring programName);
 	bool createWindow(HINSTANCE instance, std::wstring programName, context *appContext);
