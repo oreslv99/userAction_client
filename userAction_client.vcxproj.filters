@@ -156,9 +156,6 @@
     <ClInclude Include="extern\rapidJson\writer.h">
       <Filter>Source Files\extern\rapidJson</Filter>
     </ClInclude>
-    <ClInclude Include="errLog.h">
-      <Filter>Source Files\helper</Filter>
-    </ClInclude>
     <ClInclude Include="feature.h">
       <Filter>Source Files\contexts\features</Filter>
     </ClInclude>
@@ -201,6 +198,9 @@
     <ClInclude Include="ruleFileIo.h">
       <Filter>Source Files\contexts\model</Filter>
     </ClInclude>
+    <ClInclude Include="writeLog.h">
+      <Filter>Source Files\helper</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="winMain.cpp" />
@@ -209,9 +209,6 @@
     </ClCompile>
     <ClCompile Include="extern\tinyxml2\tinyxml2.cpp">
       <Filter>Source Files\extern\tinyxml2</Filter>
-    </ClCompile>
-    <ClCompile Include="errLog.cpp">
-      <Filter>Source Files\helper</Filter>
     </ClCompile>
     <ClCompile Include="context.cpp">
       <Filter>Source Files\contexts</Filter>
@@ -239,6 +236,9 @@
     </ClCompile>
     <ClCompile Include="featureFileIo.cpp">
       <Filter>Source Files\contexts\features</Filter>
+    </ClCompile>
+    <ClCompile Include="writeLog.cpp">
+      <Filter>Source Files\helper</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

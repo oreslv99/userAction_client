@@ -20,7 +20,7 @@ bool winSock::initialize()
 
 	if ((this->ip.length() <= 0) || (this->port.length() <= 0))
 	{
-		log->write(errId::error, L"[%s:%03d] Invalid ip or port.", __FUNCTIONW__, __LINE__);
+		log->write(logId::error, L"[%s:%03d] Invalid ip or port.", __FUNCTIONW__, __LINE__);
 		return this->initialized;
 	}
 
@@ -31,7 +31,7 @@ bool winSock::initialize()
 	errorNo = ::WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (errorNo != 0)
 	{
-		log->write(errId::error, L"[%s:%03d] code[%d] WSAStartup is failed.", __FUNCTIONW__, __LINE__, errorNo);
+		log->write(logId::error, L"[%s:%03d] code[%d] WSAStartup is failed.", __FUNCTIONW__, __LINE__, errorNo);
 		return this->initialized;
 	}
 
@@ -44,7 +44,7 @@ bool winSock::initialize()
 	errorNo = ::GetAddrInfoW(this->ip.c_str(), this->port.c_str(), &hints, &this->addrInfo);
 	if (errorNo != 0)
 	{
-		log->write(errId::error, L"[%s:%03d] code[%d] GetAddrInfoW is failed.", __FUNCTIONW__, __LINE__, errorNo);
+		log->write(logId::error, L"[%s:%03d] code[%d] GetAddrInfoW is failed.", __FUNCTIONW__, __LINE__, errorNo);
 		return this->initialized;
 	}
 
@@ -55,7 +55,7 @@ bool winSock::initialize()
 		this->addrInfo->ai_protocol, nullptr, 0, WSA_FLAG_OVERLAPPED);
 	if (socket == INVALID_SOCKET)
 	{
-		log->write(errId::error, L"[%s:%03d] code[%d] WSASocketW is failed.", __FUNCTIONW__, __LINE__, ::WSAGetLastError());
+		log->write(logId::error, L"[%s:%03d] code[%d] WSASocketW is failed.", __FUNCTIONW__, __LINE__, ::WSAGetLastError());
 		return this->initialized;
 	}
 
@@ -79,7 +79,7 @@ bool winSock::initialize()
 			break;
 		}
 
-		log->write(errId::error, L"[%s:%03d] %s", __FUNCTIONW__, __LINE__, errMessage.c_str());
+		log->write(logId::error, L"[%s:%03d] %s", __FUNCTIONW__, __LINE__, errMessage.c_str());
 		return this->initialized;
 	}
 

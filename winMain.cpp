@@ -7,12 +7,12 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	UNREFERENCED_PARAMETER(pCmdLine);
 	UNREFERENCED_PARAMETER(nCmdShow);
 
-	log->write(errId::debug, L"Start application.");
+	log->write(logId::debug, L"Start application.");
 
 	application app;
 	if (app.initialize(hInstance) == false)
 	{
-		log->write(errId::error, L"Failed to initialize application.");
+		log->write(logId::error, L"Failed to initialize application.");
 		return -1;
 	}
 

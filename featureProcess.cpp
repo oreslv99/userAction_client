@@ -8,21 +8,21 @@ featureProcess::~featureProcess()
 {
 	safeDelete(this->rule);
 }
-bool featureProcess::initialize(void *value, DWORD size)
+bool featureProcess::initialize(void *rule, void *extra, DWORD extraSize)
 {
-	if (size != sizeof(rules))
-	{
-		return false;
-	}
+	//if (size != sizeof(rules))
+	//{
+	//	return false;
+	//}
 
-	rules *rule = reinterpret_cast<rules*>(value);
-	this->rule = rule->getProcessRule();
-	if (this->rule->enabled == false)
-	{
-		// 해당 기능사용 안함
-		log->write(errId::warning, L"[%s:%03d] Feature process is disabled.", __FUNCTIONW__, __LINE__);
-		return true;
-	}
+	//rules *rule = reinterpret_cast<rules*>(value);
+	//this->rule = rule->getProcessRule();
+	//if (this->rule->enabled == false)
+	//{
+	//	// 해당 기능사용 안함
+	//	log->write(logId::warning, L"[%s:%03d] Feature process is disabled.", __FUNCTIONW__, __LINE__);
+	//	return true;
+	//}
 
 	return true;
 }

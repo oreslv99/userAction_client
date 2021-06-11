@@ -16,21 +16,21 @@ featurePrint::~featurePrint()
 	safeDelete(this->rule);
 }
 
-bool featurePrint::initialize(void *value, DWORD size)
+bool featurePrint::initialize(void *rule, void *extra, DWORD extraSize)
 {
-	if (size != sizeof(rules))
-	{
-		return false;
-	}
+	//if (size != sizeof(rules))
+	//{
+	//	return false;
+	//}
 
-	rules *rule = reinterpret_cast<rules*>(value);
-	this->rule = rule->getPrintRule();
-	if (this->rule->enabled == false)
-	{
-		// 해당 기능사용 안함
-		log->write(errId::warning, L"[%s:%03d] Feature print is disabled.", __FUNCTIONW__, __LINE__);
-		return true;
-	}
+	//rules *rule = reinterpret_cast<rules*>(value);
+	//this->rule = rule->getPrintRule();
+	//if (this->rule->enabled == false)
+	//{
+	//	// 해당 기능사용 안함
+	//	log->write(logId::warning, L"[%s:%03d] Feature print is disabled.", __FUNCTIONW__, __LINE__);
+	//	return true;
+	//}
 
 	// 이벤트 뷰어에서 프린트 서비스를 따로 볼 수있게 다음 항목을 등록
 	const std::wstring path = REGISTRY_PATH + EVENTVIEWER_CHANNEL_PATH;
@@ -41,7 +41,7 @@ bool featurePrint::initialize(void *value, DWORD size)
 	//	: 그 양에 따라서 EvtNext 사용되는 EVT_HANDLE 의 크기를 가늠할 수 없음.
 	if (::EvtClearLog(nullptr, EVENTVIEWER_CHANNEL_PATH.c_str(), nullptr, 0) == FALSE)
 	{
-		log->write(errId::warning, L"[%s:%03d] code[%d] EvtClearLog is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+		log->write(logId::warning, L"[%s:%03d] code[%d] EvtClearLog is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 		//return false;
 	}
 
@@ -75,13 +75,13 @@ bool featurePrint::watch()
 		switch (err)
 		{
 		case ERROR_EVT_CHANNEL_NOT_FOUND:
-			log->write(errId::error, L"[%s:%03d] code[%d] The channel is not found.", __FUNCTIONW__, __LINE__, err);
+			log->write(logId::error, L"[%s:%03d] code[%d] The channel is not found.", __FUNCTIONW__, __LINE__, err);
 			break;
 		case ERROR_EVT_INVALID_QUERY:
-			log->write(errId::error, L"[%s:%03d] code[%d] The query is invalid.", __FUNCTIONW__, __LINE__, err);
+			log->write(logId::error, L"[%s:%03d] code[%d] The query is invalid.", __FUNCTIONW__, __LINE__, err);
 			break;
 		default:
-			log->write(errId::error, L"[%s:%03d] code[%d] The query is invalid.", __FUNCTIONW__, __LINE__, err);
+			log->write(logId::error, L"[%s:%03d] code[%d] The query is invalid.", __FUNCTIONW__, __LINE__, err);
 			break;
 		}
 
@@ -206,13 +206,13 @@ void featurePrint::parseDocument(tinyxml2::XMLDocument *document)
 	wchar_t *logFormatW = (wchar_t*)::calloc(length, sizeof(wchar_t*));
 	::MultiByteToWideChar(CP_ACP, 0, logFormat.c_str(), -1, logFormatW, length);
 	
-	log->write(errId::user, L"printEvent %s", logFormatW);
+	log->write(logId::user, L"printEvent %s", logFormatW);
 	safeFree(logFormatW);
 
 	// 기록이 완료됬으면 이전 이벤트 뷰어 데이터 삭제
 	if (::EvtClearLog(nullptr, EVENTVIEWER_CHANNEL_PATH.c_str(), nullptr, 0) == FALSE)
 	{
-		log->write(errId::warning, L"[%s:%03d] code[%d] EvtClearLog is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+		log->write(logId::warning, L"[%s:%03d] code[%d] EvtClearLog is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 	}
 }
 void featurePrint::renderEvent(EVT_HANDLE fragment)

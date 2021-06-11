@@ -18,14 +18,14 @@ bool featureAFK::initialize(void *rule, void *extra, DWORD extraSize)
 	if (this->rule->enabled == false)
 	{
 		// 해당 기능사용 안함
-		log->write(errId::warning, L"[%s:%03d] Feature afk is disabled.", __FUNCTIONW__, __LINE__);
+		log->write(logId::warning, L"[%s:%03d] Feature afk is disabled.", __FUNCTIONW__, __LINE__);
 		return true;
 	}
 
 	this->event = ::CreateEventW(nullptr, FALSE, FALSE, nullptr);
 	if (this->event == INVALID_HANDLE_VALUE)
 	{
-		log->write(errId::warning, L"[%s:%03d] code[%d] CreateEventW is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+		log->write(logId::warning, L"[%s:%03d] code[%d] CreateEventW is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 		return false;
 	}
 
@@ -77,7 +77,7 @@ bool featureAFK::watch()
 			startAfkTime = ::GetTickCount();	// 시간 초기화
 			::ResetEvent(this->event);
 			result = false;
-			log->write(errId::user, L"out afk");
+			log->write(logId::user, L"out afk");
 		}
 	}
 	else
@@ -88,7 +88,7 @@ bool featureAFK::watch()
 
 			// 자리비움 상태
 			result = true;
-			log->write(errId::user, L"in afk");
+			log->write(logId::user, L"in afk");
 		}
 	}
 

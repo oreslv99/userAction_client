@@ -12,7 +12,7 @@ class featurePrint : public feature
 public:
 	featurePrint();
 	~featurePrint();
-	bool initialize(void *value, DWORD size) final;
+	bool initialize(void *rule, void *extra = nullptr, DWORD extraSize = 0) final;
 	bool watch() final;
 	bool isHighPriority() final;
 

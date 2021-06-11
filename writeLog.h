@@ -5,7 +5,7 @@
 #include <fstream>
 #include <codecvt>			// utf8 로 변환
 
-enum errId 
+enum logId 
 {
 	debug = 0,
 	info,
@@ -13,17 +13,18 @@ enum errId
 	user,
 	error,
 };
-class errLog
+class writeLog
 {
 public:
-	static errLog *getInstance();
+	static writeLog *getInstance();
 	static bool initialize();
 	static void release();
-	static void write(errId id, std::wstring message, ...);
+	static void write(logId id, std::wstring message, ...);
+	static void writeUserAction(std::wstring message, ...);
 
 private:
 	static std::wstring path;		// 저장경로
 	static CRITICAL_SECTION cs;		// sync
-	static errLog *instance;
+	static writeLog *instance;
 
 };

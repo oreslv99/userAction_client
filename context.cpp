@@ -4,7 +4,7 @@ feature *context::fileIo = nullptr;
 LRESULT CALLBACK context::wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	// file io watch 를 위함
-	fileIo->watch();
+	//fileIo->watch();
 	return ::DefWindowProcW(hWnd, uMsg, wParam, lParam);
 }
 
@@ -41,35 +41,34 @@ bool context::initialize()
 	// 소켓 확인
 	if (this->socket->initialize() == false)
 	{
-		safeDelete(this->socket);
-		log->write(errId::warning, L"[%s:%03d] Failed to initialize winSock.", __FUNCTIONW__, __LINE__);
+		log->write(logId::warning, L"[%s:%03d] Failed to initialize winSock.", __FUNCTIONW__, __LINE__);
 	}
 
-	// 정책 확인
-	rules *rule = new rules;
-	rule->initialize(this->isOnLine, this->socket);
-	
-	// 임시 (정책구조체를 initialize 에서 받을 것 - model)
-	feature *afk = new featureAFK();	// 반드시 처음 리스트에 포함
-	if ((afk != nullptr) && (afk->initialize(rule, sizeof(rules)) == true))
-	{
-		this->features.push_back(afk);
-	}
-	feature *proc = new featureProcess();
-	if ((proc != nullptr) && (proc->initialize(rule, sizeof(rules)) == true))
-	{
-		this->features.push_back(proc);
-	}
-	feature *prn = new featurePrint();
-	if ((prn != nullptr) && (prn->initialize(rule, sizeof(rules)) == true))
-	{
-		this->features.push_back(prn);
-	}
-	feature *fileIo = new featureFileIo();
-	if ((fileIo != nullptr) && (fileIo->initialize(this->window, sizeof(HWND)) == true))
-	{
-		this->features.push_back(fileIo);
-	}
+	//// 정책 확인
+	//rules *rule = new rules;
+	//rule->initialize(this->isOnLine, this->socket);
+	//
+	//// 임시 (정책구조체를 initialize 에서 받을 것 - model)
+	//feature *afk = new featureAFK();	// 반드시 처음 리스트에 포함
+	//if ((afk != nullptr) && (afk->initialize(rule, sizeof(rules)) == true))
+	//{
+	//	this->features.push_back(afk);
+	//}
+	//feature *proc = new featureProcess();
+	//if ((proc != nullptr) && (proc->initialize(rule, sizeof(rules)) == true))
+	//{
+	//	this->features.push_back(proc);
+	//}
+	//feature *prn = new featurePrint();
+	//if ((prn != nullptr) && (prn->initialize(rule, sizeof(rules)) == true))
+	//{
+	//	this->features.push_back(prn);
+	//}
+	//feature *fileIo = new featureFileIo();
+	//if ((fileIo != nullptr) && (fileIo->initialize(this->window, sizeof(HWND)) == true))
+	//{
+	//	this->features.push_back(fileIo);
+	//}
 
 	return true;
 }
@@ -82,7 +81,7 @@ int context::tickTock()
 	HANDLE watchTimer = ::CreateWaitableTimerW(nullptr, FALSE, nullptr);
 	if (::SetWaitableTimer(watchTimer, &dueTime, 3000, nullptr, nullptr, FALSE) == FALSE) // 임시 3000 ms
 	{
-		log->write(errId::error, L"[%s:%03d] code[%d] SetWaitableTimer is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+		log->write(logId::error, L"[%s:%03d] code[%d] SetWaitableTimer is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 		return -1;
 	}
 
@@ -93,7 +92,7 @@ int context::tickTock()
 		retryTimer = ::CreateWaitableTimerW(nullptr, FALSE, nullptr);
 		if (::SetWaitableTimer(retryTimer, &dueTime, 5000, nullptr, nullptr, FALSE) == FALSE) // 임시 3000 ms
 		{
-			log->write(errId::error, L"[%s:%03d] code[%d] SetWaitableTimer is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+			log->write(logId::error, L"[%s:%03d] code[%d] SetWaitableTimer is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 			return -1;
 		}
 	}
@@ -148,13 +147,13 @@ void context::retryConnect(HANDLE timer)
 		{
 			if (this->socket->initialize() == true) 
 			{
-				log->write(errId::info, L"[%s:%03d] server is on line again.", __FUNCTIONW__, __LINE__);
+				log->write(logId::info, L"[%s:%03d] server is on line again.", __FUNCTIONW__, __LINE__);
 			}
 #if _DEBUG
 			else
 			{
 
-				log->write(errId::warning, L"[%s:%03d] server is not on line.", __FUNCTIONW__, __LINE__);
+				log->write(logId::warning, L"[%s:%03d] server is not on line.", __FUNCTIONW__, __LINE__);
 			}
 #endif
 		}
