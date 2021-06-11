@@ -1,7 +1,7 @@
 #include "winSock.h"
 
-winSock::winSock(std::wstring ip, std::wstring port)
-	: addrInfo(nullptr), ip(ip), port(port)
+winSock::winSock(std::wstring ip, std::wstring port, int retryInterval)
+	: ip(ip), port(port), retryInterval(retryInterval), initialized(false), addrInfo(nullptr)
 {
 }
 winSock::~winSock()
@@ -16,10 +16,12 @@ winSock::~winSock()
 }
 bool winSock::initialize()
 {
+	this->initialized = false;
+
 	if ((this->ip.length() <= 0) || (this->port.length() <= 0))
 	{
 		log->write(errId::error, L"[%s:%03d] Invalid ip or port.", __FUNCTIONW__, __LINE__);
-		return false;
+		return this->initialized;
 	}
 
 	int errorNo = -1;
@@ -30,7 +32,7 @@ bool winSock::initialize()
 	if (errorNo != 0)
 	{
 		log->write(errId::error, L"[%s:%03d] code[%d] WSAStartup is failed.", __FUNCTIONW__, __LINE__, errorNo);
-		return false;
+		return this->initialized;
 	}
 
 	// 소켓 정보 설정
@@ -43,7 +45,7 @@ bool winSock::initialize()
 	if (errorNo != 0)
 	{
 		log->write(errId::error, L"[%s:%03d] code[%d] GetAddrInfoW is failed.", __FUNCTIONW__, __LINE__, errorNo);
-		return false;
+		return this->initialized;
 	}
 
 	// 소켓
@@ -54,7 +56,7 @@ bool winSock::initialize()
 	if (socket == INVALID_SOCKET)
 	{
 		log->write(errId::error, L"[%s:%03d] code[%d] WSASocketW is failed.", __FUNCTIONW__, __LINE__, ::WSAGetLastError());
-		return false;
+		return this->initialized;
 	}
 
 	// 연결
@@ -78,10 +80,18 @@ bool winSock::initialize()
 		}
 
 		log->write(errId::error, L"[%s:%03d] %s", __FUNCTIONW__, __LINE__, errMessage.c_str());
-		return false;
+		return this->initialized;
 	}
 
 	::closesocket(socket);
 
-	return true;
+	return (this->initialized = true);
+}
+int winSock::getRetryInterval() const
+{
+	return this->retryInterval;
+}
+bool winSock::isOnline() const
+{
+	return this->initialized;
 }

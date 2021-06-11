@@ -15,11 +15,12 @@ public:
 	context();
 	~context();
 	WNDPROC getWndProc();
-	bool initialize(HWND window, std::wstring ip, std::wstring port, int retryInterval);
+	void setWindow(HWND window);
+	void setSocket(std::wstring ip, std::wstring port, int retryInterval);
+	bool initialize();
 	int tickTock();
 
 private:
-
 	// window
 	WNDPROC callback;
 	HWND window;
@@ -30,6 +31,8 @@ private:
 	void retryConnect(HANDLE timer);
 
 	// watch
+	static feature *fileIo;
+	static LRESULT CALLBACK wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	std::list<feature*> features;
 	std::list<feature*>::iterator iter;
 

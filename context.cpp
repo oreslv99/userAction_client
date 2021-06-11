@@ -1,8 +1,10 @@
 #include "context.h"
+feature *context::fileIo = nullptr;
 
-static LRESULT CALLBACK wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK context::wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	// file io watch 를 위함
+	fileIo->watch();
 	return ::DefWindowProcW(hWnd, uMsg, wParam, lParam);
 }
 
@@ -10,7 +12,7 @@ static LRESULT CALLBACK wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 // public
 //
 context::context()
-	:socket(nullptr), callback(wndProc), features(), iter()
+	:window(nullptr), socket(nullptr), callback(wndProc), features(), iter()
 {
 }
 context::~context()
@@ -21,19 +23,26 @@ WNDPROC context::getWndProc()
 {
 	return this->callback;
 }
-bool context::initialize(HWND window, std::wstring ip, std::wstring port, int retryInterval)
+void context::setWindow(HWND window)
+{
+	this->window = window;
+}
+void context::setSocket(std::wstring ip, std::wstring port, int retryInterval)
+{
+	if (this->socket == nullptr)
+	{
+		this->socket = new winSock(ip, port, retryInterval);
+	}
+}
+bool context::initialize()
 {
 	// parser 확인
 
 	// 소켓 확인
-	if (this->socket == nullptr)
+	if (this->socket->initialize() == false)
 	{
-		this->socket = new winSock(ip, port);
-		if (this->socket->initialize() == false) 
-		{
-			safeDelete(this->socket);
-			log->write(errId::warning, L"[%s:%03d] Failed to initialize winSock.", __FUNCTIONW__, __LINE__);
-		}
+		safeDelete(this->socket);
+		log->write(errId::warning, L"[%s:%03d] Failed to initialize winSock.", __FUNCTIONW__, __LINE__);
 	}
 
 	// 정책 확인
@@ -79,7 +88,7 @@ int context::tickTock()
 
 	// 소켓 재연결은 정책에 있는경우에만
 	HANDLE retryTimer = INVALID_HANDLE_VALUE;
-	if (this->retryInterval > 0)
+	if (this->socket->getRetryInterval() > 0)
 	{
 		retryTimer = ::CreateWaitableTimerW(nullptr, FALSE, nullptr);
 		if (::SetWaitableTimer(retryTimer, &dueTime, 5000, nullptr, nullptr, FALSE) == FALSE) // 임시 3000 ms
@@ -135,10 +144,19 @@ void context::retryConnect(HANDLE timer)
 {
 	if (::WaitForSingleObject(timer, 1) == WAIT_OBJECT_0)
 	{
-		if (this->socket == nullptr)
+		if (this->socket->isOnline() == false)
 		{
-			log->write(errId::info, L"[%s:%03d] retry connection", __FUNCTIONW__, __LINE__);
-			this->socket = this->socket->initialize();
+			if (this->socket->initialize() == true) 
+			{
+				log->write(errId::info, L"[%s:%03d] server is on line again.", __FUNCTIONW__, __LINE__);
+			}
+#if _DEBUG
+			else
+			{
+
+				log->write(errId::warning, L"[%s:%03d] server is not on line.", __FUNCTIONW__, __LINE__);
+			}
+#endif
 		}
 	}
 }

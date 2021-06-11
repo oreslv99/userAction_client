@@ -7,13 +7,17 @@
 class winSock
 {
 public:
-	winSock(std::wstring ip, std::wstring port);
+	winSock(std::wstring ip, std::wstring port, int retryInterval);
 	~winSock();
 	bool initialize();
+	int getRetryInterval() const;
+	bool isOnline() const;
 
 private:
 	std::wstring ip;
 	std::wstring port;
+	int retryInterval;
+	bool initialized;
 	addrinfoW *addrInfo;
 
 };
