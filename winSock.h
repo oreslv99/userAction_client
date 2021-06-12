@@ -13,17 +13,15 @@ enum requestId
 class winSock
 {
 public:
-	winSock(std::wstring ip, std::wstring port, int retryInterval);
+	winSock(std::wstring ip, std::wstring port);
 	~winSock();
 	bool initialize();
-	int getRetryInterval() const;
 	bool isOnline() const;
 	bool request(requestId id, std::wstring *buffer);
 
 private:
 	std::wstring ip;
 	std::wstring port;
-	int retryInterval;
 	bool initialized;
 	addrinfoW *addrInfo;
 

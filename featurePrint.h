@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "feature.h"
-#include "tinyXml.h"
+#include ".\\extern\\tinyxml2\\tinyxml2.h"
 #include <winevt.h>						// 이벤트 뷰어
 #pragma comment(lib, "wevtapi.lib")		// 이벤트 뷰어
 #include <functional>
@@ -17,7 +17,6 @@ public:
 
 private:
 	const rulePrint *rule;
-	tinyXml *xml;
 
 	// 레지스트리
 	void setRegistryKey(HKEY hive, std::wstring path);

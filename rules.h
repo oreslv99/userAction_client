@@ -37,6 +37,7 @@ public:
 	rules();
 	~rules();
 	void initialize(winSock *socket, HWND window);
+	int getTimerInterval() const;
 	ruleAFK *getAFKRule() const;
 	ruleFileIo *getFileIoRule() const;
 	ruleProcess *getProcessRule() const;
@@ -60,6 +61,9 @@ private:
 
 	bool getJsonDocumentFromFile(const std::wstring filePath, jsonDocumentW *buffer);
 	bool getJsonDocumentFromString(const std::wstring jsonString, jsonDocumentW *buffer);
+	bool deserializeRule(jsonDocumentW document);
+
+	int timerInterval;
 	ruleAFK *afk;
 	ruleFileIo *fileIo;
 	ruleProcess *process;

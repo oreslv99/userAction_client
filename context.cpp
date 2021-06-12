@@ -27,7 +27,7 @@ void context::setWindow(HWND window)
 {
 	this->window = window;
 }
-void context::setSocket(std::wstring ip, std::wstring port, int retryInterval)
+void context::setSocket(std::wstring ip, std::wstring port)
 {
 	if (this->socket == nullptr)
 	{
@@ -110,7 +110,7 @@ int context::tickTock()
 
 	// 메인 watch 타이머 설정
 	HANDLE watchTimer = ::CreateWaitableTimerW(nullptr, FALSE, nullptr);
-	if (::SetWaitableTimer(watchTimer, &dueTime, 3000, nullptr, nullptr, FALSE) == FALSE) // 임시 3000 ms
+	if (::SetWaitableTimer(watchTimer, &dueTime, this->rule.getTimerInterval(), nullptr, nullptr, FALSE) == FALSE) // 임시 3000 ms
 	{
 		log->write(logId::error, L"[%s:%03d] code[%d] SetWaitableTimer is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 		return -1;
@@ -160,11 +160,11 @@ void context::watch(HANDLE timer)
 		bool inAfk = false;
 		for (std::list<feature*>::iterator iter = this->features.begin(); iter != this->features.end(); iter++)
 		{
-			// 자리비움 feature 는 high priority
-			if ((*iter)->isHighPriority() == true)
-			{
-				inAfk = (*iter)->watch();
-			}
+			//// 자리비움 feature 는 high priority
+			//if ((*iter)->isHighPriority() == true)
+			//{
+			//	inAfk = (*iter)->watch();
+			//}
 			
 			// 자리비움 중이 아닌 경우에만 감시
 			if (inAfk == false) 

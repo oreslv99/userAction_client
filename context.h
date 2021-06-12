@@ -1,7 +1,5 @@
 #pragma once
 #include "stdafx.h"
-#include "rapidJson.h"
-#include "tinyXml.h"
 #include "winSock.h"
 #include "rules.h"
 #include "featureAFK.h"

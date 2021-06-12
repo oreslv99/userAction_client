@@ -125,10 +125,9 @@ bool application::readEnvironmet(context *appContext)
 	port.resize(5);		// xxxxx
 	::GetPrivateProfileStringW(SECTION_SERVER.c_str(), L"ip", nullptr, const_cast<wchar_t*>(ip.data()), ip.length(), iniFilePath.c_str());
 	::GetPrivateProfileStringW(SECTION_SERVER.c_str(), L"port", nullptr, const_cast<wchar_t*>(port.data()), port.length(), iniFilePath.c_str());
-	int retryInterval = ::GetPrivateProfileIntW(SECTION_SERVER.c_str(), L"retryInterval", 0, iniFilePath.c_str());
 
 	// context ¿¡ ¼³Á¤
-	appContext->setSocket(ip, port, retryInterval);
+	appContext->setSocket(ip, port);
 
 	return true;
 }

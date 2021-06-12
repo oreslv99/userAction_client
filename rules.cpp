@@ -4,7 +4,7 @@
 // public
 //
 rules::rules()
-	:afk(nullptr), fileIo(nullptr), process(nullptr), print(nullptr)
+	:timerInterval(0), afk(nullptr), fileIo(nullptr), process(nullptr), print(nullptr)
 {
 }
 rules::~rules()
@@ -32,7 +32,7 @@ void rules::initialize(winSock *socket, HWND window)
 		// json object
 		jsonDocumentW document;
 
-		if (socket->isOnline == true)
+		if (socket->isOnline() == true)
 		{
 			// 서버와 통신이 o, 파일로 저장하고 읽음
 			std::wstring buffer;
@@ -52,6 +52,10 @@ void rules::initialize(winSock *socket, HWND window)
 					log->write(logId::error, L"[%s:%d] Can not open: %s", __FUNCTIONW__, __LINE__, filePath.c_str());
 				}
 			}
+			else
+			{
+				// 서버에 저장된 정책에 변화가 없거나, 정말 실패
+			}
 		}
 		else
 		{
@@ -62,6 +66,9 @@ void rules::initialize(winSock *socket, HWND window)
 		// 정책 파일로부터 읽기
 		if (getJsonDocumentFromFile(filePath, &document) == true)
 		{
+
+
+
 			result = true;
 		}
 	}
@@ -91,6 +98,10 @@ void rules::initialize(winSock *socket, HWND window)
 
 		this->print->enabled = true;
 	}
+}
+int rules::getTimerInterval() const
+{
+	return this->timerInterval;
 }
 ruleAFK *rules::getAFKRule() const
 {
@@ -146,4 +157,229 @@ bool rules::getJsonDocumentFromString(const std::wstring jsonString, jsonDocumen
 	// TODO: json 이 아닌경우 어떻게 되는지 확인
 	buffer->Parse(jsonString.c_str());
 	return buffer->IsObject();
+}
+bool rules::deserializeRule(jsonDocumentW document)
+{
+	// C/C++ 은 Reflection 을 지원하지 않기 때문에.. 아래처럼 그냥 다 작성해야함 (C# 할까..)
+	// 감시정책
+	if ((document.HasMember(L"watching") == false) || (document[L"watching"].IsObject() == false))
+	{
+		log->write(logId::error, L"[%s:%d] Invalid rule. [watching]", __FUNCTIONW__, __LINE__);
+		return false;
+	}
+	else
+	{
+		jsonObjectW watching = document[L"watching"].GetObjectW();
+		jsonMemberIteratorW watchingIter;
+		for (watchingIter = watching.begin(); watchingIter != watching.end(); watchingIter++)
+		{
+			// 감시주기
+			if ((watchingIter->name.GetStringLength() > 0) && (::_wcsicmp(watchingIter->name.GetString(), L"interval") == 0) &&
+				(watchingIter->value.IsInt() == true))
+			{
+				buffer->stalking_timer_interval = watchingIter->value.GetInt();
+			}
+			// 자리비움 감시
+			if ((watchingIter->name.GetStringLength() > 0) && (::_wcsicmp(watchingIter->name.GetString(), L"idle") == 0) &&
+				(watchingIter->value.IsObject() == true))
+			{
+				jsonObjectW idleObject = watchingIter->value.GetObjectW();
+				jsonMemberIteratorW idleIter;
+				for (idleIter = idleObject.begin(); idleIter != idleObject.end(); idleIter++)
+				{
+					if ((idleIter->name.GetStringLength() > 0) && (::_wcsicmp(idleIter->name.GetString(), L"enabled") == 0) &&
+						(idleIter->value.IsBool() == true))
+					{
+						buffer->watch_afk_enabled = idleIter->value.GetBool();
+
+						// 2020-11-26 orseL
+						buffer->watch_afk_event = ((buffer->watch_afk_enabled == true) ? ::CreateEventW(nullptr, FALSE, FALSE, nullptr) : INVALID_HANDLE_VALUE);
+					}
+					if ((idleIter->name.GetStringLength() > 0) && (::_wcsicmp(idleIter->name.GetString(), L"in") == 0) &&
+						(idleIter->value.IsInt() == true))
+					{
+						buffer->watch_afk_TimeInAfk = idleIter->value.GetInt();
+					}
+					if ((idleIter->name.GetStringLength() > 0) && (::_wcsicmp(idleIter->name.GetString(), L"awake") == 0) &&
+						(idleIter->value.IsInt() == true))
+					{
+						buffer->watch_afk_TimeAwakeAfk = idleIter->value.GetInt();
+					}
+				}
+			}
+			// 프로세스 감시
+			if ((watchingIter->name.GetStringLength() > 0) && (::_wcsicmp(watchingIter->name.GetString(), L"process") == 0) &&
+				(watchingIter->value.IsObject() == true))
+			{
+				jsonObjectW processObject = watchingIter->value.GetObjectW();
+				jsonMemberIteratorW processIter;
+				for (processIter = processObject.begin(); processIter != processObject.end(); processIter++)
+				{
+					if ((processIter->name.GetStringLength() > 0) && (::_wcsicmp(processIter->name.GetString(), L"enabled") == 0) &&
+						(processIter->value.IsBool() == true))
+					{
+						// 사용유무
+						buffer->watch_process_enabled = processIter->value.GetBool();
+					}
+					if ((processIter->name.GetStringLength() > 0) && (::_wcsicmp(processIter->name.GetString(), L"browsers") == 0) &&
+						(processIter->value.IsArray() == true))
+					{
+						// 브라우저 정의
+						jsonArrayW browsersArray = processIter->value.GetArray();
+						jsonValueIteratorW browsersIter;
+						for (browsersIter = browsersArray.begin(); browsersIter != browsersArray.end(); browsersIter++)
+						{
+							if ((browsersIter->IsString() == true) && (browsersIter->GetStringLength() > 0))
+							{
+								wchar_t *item = nullptr;
+								copyString(browsersIter->GetString(), &item);
+								buffer->watch_process_browsers.push_back(item);
+							}
+						}
+					}
+					if ((processIter->name.GetStringLength() > 0) && (::_wcsicmp(processIter->name.GetString(), L"excludes") == 0) &&
+						(processIter->value.IsArray() == true))
+					{
+						// 감시 예외 프로세스 정의
+						jsonArrayW excludesArray = processIter->value.GetArray();
+						jsonValueIteratorW excludesIter;
+						for (excludesIter = excludesArray.begin(); excludesIter != excludesArray.end(); excludesIter++)
+						{
+							if ((excludesIter->IsString() == true) && (excludesIter->GetStringLength() > 0))
+							{
+								wchar_t *item = nullptr;
+								copyString(excludesIter->GetString(), &item);
+								buffer->watch_process_excludes.push_back(item);
+							}
+						}
+					}
+					if ((processIter->name.GetStringLength() > 0) && (::_wcsicmp(processIter->name.GetString(), L"privates") == 0) &&
+						(processIter->value.IsArray() == true))
+					{
+						// 사생활 보호 프로세스 정의
+						jsonArrayW privatesArray = processIter->value.GetArray();
+						jsonValueIteratorW privatesIter;
+						for (privatesIter = privatesArray.begin(); privatesIter != privatesArray.end(); privatesIter++)
+						{
+							if ((privatesIter->IsString() == true) && (privatesIter->GetStringLength() > 0))
+							{
+								wchar_t *item = nullptr;
+								copyString(privatesIter->GetString(), &item);
+								buffer->watch_process_private_contents.push_back(item);
+							}
+						}
+					}
+					if ((processIter->name.GetStringLength() > 0) && (::_wcsicmp(processIter->name.GetString(), L"preventCaptionDuplicate") == 0) &&
+						(processIter->value.IsArray() == true))
+					{
+						// 사생활 보호 프로세스 정의
+						jsonArrayW duplicateArray = processIter->value.GetArray();
+						jsonValueIteratorW duplicatesIter;
+						for (duplicatesIter = duplicateArray.begin(); duplicatesIter != duplicateArray.end(); duplicatesIter++)
+						{
+							if ((duplicatesIter->IsString() == true) && (duplicatesIter->GetStringLength() > 0))
+							{
+								wchar_t *item = nullptr;
+								copyString(duplicatesIter->GetString(), &item);
+								buffer->watch_process_prevent_caption_duplicates.push_back(item);
+							}
+						}
+					}
+				}
+			}
+			// 파일 io 감시
+			if ((watchingIter->name.GetStringLength() > 0) && (::_wcsicmp(watchingIter->name.GetString(), L"fileIo") == 0) &&
+				(watchingIter->value.IsObject() == true))
+			{
+				jsonObjectW fileIoObject = watchingIter->value.GetObjectW();
+				jsonMemberIteratorW fileIoIter;
+				for (fileIoIter = fileIoObject.begin(); fileIoIter != fileIoObject.end(); fileIoIter++)
+				{
+					if ((fileIoIter->name.GetStringLength() > 0) && (::_wcsicmp(fileIoIter->name.GetString(), L"enabled") == 0) &&
+						(fileIoIter->value.IsBool() == true))
+					{
+						// 사용유무
+						buffer->watch_file_io_enabled = fileIoIter->value.GetBool();
+					}
+					if ((fileIoIter->name.GetStringLength() > 0) && (::_wcsicmp(fileIoIter->name.GetString(), L"excludes") == 0) &&
+						(fileIoIter->value.IsArray() == true))
+					{
+						// 감시 예외경로 정의
+						jsonArrayW excludesArray = fileIoIter->value.GetArray();
+						jsonValueIteratorW excludesIter;
+						for (excludesIter = excludesArray.begin(); excludesIter != excludesArray.end(); excludesIter++)
+						{
+							if ((excludesIter->IsString() == true) && (excludesIter->GetStringLength() > 0))
+							{
+								wchar_t *item = nullptr;
+								copyString(excludesIter->GetString(), &item);
+								buffer->watch_file_io_exclude_paths.push_back(item);
+							}
+						}
+					}
+					if ((fileIoIter->name.GetStringLength() > 0) && (::_wcsicmp(fileIoIter->name.GetString(), L"extensions") == 0) &&
+						(fileIoIter->value.IsArray() == true))
+					{
+						// 수집 대상 확장명 정의
+						jsonArrayW extensionsArray = fileIoIter->value.GetArray();
+						jsonValueIteratorW extensionsIter;
+						for (extensionsIter = extensionsArray.begin(); extensionsIter != extensionsArray.end(); extensionsIter++)
+						{
+							if ((extensionsIter->IsString() == true) && (extensionsIter->GetStringLength() > 0))
+							{
+								wchar_t *item = nullptr;
+								copyString(extensionsIter->GetString(), &item);
+								buffer->watch_file_io_include_extensions.push_back(item);
+							}
+						}
+					}
+				}
+			}
+			// 프린터 출력 감시
+			if ((watchingIter->name.GetStringLength() > 0) && (::_wcsicmp(watchingIter->name.GetString(), L"print") == 0) &&
+				(watchingIter->value.IsObject() == true))
+			{
+				jsonObjectW printingObject = watchingIter->value.GetObjectW();
+				jsonMemberIteratorW printingIter;
+				for (printingIter = printingObject.begin(); printingIter != printingObject.end(); printingIter++)
+				{
+					if ((printingIter->name.GetStringLength() > 0) && (::_wcsicmp(printingIter->name.GetString(), L"enabled") == 0) &&
+						(printingIter->value.IsBool() == true))
+					{
+						// 사용유무
+						buffer->watch_printing_enabled = printingIter->value.GetBool();
+					}
+
+				}
+			}
+		}
+	}
+
+	// 탐지정책
+	if ((ruleDocument.HasMember(L"detection") == false) || (ruleDocument[L"detection"].IsObject() == false))
+	{
+		traceW(L"fatal error [%s:%d] invalid rule. [detection]\n", __FUNCTIONW__, __LINE__);
+		errLog::getInstance()->write(fatal, L"[%s:%d] invalid rule. [detection]", __FUNCTIONW__, __LINE__);
+		return false;
+	}
+	else
+	{
+		jsonObjectW detectionObject = ruleDocument[L"detection"].GetObjectW();
+		jsonMemberIteratorW detectionIter;
+		for (detectionIter = detectionObject.begin(); detectionIter != detectionObject.end(); detectionIter++)
+		{
+			// 사용유무
+			if ((detectionIter->name.GetStringLength() > 0) && (::_wcsicmp(detectionIter->name.GetString(), L"enabled") == 0) &&
+				(detectionIter->value.IsBool() == true))
+			{
+				buffer->detection_enabled = detectionIter->value.GetBool();
+			}
+			// 감시주기
+			if ((detectionIter->name.GetStringLength() > 0) && (::_wcsicmp(detectionIter->name.GetString(), L"interval") == 0) &&
+				(detectionIter->value.IsInt() == true))
+			{
+				buffer->detection_timer_interval = detectionIter->value.GetInt();
+			}
+		}
+	}
 }

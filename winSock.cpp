@@ -3,8 +3,8 @@
 //
 // public
 //
-winSock::winSock(std::wstring ip, std::wstring port, int retryInterval)
-	: ip(ip), port(port), retryInterval(retryInterval), initialized(false), addrInfo(nullptr)
+winSock::winSock(std::wstring ip, std::wstring port)
+	: ip(ip), port(port), initialized(false), addrInfo(nullptr)
 {
 }
 winSock::~winSock()
@@ -89,10 +89,6 @@ bool winSock::initialize()
 	::closesocket(socket);
 
 	return (this->initialized = true);
-}
-int winSock::getRetryInterval() const
-{
-	return this->retryInterval;
 }
 bool winSock::isOnline() const
 {
