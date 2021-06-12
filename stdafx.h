@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <string>
 #include <list>
+#include <codecvt>					// utf8 로 변환
 
 // safe 함수
 #define safeFree(x)					if (x) { ::free(x); (x) = nullptr; }

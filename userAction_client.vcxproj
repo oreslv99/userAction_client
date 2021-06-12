@@ -64,14 +64,8 @@
     <ClInclude Include="featureFileIo.h" />
     <ClInclude Include="featurePrint.h" />
     <ClInclude Include="featureProcess.h" />
-    <ClInclude Include="rapidJson.h" />
-    <ClInclude Include="ruleFileIo.h" />
     <ClInclude Include="rules.h" />
-    <ClInclude Include="ruleAFK.h" />
-    <ClInclude Include="rulePrint.h" />
-    <ClInclude Include="ruleProcess.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="tinyXml.h" />
     <ClInclude Include="winSock.h" />
   </ItemGroup>
   <ItemGroup>
@@ -83,9 +77,7 @@
     <ClCompile Include="featureFileIo.cpp" />
     <ClCompile Include="featurePrint.cpp" />
     <ClCompile Include="featureProcess.cpp" />
-    <ClCompile Include="rapidJson.cpp" />
     <ClCompile Include="rules.cpp" />
-    <ClCompile Include="tinyXml.cpp" />
     <ClCompile Include="winMain.cpp" />
     <ClCompile Include="winSock.cpp" />
   </ItemGroup>

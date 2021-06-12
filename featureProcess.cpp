@@ -6,9 +6,8 @@ featureProcess::featureProcess()
 }
 featureProcess::~featureProcess()
 {
-	safeDelete(this->rule);
 }
-bool featureProcess::initialize(void *rule, void *extra, DWORD extraSize)
+bool featureProcess::initialize(const rules rule)
 {
 	//if (size != sizeof(rules))
 	//{
@@ -58,7 +57,7 @@ bool featureProcess::watch()
 
 	return true;
 }
-bool featureProcess::isHighPriority()
-{
-	return false;
-}
+//featureType featureProcess::getFeatureType()
+//{
+//	return featureType::process;
+//}

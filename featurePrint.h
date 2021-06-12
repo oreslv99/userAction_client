@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.h"
 #include "feature.h"
-#include "rulePrint.h"
 #include "tinyXml.h"
 #include <winevt.h>						// 이벤트 뷰어
 #pragma comment(lib, "wevtapi.lib")		// 이벤트 뷰어
@@ -12,12 +11,12 @@ class featurePrint : public feature
 public:
 	featurePrint();
 	~featurePrint();
-	bool initialize(void *rule, void *extra = nullptr, DWORD extraSize = 0) final;
+	bool initialize(const rules rule) final;
 	bool watch() final;
-	bool isHighPriority() final;
+	//featureType getFeatureType() final;
 
 private:
-	rulePrint *rule;
+	const rulePrint *rule;
 	tinyXml *xml;
 
 	// 레지스트리

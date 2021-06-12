@@ -3,14 +3,12 @@
 #include <shlobj_core.h>	// SHGetKnownFolderPath
 #include <map>
 #include <fstream>
-#include <codecvt>			// utf8 ·Î º¯È¯
 
 enum logId 
 {
 	debug = 0,
 	info,
 	warning,
-	user,
 	error,
 };
 class writeLog

@@ -47,7 +47,7 @@ bool application::initialize(HINSTANCE instance)
 		return false;
 	}
 
-	// 환경 파일
+	// 환경 파일 (socket 설정)
 	if (readEnvironmet(&this->appContext) == false)
 	{
 		log->write(logId::error, L"[%s:%03d] readEnvironmet is Failed.", __FUNCTIONW__, __LINE__);
@@ -90,8 +90,15 @@ bool application::createWindow(HINSTANCE instance, std::wstring programName, con
 		return false;
 	}
 
-	// 윈도우 생성
-	appContext->setWindow(::CreateWindowExW(0, wndClass.lpszClassName, wndClass.lpszClassName, 0, 0, 0, 0, 0, nullptr, nullptr, wndClass.hInstance, nullptr));
+	// 윈도우 생성 (파일io watch 등록을 위해 필요함)
+	HWND window = ::CreateWindowExW(0, wndClass.lpszClassName, wndClass.lpszClassName, 0, 0, 0, 0, 0, nullptr, nullptr, wndClass.hInstance, nullptr);
+	if (window == nullptr)
+	{
+		log->write(logId::error, L"[%s:%03d] err[%05d] CreateWindowExW is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+		return false;
+	}
+
+	appContext->setWindow(window);
 
 	return true;
 }

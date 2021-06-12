@@ -13,10 +13,8 @@ featurePrint::featurePrint()
 }
 featurePrint::~featurePrint()
 {
-	safeDelete(this->rule);
 }
-
-bool featurePrint::initialize(void *rule, void *extra, DWORD extraSize)
+bool featurePrint::initialize(const rules rule)
 {
 	//if (size != sizeof(rules))
 	//{
@@ -90,10 +88,10 @@ bool featurePrint::watch()
 
 	return true;
 }
-bool featurePrint::isHighPriority()
-{
-	return false;
-}
+//featureType featurePrint::getFeatureType()
+//{
+//	return featureType::print;
+//}
 
 //
 // private
@@ -206,7 +204,7 @@ void featurePrint::parseDocument(tinyxml2::XMLDocument *document)
 	wchar_t *logFormatW = (wchar_t*)::calloc(length, sizeof(wchar_t*));
 	::MultiByteToWideChar(CP_ACP, 0, logFormat.c_str(), -1, logFormatW, length);
 	
-	log->write(logId::user, L"printEvent %s", logFormatW);
+	log->writeUserAction(L"printEvent %s", logFormatW);
 	safeFree(logFormatW);
 
 	// 기록이 완료됬으면 이전 이벤트 뷰어 데이터 삭제

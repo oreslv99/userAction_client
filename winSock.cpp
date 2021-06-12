@@ -1,5 +1,8 @@
 #include "winSock.h"
 
+//
+// public
+//
 winSock::winSock(std::wstring ip, std::wstring port, int retryInterval)
 	: ip(ip), port(port), retryInterval(retryInterval), initialized(false), addrInfo(nullptr)
 {
@@ -94,4 +97,8 @@ int winSock::getRetryInterval() const
 bool winSock::isOnline() const
 {
 	return this->initialized;
+}
+bool winSock::request(requestId id, std::wstring *buffer)
+{
+	return true;
 }

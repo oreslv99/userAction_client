@@ -9,24 +9,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\extern">
-      <UniqueIdentifier>{7b092591-7278-4a50-8d96-0e553be6f987}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\extern\tinyxml2">
-      <UniqueIdentifier>{7fe63298-db5d-475a-bd70-4dc96a79b7b4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\extern\rapidJson">
-      <UniqueIdentifier>{baa60c7e-c469-4e74-a67d-30753f57e7f1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\extern\rapidJson\error">
-      <UniqueIdentifier>{667d3eea-360f-43e9-8b23-858fde7c4977}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\extern\rapidJson\internal">
-      <UniqueIdentifier>{dfa62e05-0e00-4008-a7a3-6b7643ed4e5c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\extern\rapidJson\msinttypes">
-      <UniqueIdentifier>{7a60055a-37c0-4660-97d1-315662279310}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\contexts">
       <UniqueIdentifier>{30517dd8-123b-4c76-88c1-decb1b043ecc}</UniqueIdentifier>
     </Filter>
@@ -36,8 +18,23 @@
     <Filter Include="Source Files\helper">
       <UniqueIdentifier>{20bbba45-0071-495f-a265-fe47ae2020e8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\contexts\model">
-      <UniqueIdentifier>{da718c32-5d81-4b23-b2f2-43080108a7e6}</UniqueIdentifier>
+    <Filter Include="Source Files\helper\extern">
+      <UniqueIdentifier>{7b092591-7278-4a50-8d96-0e553be6f987}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\helper\extern\tinyxml2">
+      <UniqueIdentifier>{7fe63298-db5d-475a-bd70-4dc96a79b7b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\helper\extern\rapidJson">
+      <UniqueIdentifier>{baa60c7e-c469-4e74-a67d-30753f57e7f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\helper\extern\rapidJson\error">
+      <UniqueIdentifier>{667d3eea-360f-43e9-8b23-858fde7c4977}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\helper\extern\rapidJson\internal">
+      <UniqueIdentifier>{dfa62e05-0e00-4008-a7a3-6b7643ed4e5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\helper\extern\rapidJson\msinttypes">
+      <UniqueIdentifier>{7a60055a-37c0-4660-97d1-315662279310}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -46,115 +43,115 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="extern\tinyxml2\tinyxml2.h">
-      <Filter>Source Files\extern\tinyxml2</Filter>
+      <Filter>Source Files\helper\extern\tinyxml2</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\error\en.h">
-      <Filter>Source Files\extern\rapidJson\error</Filter>
+      <Filter>Source Files\helper\extern\rapidJson\error</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\error\error.h">
-      <Filter>Source Files\extern\rapidJson\error</Filter>
+      <Filter>Source Files\helper\extern\rapidJson\error</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\internal\biginteger.h">
-      <Filter>Source Files\extern\rapidJson\internal</Filter>
+      <Filter>Source Files\helper\extern\rapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\internal\diyfp.h">
-      <Filter>Source Files\extern\rapidJson\internal</Filter>
+      <Filter>Source Files\helper\extern\rapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\internal\dtoa.h">
-      <Filter>Source Files\extern\rapidJson\internal</Filter>
+      <Filter>Source Files\helper\extern\rapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\internal\ieee754.h">
-      <Filter>Source Files\extern\rapidJson\internal</Filter>
+      <Filter>Source Files\helper\extern\rapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\internal\itoa.h">
-      <Filter>Source Files\extern\rapidJson\internal</Filter>
+      <Filter>Source Files\helper\extern\rapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\internal\meta.h">
-      <Filter>Source Files\extern\rapidJson\internal</Filter>
+      <Filter>Source Files\helper\extern\rapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\internal\pow10.h">
-      <Filter>Source Files\extern\rapidJson\internal</Filter>
+      <Filter>Source Files\helper\extern\rapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\internal\regex.h">
-      <Filter>Source Files\extern\rapidJson\internal</Filter>
+      <Filter>Source Files\helper\extern\rapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\internal\stack.h">
-      <Filter>Source Files\extern\rapidJson\internal</Filter>
+      <Filter>Source Files\helper\extern\rapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\internal\strfunc.h">
-      <Filter>Source Files\extern\rapidJson\internal</Filter>
+      <Filter>Source Files\helper\extern\rapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\internal\strtod.h">
-      <Filter>Source Files\extern\rapidJson\internal</Filter>
+      <Filter>Source Files\helper\extern\rapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\internal\swap.h">
-      <Filter>Source Files\extern\rapidJson\internal</Filter>
+      <Filter>Source Files\helper\extern\rapidJson\internal</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\msinttypes\inttypes.h">
-      <Filter>Source Files\extern\rapidJson\msinttypes</Filter>
+      <Filter>Source Files\helper\extern\rapidJson\msinttypes</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\msinttypes\stdint.h">
-      <Filter>Source Files\extern\rapidJson\msinttypes</Filter>
+      <Filter>Source Files\helper\extern\rapidJson\msinttypes</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\allocators.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\cursorstreamwrapper.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\document.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\encodedstream.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\encodings.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\filereadstream.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\filewritestream.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\fwd.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\istreamwrapper.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\memorybuffer.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\memorystream.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\ostreamwrapper.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\pointer.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\prettywriter.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\rapidjson.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\reader.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\schema.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\stream.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\stringbuffer.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="extern\rapidJson\writer.h">
-      <Filter>Source Files\extern\rapidJson</Filter>
+      <Filter>Source Files\helper\extern\rapidJson</Filter>
     </ClInclude>
     <ClInclude Include="feature.h">
       <Filter>Source Files\contexts\features</Filter>
@@ -163,12 +160,6 @@
       <Filter>Source Files\contexts</Filter>
     </ClInclude>
     <ClInclude Include="winSock.h">
-      <Filter>Source Files\helper</Filter>
-    </ClInclude>
-    <ClInclude Include="rapidJson.h">
-      <Filter>Source Files\helper</Filter>
-    </ClInclude>
-    <ClInclude Include="tinyXml.h">
       <Filter>Source Files\helper</Filter>
     </ClInclude>
     <ClInclude Include="featureAFK.h">
@@ -180,23 +171,11 @@
     <ClInclude Include="featureProcess.h">
       <Filter>Source Files\contexts\features</Filter>
     </ClInclude>
-    <ClInclude Include="ruleAFK.h">
-      <Filter>Source Files\contexts\model</Filter>
-    </ClInclude>
-    <ClInclude Include="rulePrint.h">
-      <Filter>Source Files\contexts\model</Filter>
-    </ClInclude>
-    <ClInclude Include="ruleProcess.h">
-      <Filter>Source Files\contexts\model</Filter>
-    </ClInclude>
     <ClInclude Include="rules.h">
       <Filter>Source Files\contexts\features</Filter>
     </ClInclude>
     <ClInclude Include="featureFileIo.h">
       <Filter>Source Files\contexts\features</Filter>
-    </ClInclude>
-    <ClInclude Include="ruleFileIo.h">
-      <Filter>Source Files\contexts\model</Filter>
     </ClInclude>
     <ClInclude Include="writeLog.h">
       <Filter>Source Files\helper</Filter>
@@ -208,16 +187,10 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="extern\tinyxml2\tinyxml2.cpp">
-      <Filter>Source Files\extern\tinyxml2</Filter>
+      <Filter>Source Files\helper\extern\tinyxml2</Filter>
     </ClCompile>
     <ClCompile Include="context.cpp">
       <Filter>Source Files\contexts</Filter>
-    </ClCompile>
-    <ClCompile Include="rapidJson.cpp">
-      <Filter>Source Files\helper</Filter>
-    </ClCompile>
-    <ClCompile Include="tinyXml.cpp">
-      <Filter>Source Files\helper</Filter>
     </ClCompile>
     <ClCompile Include="winSock.cpp">
       <Filter>Source Files\helper</Filter>

@@ -8,6 +8,7 @@
 #include "featureFileIo.h"
 #include "featurePrint.h"
 #include "featureProcess.h"
+#include <algorithm>
 
 class context
 {
@@ -21,6 +22,9 @@ public:
 	int tickTock();
 
 private:
+	// rule
+	rules rule;
+
 	// window
 	WNDPROC callback;
 	HWND window;
@@ -34,6 +38,5 @@ private:
 	static feature *fileIo;
 	static LRESULT CALLBACK wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	std::list<feature*> features;
-	std::list<feature*>::iterator iter;
 
 };

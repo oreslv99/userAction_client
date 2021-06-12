@@ -10,17 +10,16 @@ featureAFK::featureAFK()
 featureAFK::~featureAFK()
 {
 	safeCloseHandle(this->event);
-	safeDelete(this->rule);
 }
-bool featureAFK::initialize(void *rule, void *extra, DWORD extraSize)
+bool featureAFK::initialize(const rules rule)
 {
-	this->rule = reinterpret_cast<rules*>(rule)->getAFKRule();
-	if (this->rule->enabled == false)
-	{
-		// 해당 기능사용 안함
-		log->write(logId::warning, L"[%s:%03d] Feature afk is disabled.", __FUNCTIONW__, __LINE__);
-		return true;
-	}
+	//this->rule = reinterpret_cast<rules*>(rule)->getAFKRule();
+	//if (this->rule->enabled == false)
+	//{
+	//	// 해당 기능사용 안함
+	//	log->write(logId::warning, L"[%s:%03d] Feature afk is disabled.", __FUNCTIONW__, __LINE__);
+	//	return true;
+	//}
 
 	this->event = ::CreateEventW(nullptr, FALSE, FALSE, nullptr);
 	if (this->event == INVALID_HANDLE_VALUE)
@@ -44,7 +43,7 @@ bool featureAFK::watch()
 
 		if (::GetLastInputInfo(&lastInputInfo) == FALSE)
 		{
-			//traceW(L"fatal error [%s:%d]\n", __FUNCTIONW__, __LINE__);
+			log->write(logId::error, L"[%s:%03d] err[%05d] GetLastInputInfo is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 			return 0;
 		}
 
@@ -77,25 +76,24 @@ bool featureAFK::watch()
 			startAfkTime = ::GetTickCount();	// 시간 초기화
 			::ResetEvent(this->event);
 			result = false;
-			log->write(logId::user, L"out afk");
+			log->writeUserAction(L"out afk");
 		}
 	}
 	else
 	{
-		if ((::GetTickCount() - getLastInputTime()) >= this->rule->in /* 임시 3초 */)
+		if ((::GetTickCount() - getLastInputTime()) >= this->rule->in)
 		{
 			startAfkTime = ::GetTickCount();
 
 			// 자리비움 상태
 			result = true;
-			log->write(logId::user, L"in afk");
+			log->writeUserAction(L"in afk");
 		}
 	}
 
 	return result;
 }
-bool featureAFK::isHighPriority()
-{
-	// 가장 먼저 호출되어야 함
-	return true;
-}
+//featureType featureAFK::getFeatureType()
+//{
+//	return featureType::afk;
+//}

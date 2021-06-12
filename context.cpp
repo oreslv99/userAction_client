@@ -12,7 +12,7 @@ LRESULT CALLBACK context::wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 // public
 //
 context::context()
-	:window(nullptr), socket(nullptr), callback(wndProc), features(), iter()
+	:rule(), window(nullptr), socket(nullptr), callback(wndProc), features()
 {
 }
 context::~context()
@@ -36,39 +36,70 @@ void context::setSocket(std::wstring ip, std::wstring port, int retryInterval)
 }
 bool context::initialize()
 {
-	// parser 확인
-
 	// 소켓 확인
 	if (this->socket->initialize() == false)
 	{
 		log->write(logId::warning, L"[%s:%03d] Failed to initialize winSock.", __FUNCTIONW__, __LINE__);
 	}
 
-	//// 정책 확인
-	//rules *rule = new rules;
-	//rule->initialize(this->isOnLine, this->socket);
-	//
-	//// 임시 (정책구조체를 initialize 에서 받을 것 - model)
-	//feature *afk = new featureAFK();	// 반드시 처음 리스트에 포함
-	//if ((afk != nullptr) && (afk->initialize(rule, sizeof(rules)) == true))
-	//{
-	//	this->features.push_back(afk);
-	//}
-	//feature *proc = new featureProcess();
-	//if ((proc != nullptr) && (proc->initialize(rule, sizeof(rules)) == true))
-	//{
-	//	this->features.push_back(proc);
-	//}
-	//feature *prn = new featurePrint();
-	//if ((prn != nullptr) && (prn->initialize(rule, sizeof(rules)) == true))
-	//{
-	//	this->features.push_back(prn);
-	//}
-	//feature *fileIo = new featureFileIo();
-	//if ((fileIo != nullptr) && (fileIo->initialize(this->window, sizeof(HWND)) == true))
-	//{
-	//	this->features.push_back(fileIo);
-	//}
+	// 정책 확인
+	this->rule.initialize(this->socket, this->window);
+	
+	// 감시기능 - 자리비움 (** 반드시 처음 리스트에 포함 **)
+	feature *afk = new featureAFK();
+	if (afk != nullptr)
+	{
+		if (afk->initialize(this->rule) == true)
+		{
+			this->features.push_back(afk);
+		}
+		else
+		{
+			safeDelete(afk);
+		}
+	}
+
+	// 감시기능 - 프로세스
+	feature *proc = new featureProcess();
+	if (proc != nullptr)
+	{
+		if (proc->initialize(rule) == true)
+		{
+			this->features.push_back(proc);
+		}
+		else
+		{
+			safeDelete(proc);
+		}
+	}
+
+	// 감시기능 - 프린트 출력
+	feature *prn = new featurePrint();
+	if (prn != nullptr)
+	{
+		if (prn->initialize(rule) == true)
+		{
+			this->features.push_back(prn);
+		}
+		else
+		{
+			safeDelete(prn);
+		}
+	}
+
+	// 감시기능 - 파일io
+	feature *fileIo = new featureFileIo();
+	if (fileIo != nullptr)
+	{
+		if (fileIo->initialize(rule) == true)
+		{
+			this->features.push_back(fileIo);
+		}
+		else
+		{
+			safeDelete(fileIo);
+		}
+	}
 
 	return true;
 }
@@ -109,6 +140,10 @@ int context::tickTock()
 	}
 
 	// release
+	for (std::list<feature*>::iterator iter = this->features.begin(); iter != this->features.end(); iter++)
+	{
+	}
+
 	::CancelWaitableTimer(retryTimer);
 	::CancelWaitableTimer(watchTimer);
 	safeCloseHandle(retryTimer);
@@ -123,18 +158,18 @@ void context::watch(HANDLE timer)
 	if (::WaitForSingleObject(timer, 1) == WAIT_OBJECT_0)
 	{
 		bool inAfk = false;
-		for (this->iter = this->features.begin(); this->iter != this->features.end(); this->iter++)
+		for (std::list<feature*>::iterator iter = this->features.begin(); iter != this->features.end(); iter++)
 		{
 			// 자리비움 feature 는 high priority
-			if ((*this->iter)->isHighPriority() == true)
+			if ((*iter)->isHighPriority() == true)
 			{
-				inAfk = (*this->iter)->watch();
+				inAfk = (*iter)->watch();
 			}
 			
 			// 자리비움 중이 아닌 경우에만 감시
 			if (inAfk == false) 
 			{
-				(*this->iter)->watch();
+				(*iter)->watch();
 			}
 		}
 	}

@@ -4,6 +4,12 @@
 #include <WS2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")
 
+enum requestId
+{
+	rule,
+	uploadUserData
+};
+
 class winSock
 {
 public:
@@ -12,6 +18,7 @@ public:
 	bool initialize();
 	int getRetryInterval() const;
 	bool isOnline() const;
+	bool request(requestId id, std::wstring *buffer);
 
 private:
 	std::wstring ip;

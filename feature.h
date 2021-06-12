@@ -4,9 +4,11 @@
 class feature
 {
 public:
-	virtual bool initialize(void *rule, void *extra, DWORD extraSize) = 0;
+	virtual bool initialize(const rules rule) = 0;
 	virtual bool watch() = 0;
-	virtual bool isHighPriority() = 0;
+	// 2021-06-12 
+	//	: list 에 순서대로 넣어서 loop
+	//virtual featureType getFeatureType() = 0;
 protected:
 	bool isMatch(const wchar_t *source, const wchar_t *pattern)
 	{
