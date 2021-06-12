@@ -62,7 +62,7 @@ private:
 
 	bool getJsonDocumentFromFile(const std::wstring filePath, jsonDocumentW *buffer);
 	bool getJsonDocumentFromString(const std::wstring jsonString, jsonDocumentW *buffer);
-	bool deserializeRule(jsonDocumentW document);
+	bool deserializeRule(jsonDocumentW &document);
 
 	int timerInterval;
 	int socketRetryInterval;

@@ -63,7 +63,7 @@ bool context::initialize()
 	feature *proc = new featureProcess();
 	if (proc != nullptr)
 	{
-		if (proc->initialize(rule) == true)
+		if (proc->initialize(this->rule) == true)
 		{
 			this->features.push_back(proc);
 		}
@@ -77,7 +77,7 @@ bool context::initialize()
 	feature *prn = new featurePrint();
 	if (prn != nullptr)
 	{
-		if (prn->initialize(rule) == true)
+		if (prn->initialize(this->rule) == true)
 		{
 			this->features.push_back(prn);
 		}
@@ -91,7 +91,7 @@ bool context::initialize()
 	feature *fileIo = new featureFileIo();
 	if (fileIo != nullptr)
 	{
-		if (fileIo->initialize(rule) == true)
+		if (fileIo->initialize(this->rule) == true)
 		{
 			this->features.push_back(fileIo);
 		}
