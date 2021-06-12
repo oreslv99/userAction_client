@@ -140,10 +140,10 @@ int context::tickTock()
 		}
 	}
 
-	// release
-	for (std::list<feature*>::iterator iter = this->features.begin(); iter != this->features.end(); iter++)
-	{
-	}
+	//// release
+	//for (std::list<feature*>::iterator iter = this->features.begin(); iter != this->features.end(); iter++)
+	//{
+	//}
 
 	this->rule.release();
 	::CancelWaitableTimer(retryTimer);
@@ -159,19 +159,19 @@ void context::watch(HANDLE timer)
 {
 	if (::WaitForSingleObject(timer, 1) == WAIT_OBJECT_0)
 	{
-		bool inAfk = false;
-		for (std::list<feature*>::iterator iter = this->features.begin(); iter != this->features.end(); iter++)
+		bool inAFK = false;
+		for (int i = 0; i < this->features.size(); i++)
 		{
-			//// 자리비움 feature 는 high priority
-			//if ((*iter)->isHighPriority() == true)
-			//{
-			//	inAfk = (*iter)->watch();
-			//}
-			
-			// 자리비움 중이 아닌 경우에만 감시
-			if (inAfk == false) 
+			if (i == 0)
 			{
-				(*iter)->watch();
+				inAFK = this->features[i]->watch();
+			}
+			else
+			{
+				if (inAFK == false)
+				{
+					this->features[i]->watch();
+				}
 			}
 		}
 	}

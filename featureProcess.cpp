@@ -54,6 +54,8 @@ bool featureProcess::watch()
 		{
 			break;
 		}
+
+		break;
 	}
 
 	return true;

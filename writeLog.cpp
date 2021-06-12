@@ -77,6 +77,7 @@ void writeLog::write(logId id, std::wstring message, ...)
 	// 파일 열기 (utf-8 인코딩)
 	std::wofstream stream;
 	stream.imbue(std::locale(stream.getloc(), new std::codecvt_utf8<wchar_t, 0x10ffff, std::consume_header>));
+	stream.open(filePath, std::ios::app);
 	if (stream.is_open() == true)
 	{
 		std::map<int, std::wstring>::iterator iter = errIds.find(id);

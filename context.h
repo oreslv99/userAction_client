@@ -6,7 +6,7 @@
 #include "featureFileIo.h"
 #include "featurePrint.h"
 #include "featureProcess.h"
-#include <algorithm>
+#include <vector>
 
 class context
 {
@@ -35,6 +35,6 @@ private:
 	// watch
 	static feature *fileIo;
 	static LRESULT CALLBACK wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	std::list<feature*> features;
+	std::vector<feature*> features;
 
 };
