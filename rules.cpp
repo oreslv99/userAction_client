@@ -4,7 +4,7 @@
 // public
 //
 rules::rules()
-	:timerInterval(0), afk(nullptr), fileIo(nullptr), process(nullptr), print(nullptr)
+	:timerInterval(0), socketRetryInterval(0), afk(nullptr), fileIo(nullptr), process(nullptr), print(nullptr)
 {
 }
 rules::~rules()
@@ -103,6 +103,10 @@ int rules::getTimerInterval() const
 {
 	return this->timerInterval;
 }
+int rules::getSocketRetryInterval() const
+{
+	return this->socketRetryInterval;
+}
 ruleAFK *rules::getAFKRule() const
 {
 	return this->afk;
@@ -161,29 +165,47 @@ bool rules::getJsonDocumentFromString(const std::wstring jsonString, jsonDocumen
 bool rules::deserializeRule(jsonDocumentW document)
 {
 	// C/C++ 은 Reflection 을 지원하지 않기 때문에.. 아래처럼 그냥 다 작성해야함 (C# 할까..)
-	// 감시정책
-	if ((document.HasMember(L"watching") == false) || (document[L"watching"].IsObject() == false))
+	// TODO : string 전부 const 로 바꾸자
+
+	// 감시주기
+	if ((document.HasMember(L"timerInterval") == false) || (document[L"timerInterval"].IsInt() == false))
 	{
-		log->write(logId::error, L"[%s:%d] Invalid rule. [watching]", __FUNCTIONW__, __LINE__);
+		log->write(logId::error, L"[%s:%d] Invalid rule. [timerInterval]", __FUNCTIONW__, __LINE__);
 		return false;
 	}
 	else
 	{
-		jsonObjectW watching = document[L"watching"].GetObjectW();
-		jsonMemberIteratorW watchingIter;
-		for (watchingIter = watching.begin(); watchingIter != watching.end(); watchingIter++)
+		this->timerInterval = document[L"timerInterval"].GetInt();
+	}
+
+	// 서버 재연결 주기
+	if ((document.HasMember(L"serverRetryInterval") == false) || (document[L"serverRetryInterval"].IsInt() == false))
+	{
+		log->write(logId::error, L"[%s:%d] Invalid rule. [serverRetryInterval]", __FUNCTIONW__, __LINE__);
+		return false;
+	}
+	else
+	{
+		this->timerInterval = document[L"serverRetryInterval"].GetInt();
+	}
+
+	// 감시기능
+	if ((document.HasMember(L"feature") == false) || (document[L"feature"].IsObject() == false))
+	{
+		log->write(logId::error, L"[%s:%d] Invalid rule. [feature]", __FUNCTIONW__, __LINE__);
+		return false;
+	}
+	else
+	{
+		jsonObjectW feature = document[L"feature"].GetObjectW();
+		jsonMemberIteratorW featureIter;
+		for (featureIter = feature.begin(); featureIter != feature.end(); featureIter++)
 		{
-			// 감시주기
-			if ((watchingIter->name.GetStringLength() > 0) && (::_wcsicmp(watchingIter->name.GetString(), L"interval") == 0) &&
-				(watchingIter->value.IsInt() == true))
+			// 자리비움
+			if ((featureIter->name.GetStringLength() > 0) && (::_wcsicmp(featureIter->name.GetString(), L"idle") == 0) &&
+				(featureIter->value.IsObject() == true))
 			{
-				buffer->stalking_timer_interval = watchingIter->value.GetInt();
-			}
-			// 자리비움 감시
-			if ((watchingIter->name.GetStringLength() > 0) && (::_wcsicmp(watchingIter->name.GetString(), L"idle") == 0) &&
-				(watchingIter->value.IsObject() == true))
-			{
-				jsonObjectW idleObject = watchingIter->value.GetObjectW();
+				jsonObjectW idleObject = featureIter->value.GetObjectW();
 				jsonMemberIteratorW idleIter;
 				for (idleIter = idleObject.begin(); idleIter != idleObject.end(); idleIter++)
 				{
@@ -207,11 +229,11 @@ bool rules::deserializeRule(jsonDocumentW document)
 					}
 				}
 			}
-			// 프로세스 감시
-			if ((watchingIter->name.GetStringLength() > 0) && (::_wcsicmp(watchingIter->name.GetString(), L"process") == 0) &&
-				(watchingIter->value.IsObject() == true))
+			// 프로세스
+			if ((featureIter->name.GetStringLength() > 0) && (::_wcsicmp(featureIter->name.GetString(), L"process") == 0) &&
+				(featureIter->value.IsObject() == true))
 			{
-				jsonObjectW processObject = watchingIter->value.GetObjectW();
+				jsonObjectW processObject = featureIter->value.GetObjectW();
 				jsonMemberIteratorW processIter;
 				for (processIter = processObject.begin(); processIter != processObject.end(); processIter++)
 				{
@@ -287,11 +309,11 @@ bool rules::deserializeRule(jsonDocumentW document)
 					}
 				}
 			}
-			// 파일 io 감시
-			if ((watchingIter->name.GetStringLength() > 0) && (::_wcsicmp(watchingIter->name.GetString(), L"fileIo") == 0) &&
-				(watchingIter->value.IsObject() == true))
+			// 파일 io
+			if ((featureIter->name.GetStringLength() > 0) && (::_wcsicmp(featureIter->name.GetString(), L"fileIo") == 0) &&
+				(featureIter->value.IsObject() == true))
 			{
-				jsonObjectW fileIoObject = watchingIter->value.GetObjectW();
+				jsonObjectW fileIoObject = featureIter->value.GetObjectW();
 				jsonMemberIteratorW fileIoIter;
 				for (fileIoIter = fileIoObject.begin(); fileIoIter != fileIoObject.end(); fileIoIter++)
 				{
@@ -335,11 +357,11 @@ bool rules::deserializeRule(jsonDocumentW document)
 					}
 				}
 			}
-			// 프린터 출력 감시
-			if ((watchingIter->name.GetStringLength() > 0) && (::_wcsicmp(watchingIter->name.GetString(), L"print") == 0) &&
-				(watchingIter->value.IsObject() == true))
+			// 프린터 출력
+			if ((featureIter->name.GetStringLength() > 0) && (::_wcsicmp(featureIter->name.GetString(), L"print") == 0) &&
+				(featureIter->value.IsObject() == true))
 			{
-				jsonObjectW printingObject = watchingIter->value.GetObjectW();
+				jsonObjectW printingObject = featureIter->value.GetObjectW();
 				jsonMemberIteratorW printingIter;
 				for (printingIter = printingObject.begin(); printingIter != printingObject.end(); printingIter++)
 				{
@@ -355,31 +377,5 @@ bool rules::deserializeRule(jsonDocumentW document)
 		}
 	}
 
-	// 탐지정책
-	if ((ruleDocument.HasMember(L"detection") == false) || (ruleDocument[L"detection"].IsObject() == false))
-	{
-		traceW(L"fatal error [%s:%d] invalid rule. [detection]\n", __FUNCTIONW__, __LINE__);
-		errLog::getInstance()->write(fatal, L"[%s:%d] invalid rule. [detection]", __FUNCTIONW__, __LINE__);
-		return false;
-	}
-	else
-	{
-		jsonObjectW detectionObject = ruleDocument[L"detection"].GetObjectW();
-		jsonMemberIteratorW detectionIter;
-		for (detectionIter = detectionObject.begin(); detectionIter != detectionObject.end(); detectionIter++)
-		{
-			// 사용유무
-			if ((detectionIter->name.GetStringLength() > 0) && (::_wcsicmp(detectionIter->name.GetString(), L"enabled") == 0) &&
-				(detectionIter->value.IsBool() == true))
-			{
-				buffer->detection_enabled = detectionIter->value.GetBool();
-			}
-			// 감시주기
-			if ((detectionIter->name.GetStringLength() > 0) && (::_wcsicmp(detectionIter->name.GetString(), L"interval") == 0) &&
-				(detectionIter->value.IsInt() == true))
-			{
-				buffer->detection_timer_interval = detectionIter->value.GetInt();
-			}
-		}
-	}
+	return true;
 }

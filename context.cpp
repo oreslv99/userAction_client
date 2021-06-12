@@ -31,7 +31,7 @@ void context::setSocket(std::wstring ip, std::wstring port)
 {
 	if (this->socket == nullptr)
 	{
-		this->socket = new winSock(ip, port, retryInterval);
+		this->socket = new winSock(ip, port);
 	}
 }
 bool context::initialize()
@@ -118,10 +118,11 @@ int context::tickTock()
 
 	// 소켓 재연결은 정책에 있는경우에만
 	HANDLE retryTimer = INVALID_HANDLE_VALUE;
-	if (this->socket->getRetryInterval() > 0)
+	int retryInterval = this->rule.getSocketRetryInterval();
+	if (retryInterval > 0)
 	{
 		retryTimer = ::CreateWaitableTimerW(nullptr, FALSE, nullptr);
-		if (::SetWaitableTimer(retryTimer, &dueTime, 5000, nullptr, nullptr, FALSE) == FALSE) // 임시 3000 ms
+		if (::SetWaitableTimer(retryTimer, &dueTime, retryInterval, nullptr, nullptr, FALSE) == FALSE) // 임시 3000 ms
 		{
 			log->write(logId::error, L"[%s:%03d] code[%d] SetWaitableTimer is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 			return -1;

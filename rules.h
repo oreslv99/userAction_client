@@ -38,6 +38,7 @@ public:
 	~rules();
 	void initialize(winSock *socket, HWND window);
 	int getTimerInterval() const;
+	int getSocketRetryInterval() const;
 	ruleAFK *getAFKRule() const;
 	ruleFileIo *getFileIoRule() const;
 	ruleProcess *getProcessRule() const;
@@ -64,6 +65,7 @@ private:
 	bool deserializeRule(jsonDocumentW document);
 
 	int timerInterval;
+	int socketRetryInterval;
 	ruleAFK *afk;
 	ruleFileIo *fileIo;
 	ruleProcess *process;

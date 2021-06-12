@@ -15,7 +15,7 @@ public:
 	~context();
 	WNDPROC getWndProc();
 	void setWindow(HWND window);
-	void setSocket(std::wstring ip, std::wstring port, int retryInterval);
+	void setSocket(std::wstring ip, std::wstring port);
 	bool initialize();
 	int tickTock();
 
