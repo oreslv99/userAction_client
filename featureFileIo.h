@@ -8,7 +8,7 @@ class featureFileIo : public feature
 public:
 	featureFileIo();
 	~featureFileIo();
-	bool initialize(const rules rule) final;
+	bool initialize(const rules &rule) final;
 	bool watch() final;
 	//featureType getFeatureType() final;
 

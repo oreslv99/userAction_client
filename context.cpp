@@ -118,11 +118,11 @@ int context::tickTock()
 
 	// 소켓 재연결은 정책에 있는경우에만
 	HANDLE retryTimer = INVALID_HANDLE_VALUE;
-	int retryInterval = this->rule.getSocketRetryInterval();
-	if (retryInterval > 0)
+	int serverRetryInterval = this->rule.getServerRetryInterval();
+	if (serverRetryInterval > 0)
 	{
 		retryTimer = ::CreateWaitableTimerW(nullptr, FALSE, nullptr);
-		if (::SetWaitableTimer(retryTimer, &dueTime, retryInterval, nullptr, nullptr, FALSE) == FALSE) // 임시 3000 ms
+		if (::SetWaitableTimer(retryTimer, &dueTime, serverRetryInterval, nullptr, nullptr, FALSE) == FALSE) // 임시 3000 ms
 		{
 			log->write(logId::error, L"[%s:%03d] code[%d] SetWaitableTimer is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 			return -1;
@@ -145,6 +145,7 @@ int context::tickTock()
 	{
 	}
 
+	this->rule.release();
 	::CancelWaitableTimer(retryTimer);
 	::CancelWaitableTimer(watchTimer);
 	safeCloseHandle(retryTimer);

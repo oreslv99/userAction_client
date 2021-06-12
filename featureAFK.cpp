@@ -11,9 +11,9 @@ featureAFK::~featureAFK()
 {
 	safeCloseHandle(this->event);
 }
-bool featureAFK::initialize(const rules rule)
+bool featureAFK::initialize(const rules &rule)
 {
-	//this->rule = reinterpret_cast<rules*>(rule)->getAFKRule();
+	this->rule = rule.getAFKRule();
 	//if (this->rule->enabled == false)
 	//{
 	//	// 해당 기능사용 안함

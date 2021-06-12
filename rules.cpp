@@ -4,15 +4,15 @@
 // public
 //
 rules::rules()
-	:timerInterval(0), socketRetryInterval(0), afk(nullptr), fileIo(nullptr), process(nullptr), print(nullptr)
+	:timerInterval(0), serverRetryInterval(0), afk(nullptr), fileIo(nullptr), process(nullptr), print(nullptr)
 {
 }
 rules::~rules()
 {
-	safeDelete(this->print);
-	safeDelete(this->process);
-	safeDelete(this->fileIo);
-	safeDelete(this->afk);
+	//safeDelete(this->print);
+	//safeDelete(this->process);
+	//safeDelete(this->fileIo);
+	//safeDelete(this->afk);
 }
 void rules::initialize(winSock *socket, HWND window)
 {
@@ -103,9 +103,9 @@ int rules::getTimerInterval() const
 {
 	return this->timerInterval;
 }
-int rules::getSocketRetryInterval() const
+int rules::getServerRetryInterval() const
 {
-	return this->socketRetryInterval;
+	return this->serverRetryInterval;
 }
 ruleAFK *rules::getAFKRule() const
 {
@@ -122,6 +122,13 @@ ruleProcess *rules::getProcessRule() const
 rulePrint *rules::getPrintRule() const
 { 
 	return this->print; 
+}
+void rules::release()
+{
+	safeDelete(this->print);
+	safeDelete(this->process);
+	safeDelete(this->fileIo);
+	safeDelete(this->afk);
 }
 
 //
@@ -186,7 +193,7 @@ bool rules::deserializeRule(jsonDocumentW &document)
 	}
 	else
 	{
-		this->timerInterval = document[L"serverRetryInterval"].GetInt();
+		this->serverRetryInterval = document[L"serverRetryInterval"].GetInt();
 	}
 
 	// 감시기능

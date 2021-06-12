@@ -14,14 +14,9 @@ featurePrint::featurePrint()
 featurePrint::~featurePrint()
 {
 }
-bool featurePrint::initialize(const rules rule)
+bool featurePrint::initialize(const rules &rule)
 {
-	//if (size != sizeof(rules))
-	//{
-	//	return false;
-	//}
-
-	//rules *rule = reinterpret_cast<rules*>(value);
+	this->rule = rule.getPrintRule();
 	//this->rule = rule->getPrintRule();
 	//if (this->rule->enabled == false)
 	//{

@@ -1,14 +1,15 @@
 #include "featureProcess.h"
 
 featureProcess::featureProcess()
-	:rule(nullptr)
+	:rule()
 {
 }
 featureProcess::~featureProcess()
 {
 }
-bool featureProcess::initialize(const rules rule)
+bool featureProcess::initialize(const rules &rule)
 {
+	this->rule = rule.getProcessRule();
 	//if (size != sizeof(rules))
 	//{
 	//	return false;

@@ -8,7 +8,7 @@ class featureAFK : public feature
 public:
 	featureAFK();
 	~featureAFK();
-	bool initialize(const rules rule) final;
+	bool initialize(const rules &rule) final;
 	bool watch() final;
 	//featureType getFeatureType() final;
 

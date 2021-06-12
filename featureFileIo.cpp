@@ -9,9 +9,9 @@ featureFileIo::featureFileIo()
 featureFileIo::~featureFileIo()
 {
 }
-bool featureFileIo::initialize(const rules rule)
+bool featureFileIo::initialize(const rules &rule)
 {
-	//this->rule = reinterpret_cast<rules*>(rule)->getFileIoRule();
+	this->rule = rule.getFileIoRule();
 	return true;
 }
 bool featureFileIo::watch()
