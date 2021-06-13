@@ -110,7 +110,7 @@ int context::tickTock()
 
 	// 메인 watch 타이머 설정
 	HANDLE watchTimer = ::CreateWaitableTimerW(nullptr, FALSE, nullptr);
-	if (::SetWaitableTimer(watchTimer, &dueTime, this->rule.getTimerInterval(), nullptr, nullptr, FALSE) == FALSE) // 임시 3000 ms
+	if (::SetWaitableTimer(watchTimer, &dueTime, this->rule.getTimerInterval(), nullptr, nullptr, FALSE) == FALSE)
 	{
 		log->write(logId::error, L"[%s:%03d] code[%d] SetWaitableTimer is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 		return -1;
@@ -122,7 +122,7 @@ int context::tickTock()
 	if (serverRetryInterval > 0)
 	{
 		retryTimer = ::CreateWaitableTimerW(nullptr, FALSE, nullptr);
-		if (::SetWaitableTimer(retryTimer, &dueTime, serverRetryInterval, nullptr, nullptr, FALSE) == FALSE) // 임시 3000 ms
+		if (::SetWaitableTimer(retryTimer, &dueTime, serverRetryInterval, nullptr, nullptr, FALSE) == FALSE)
 		{
 			log->write(logId::error, L"[%s:%03d] code[%d] SetWaitableTimer is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 			return -1;
@@ -140,12 +140,15 @@ int context::tickTock()
 		}
 	}
 
-	//// release
-	//for (std::list<feature*>::iterator iter = this->features.begin(); iter != this->features.end(); iter++)
-	//{
-	//}
+	// release
+	for (int i = 0; i < this->features.size(); i++)
+	{
+		safeDelete(this->features[i]);
+	}
+	this->features.clear();
 
 	this->rule.release();
+
 	::CancelWaitableTimer(retryTimer);
 	::CancelWaitableTimer(watchTimer);
 	safeCloseHandle(retryTimer);

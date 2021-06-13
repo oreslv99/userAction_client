@@ -14,13 +14,6 @@ featureAFK::~featureAFK()
 bool featureAFK::initialize(const rules &rule)
 {
 	this->rule = rule.getAFKRule();
-	//if (this->rule->enabled == false)
-	//{
-	//	// 해당 기능사용 안함
-	//	log->write(logId::warning, L"[%s:%03d] Feature afk is disabled.", __FUNCTIONW__, __LINE__);
-	//	return true;
-	//}
-
 	this->event = ::CreateEventW(nullptr, FALSE, FALSE, nullptr);
 	if (this->event == INVALID_HANDLE_VALUE)
 	{
@@ -33,6 +26,12 @@ bool featureAFK::initialize(const rules &rule)
 bool featureAFK::watch()
 {
 	::Sleep(1);
+
+	static bool result = false;
+	if (this->rule->enabled == false)
+	{
+		return result;
+	}
 
 	// 마지막 입력시간 확인
 	std::function<DWORD()> getLastInputTime = []() -> DWORD
@@ -50,7 +49,6 @@ bool featureAFK::watch()
 		return lastInputInfo.dwTime;
 	};
 
-	static bool result = false;
 	static DWORD startAfkTime = ::GetTickCount();
 
 	SYSTEMTIME localTime;

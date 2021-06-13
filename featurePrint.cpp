@@ -17,13 +17,6 @@ featurePrint::~featurePrint()
 bool featurePrint::initialize(const rules &rule)
 {
 	this->rule = rule.getPrintRule();
-	//this->rule = rule->getPrintRule();
-	//if (this->rule->enabled == false)
-	//{
-	//	// 해당 기능사용 안함
-	//	log->write(logId::warning, L"[%s:%03d] Feature print is disabled.", __FUNCTIONW__, __LINE__);
-	//	return true;
-	//}
 
 	// 이벤트 뷰어에서 프린트 서비스를 따로 볼 수있게 다음 항목을 등록
 	const std::wstring path = REGISTRY_PATH + EVENTVIEWER_CHANNEL_PATH;
@@ -199,7 +192,7 @@ void featurePrint::parseDocument(tinyxml2::XMLDocument *document)
 	wchar_t *logFormatW = (wchar_t*)::calloc(length, sizeof(wchar_t*));
 	::MultiByteToWideChar(CP_ACP, 0, logFormat.c_str(), -1, logFormatW, length);
 	
-	log->writeUserAction(L"printEvent %s", logFormatW);
+	log->writeUserAction(L"print %s", logFormatW);
 	safeFree(logFormatW);
 
 	// 기록이 완료됬으면 이전 이벤트 뷰어 데이터 삭제

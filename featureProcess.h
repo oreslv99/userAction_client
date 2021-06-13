@@ -14,7 +14,11 @@ public:
 private:
 	const ruleProcess *rule;
 
-	void getFullProcessName();
-	void getPureProcessName();
+	void getProcessName(DWORD processId, std::wstring *processName, DWORD length);
+	
+	void getContents();
+	void getUrlFromIHTMLDocument();
+	void getUrlFromIAccessible();
+	void getUrlFromUIAutomation();
 
 };
