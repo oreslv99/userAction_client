@@ -5,6 +5,7 @@
 #include <string>
 #include <list>
 #include <codecvt>					// utf8 로 변환
+#include <algorithm>
 
 // safe 함수
 #define safeFree(x)					if (x) { ::free(x); (x) = nullptr; }

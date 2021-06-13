@@ -111,6 +111,9 @@ void featureProcess::getProcessName(DWORD processId, std::wstring *processName, 
 		{
 			// 확장명을 포함한 프로세스 이름만
 			*processName = processName->substr(processName->rfind('\\') + 1);
+
+			// 소문자
+			std::transform(processName->begin(), processName->end(), processName->begin(), ::tolower);
 		}
 	}
 
@@ -124,7 +127,15 @@ void featureProcess::getContents(bool isBrowser, HWND window, std::wstring proce
 
 	if (isBrowser == true)
 	{
-		//getUrl((*browserIter), original, currentData, _countof(currentData));
+		if (processName.compare(L"iexplore.exe") == 0)
+		{
+			// IHTMLDocuments2
+		}
+		else
+		{
+			// IAccessible
+			// UIAutomation
+		}
 	}
 	else
 	{
