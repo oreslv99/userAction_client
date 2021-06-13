@@ -16,7 +16,7 @@ private:
 
 	void getProcessName(DWORD processId, std::wstring *processName, DWORD length);
 	
-	void getContents();
+	void getContents(bool isBrowser, HWND window, std::wstring processName);
 	void getUrlFromIHTMLDocument();
 	void getUrlFromIAccessible();
 	void getUrlFromUIAutomation();
