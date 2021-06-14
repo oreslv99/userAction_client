@@ -50,11 +50,11 @@ void rules::initialize(winSock *socket, HWND window)
 				{
 					data << buffer;
 					data.close();
-					log->write(logId::info, L"[%s:%d] Read server .", __FUNCTIONW__, __LINE__);
+					help->writeLog(logId::info, L"[%s:%d] Read server .", __FUNCTIONW__, __LINE__);
 				}
 				else
 				{
-					log->write(logId::error, L"[%s:%d] Can not open: %s", __FUNCTIONW__, __LINE__, filePath.c_str());
+					help->writeLog(logId::error, L"[%s:%d] Can not open: %s", __FUNCTIONW__, __LINE__, filePath.c_str());
 				}
 			}
 			else
@@ -65,7 +65,7 @@ void rules::initialize(winSock *socket, HWND window)
 		else
 		{
 			// 서버와 통신이 x, 이전 파일을 읽음
-			log->write(logId::info, L"[%s:%d] Read latest rule.", __FUNCTIONW__, __LINE__);
+			help->writeLog(logId::info, L"[%s:%d] Read latest rule.", __FUNCTIONW__, __LINE__);
 		}
 		
 		// 정책 파일로부터 읽기
@@ -138,7 +138,7 @@ bool rules::getJsonDocumentFromFile(const std::wstring filePath, jsonDocumentW *
 {
 	if ((filePath.length() < 0) || (buffer == nullptr))
 	{
-		log->write(logId::error, L"[%s:%03d] Invalid parameter.", __FUNCTIONW__, __LINE__);
+		help->writeLog(logId::error, L"[%s:%03d] Invalid parameter.", __FUNCTIONW__, __LINE__);
 		return false;
 	}
 
@@ -146,7 +146,7 @@ bool rules::getJsonDocumentFromFile(const std::wstring filePath, jsonDocumentW *
 	std::wifstream fileStream(filePath);
 	if (fileStream.is_open() == false)
 	{
-		log->write(logId::error, L"[%s:%03d] Can not open: %s", __FUNCTIONW__, __LINE__, filePath.c_str());
+		help->writeLog(logId::error, L"[%s:%03d] Can not open: %s", __FUNCTIONW__, __LINE__, filePath.c_str());
 		return false;
 	}
 
@@ -161,7 +161,7 @@ bool rules::getJsonDocumentFromString(const std::wstring jsonString, jsonDocumen
 {
 	if ((jsonString.length() < 0) || (buffer == nullptr))
 	{
-		log->write(logId::error, L"[%s:%03d] Invalid parameter.", __FUNCTIONW__, __LINE__);
+		help->writeLog(logId::error, L"[%s:%03d] Invalid parameter.", __FUNCTIONW__, __LINE__);
 		return false;
 	}
 
@@ -177,7 +177,7 @@ bool rules::deserializeRule(jsonDocumentW &document)
 	// 감시주기
 	if ((document.HasMember(L"timerInterval") == false) || (document[L"timerInterval"].IsInt() == false))
 	{
-		log->write(logId::error, L"[%s:%d] Invalid rule. [timerInterval]", __FUNCTIONW__, __LINE__);
+		help->writeLog(logId::error, L"[%s:%d] Invalid rule. [timerInterval]", __FUNCTIONW__, __LINE__);
 		return false;
 	}
 	else
@@ -188,7 +188,7 @@ bool rules::deserializeRule(jsonDocumentW &document)
 	// 서버 재연결 주기
 	if ((document.HasMember(L"serverRetryInterval") == false) || (document[L"serverRetryInterval"].IsInt() == false))
 	{
-		log->write(logId::error, L"[%s:%d] Invalid rule. [serverRetryInterval]", __FUNCTIONW__, __LINE__);
+		help->writeLog(logId::error, L"[%s:%d] Invalid rule. [serverRetryInterval]", __FUNCTIONW__, __LINE__);
 		return false;
 	}
 	else
@@ -197,9 +197,10 @@ bool rules::deserializeRule(jsonDocumentW &document)
 	}
 
 	// 감시기능
+	std::wstring temp;
 	if ((document.HasMember(L"features") == false) || (document[L"features"].IsObject() == false))
 	{
-		log->write(logId::error, L"[%s:%d] Invalid rule. [features]", __FUNCTIONW__, __LINE__);
+		help->writeLog(logId::error, L"[%s:%d] Invalid rule. [features]", __FUNCTIONW__, __LINE__);
 		return false;
 	}
 	else
@@ -257,7 +258,9 @@ bool rules::deserializeRule(jsonDocumentW &document)
 						{
 							if ((excludesIter->IsString() == true) && (excludesIter->GetStringLength() > 0))
 							{
-								this->process->excludes.push_back(excludesIter->GetString());
+								temp = excludesIter->GetString();
+								help->toLower(temp);
+								this->process->excludes.push_back(temp);
 							}
 						}
 					}
@@ -271,7 +274,9 @@ bool rules::deserializeRule(jsonDocumentW &document)
 						{
 							if ((browsersIter->IsString() == true) && (browsersIter->GetStringLength() > 0))
 							{
-								this->process->browsers.push_back(browsersIter->GetString());
+								temp = browsersIter->GetString();
+								help->toLower(temp);
+								this->process->browsers.push_back(temp);
 							}
 						}
 					}
@@ -285,7 +290,9 @@ bool rules::deserializeRule(jsonDocumentW &document)
 						{
 							if ((privatesIter->IsString() == true) && (privatesIter->GetStringLength() > 0))
 							{
-								this->process->privates.push_back(privatesIter->GetString());
+								temp = privatesIter->GetString();
+								help->toLower(temp);
+								this->process->privates.push_back(temp);
 							}
 						}
 					}
@@ -299,7 +306,9 @@ bool rules::deserializeRule(jsonDocumentW &document)
 						{
 							if ((duplicatesIter->IsString() == true) && (duplicatesIter->GetStringLength() > 0))
 							{
-								this->process->duplicates.push_back(duplicatesIter->GetString());
+								temp = duplicatesIter->GetString();
+								help->toLower(temp);
+								this->process->duplicates.push_back(temp);
 							}
 						}
 					}
@@ -329,7 +338,9 @@ bool rules::deserializeRule(jsonDocumentW &document)
 						{
 							if ((excludesIter->IsString() == true) && (excludesIter->GetStringLength() > 0))
 							{
-								this->fileIo->excludes.push_back(excludesIter->GetString());
+								temp = excludesIter->GetString();
+								help->toLower(temp);
+								this->fileIo->excludes.push_back(temp);
 							}
 						}
 					}
@@ -343,7 +354,9 @@ bool rules::deserializeRule(jsonDocumentW &document)
 						{
 							if ((extensionsIter->IsString() == true) && (extensionsIter->GetStringLength() > 0))
 							{
-								this->fileIo->extensions.push_back(extensionsIter->GetString());
+								temp = extensionsIter->GetString();
+								help->toLower(temp);
+								this->fileIo->extensions.push_back(temp);
 							}
 						}
 					}

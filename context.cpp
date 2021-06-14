@@ -39,7 +39,7 @@ bool context::initialize()
 	// 소켓 확인
 	if (this->socket->initialize() == false)
 	{
-		log->write(logId::warning, L"[%s:%03d] Failed to initialize winSock.", __FUNCTIONW__, __LINE__);
+		help->writeLog(logId::warning, L"[%s:%03d] Failed to initialize winSock.", __FUNCTIONW__, __LINE__);
 	}
 
 	// 정책 확인
@@ -112,7 +112,7 @@ int context::tickTock()
 	HANDLE watchTimer = ::CreateWaitableTimerW(nullptr, FALSE, nullptr);
 	if (::SetWaitableTimer(watchTimer, &dueTime, this->rule.getTimerInterval(), nullptr, nullptr, FALSE) == FALSE)
 	{
-		log->write(logId::error, L"[%s:%03d] code[%d] SetWaitableTimer is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+		help->writeLog(logId::error, L"[%s:%03d] code[%d] SetWaitableTimer is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 		return -1;
 	}
 
@@ -124,7 +124,7 @@ int context::tickTock()
 		retryTimer = ::CreateWaitableTimerW(nullptr, FALSE, nullptr);
 		if (::SetWaitableTimer(retryTimer, &dueTime, serverRetryInterval, nullptr, nullptr, FALSE) == FALSE)
 		{
-			log->write(logId::error, L"[%s:%03d] code[%d] SetWaitableTimer is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+			help->writeLog(logId::error, L"[%s:%03d] code[%d] SetWaitableTimer is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 			return -1;
 		}
 	}
@@ -187,13 +187,13 @@ void context::retryConnect(HANDLE timer)
 		{
 			if (this->socket->initialize() == true) 
 			{
-				log->write(logId::info, L"[%s:%03d] server is on line again.", __FUNCTIONW__, __LINE__);
+				help->writeLog(logId::info, L"[%s:%03d] server is on line again.", __FUNCTIONW__, __LINE__);
 			}
 #if _DEBUG
 			else
 			{
 
-				log->write(logId::warning, L"[%s:%03d] server is not on line.", __FUNCTIONW__, __LINE__);
+				help->writeLog(logId::warning, L"[%s:%03d] server is not on line.", __FUNCTIONW__, __LINE__);
 			}
 #endif
 		}

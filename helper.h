@@ -3,6 +3,7 @@
 #include <shlobj_core.h>	// SHGetKnownFolderPath
 #include <map>
 #include <fstream>
+#include <algorithm>
 
 enum logId 
 {
@@ -11,18 +12,19 @@ enum logId
 	warning,
 	error,
 };
-class writeLog
+class helper
 {
 public:
-	static writeLog *getInstance();
+	static helper *getInstance();
 	static bool initialize();
 	static void release();
-	static void write(logId id, std::wstring message, ...);
+	static void writeLog(logId id, std::wstring message, ...);
 	static void writeUserAction(std::wstring message, ...);
+	static void toLower(std::wstring &source);
 
 private:
 	static std::wstring path;		// 저장경로
 	static CRITICAL_SECTION cs;		// sync
-	static writeLog *instance;
+	static helper *instance;
 
 };

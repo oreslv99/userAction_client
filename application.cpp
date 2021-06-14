@@ -13,8 +13,8 @@ application::~application()
 {
 	::CoUninitialize();
 
-	log->write(logId::info, L"End of application.");
-	log->release();
+	help->writeLog(logId::info, L"End of application.");
+	help->release();
 }
 bool application::initialize(HINSTANCE instance)
 {
@@ -28,14 +28,14 @@ bool application::initialize(HINSTANCE instance)
 	// 현재 실행중이라면 종료
 	if (isAlreadyRunning(programName) == true)
 	{
-		log->write(logId::error, L"[%s:%03d] Application is already running now.", __FUNCTIONW__, __LINE__);
+		help->writeLog(logId::error, L"[%s:%03d] Application is already running now.", __FUNCTIONW__, __LINE__);
 		return false;
 	}
 
 	// window 생성
 	if (createWindow(instance, programName, &this->appContext) == false)
 	{
-		log->write(logId::error, L"[%s:%03d] createWindow is Failed.", __FUNCTIONW__, __LINE__);
+		help->writeLog(logId::error, L"[%s:%03d] createWindow is Failed.", __FUNCTIONW__, __LINE__);
 		return false;
 	}
 
@@ -43,21 +43,21 @@ bool application::initialize(HINSTANCE instance)
 	//	: COINIT_DISABLE_OLE1DDE "OLE 1.0" 관련된 오버헤드를 줄일 수 있음 COINIT_APARTMENTTHREADED, COINIT_MULTITHREADED
 	if (FAILED(::CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)))
 	{
-		log->write(logId::error, L"[%s:%03d] err[%05d] CoInitializeEx is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+		help->writeLog(logId::error, L"[%s:%03d] err[%05d] CoInitializeEx is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 		return false;
 	}
 
 	// 환경 파일 (socket 설정)
 	if (readEnvironmet(&this->appContext) == false)
 	{
-		log->write(logId::error, L"[%s:%03d] readEnvironmet is Failed.", __FUNCTIONW__, __LINE__);
+		help->writeLog(logId::error, L"[%s:%03d] readEnvironmet is Failed.", __FUNCTIONW__, __LINE__);
 		return false;
 	}
 
 	// 컨텍스트 초기화
 	if (this->appContext.initialize() == false)
 	{
-		log->write(logId::error, L"[%s:%03d] Failed to create application context.", __FUNCTIONW__, __LINE__);
+		help->writeLog(logId::error, L"[%s:%03d] Failed to create application context.", __FUNCTIONW__, __LINE__);
 		return false;
 	}
 
@@ -86,7 +86,7 @@ bool application::createWindow(HINSTANCE instance, std::wstring programName, con
 	wndClass.lpszClassName = programName.c_str();
 	if (::RegisterClassW(&wndClass) == 0)
 	{
-		log->write(logId::error, L"[%s:%03d] err[%05d] RegisterClassW is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+		help->writeLog(logId::error, L"[%s:%03d] err[%05d] RegisterClassW is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 		return false;
 	}
 
@@ -94,7 +94,7 @@ bool application::createWindow(HINSTANCE instance, std::wstring programName, con
 	HWND window = ::CreateWindowExW(0, wndClass.lpszClassName, wndClass.lpszClassName, 0, 0, 0, 0, 0, nullptr, nullptr, wndClass.hInstance, nullptr);
 	if (window == nullptr)
 	{
-		log->write(logId::error, L"[%s:%03d] err[%05d] CreateWindowExW is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+		help->writeLog(logId::error, L"[%s:%03d] err[%05d] CreateWindowExW is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 		return false;
 	}
 

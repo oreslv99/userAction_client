@@ -15,5 +15,5 @@
 #define safeCoTaskMemFree(x)		if (x) { ::CoTaskMemFree(x); (x) = nullptr; }
 #define safeCloseHandle(x)			if (x) { ::CloseHandle(x); (x) = INVALID_HANDLE_VALUE; }
 
-#include "writeLog.h"
-#define log writeLog::getInstance()
+#include "helper.h"
+#define help helper::getInstance()

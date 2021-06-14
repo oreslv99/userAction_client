@@ -1,5 +1,25 @@
 #include "featureProcess.h"
 
+
+BOOL CALLBACK featureProcess::wndEnumProc(HWND hwnd, LPARAM lParam)
+{
+	std::wstring className;
+	DWORD length = MAX_PATH;
+	className.resize(length);
+
+	::GetClassNameW(hwnd, const_cast<wchar_t*>(className.data()), length);
+	if (className.compare(L"Internet Explorer_Server") == 0)
+	{
+		*(HWND*)lParam = hwnd;
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+//
+// public
+//
 featureProcess::featureProcess()
 	:rule()
 {
@@ -51,7 +71,7 @@ bool featureProcess::watch()
 			// string 의 크기를 MAX_PATH 로 지정했기 때문에, wstring.length() 는 실제 데이터가 없더라도 length 가 되어버림
 			// 따라서 wcslen 을 사용
 
-			log->write(logId::warning, L"[%s:%03d] Invalid process name.", __FUNCTIONW__, __LINE__);
+			help->writeLog(logId::warning, L"[%s:%03d] Invalid process name.", __FUNCTIONW__, __LINE__);
 			break;
 		}
 
@@ -105,7 +125,7 @@ void featureProcess::getProcessName(DWORD processId, std::wstring *processName, 
 	{
 		if (::QueryFullProcessImageNameW(process, 0, const_cast<wchar_t*>(processName->data()), &length) == FALSE)
 		{
-			log->write(logId::warning, L"[%s:%03d] code[%d] QueryFullProcessImageNameW is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+			help->writeLog(logId::warning, L"[%s:%03d] code[%d] QueryFullProcessImageNameW is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 		}
 		else
 		{
@@ -118,6 +138,45 @@ void featureProcess::getProcessName(DWORD processId, std::wstring *processName, 
 	}
 
 	safeCloseHandle(process);
+}
+void featureProcess::getUrlFromIHTMLDocument(HWND window)
+{
+	HWND hwndParent = reinterpret_cast<HWND>(::GetWindowLongPtrW(window, GWLP_HWNDPARENT));
+	if (hwndParent == nullptr)
+	{
+		return;
+	}
+
+	// get window handle for "Internet Explore_Server" class name
+	HWND ieServer = nullptr;
+	::EnumChildWindows(hwndParent, wndEnumProc, reinterpret_cast<LPARAM>(&ieServer));
+	if (ieServer == nullptr)
+	{
+		return;
+	}
+
+	//// get IHTMLDocument2 object
+	//LRESULT result = 0;
+	//result = ::SendMessageW(ieServer, WM_GETOBJECT_HTML, 0, 0);
+	////::SendMessageTimeoutW(ieServer, WM_GETOBJECT_HTML, static_cast<WPARAM>(0), static_cast<LPARAM>(0), SMTO_ABORTIFHUNG, 1000, reinterpret_cast<PDWORD_PTR>(&result));
+
+	////ATL::CComPtr<IHTMLDocument2> iHTMLDocument2;
+	//IHTMLDocument2 *iHTMLDocument2;
+	//if (SUCCEEDED(::ObjectFromLresult(result, IID_IHTMLDocument2, static_cast<WPARAM>(0), reinterpret_cast<void**>(&iHTMLDocument2))))
+	//{
+	//	//ATL::CComBSTR url;
+	//	BSTR url;
+	//	if (SUCCEEDED(iHTMLDocument2->get_URL(&url)))
+	//	{
+	//		::wcsncpy_s(buffer, length, url, _TRUNCATE);
+	//	}
+
+	//	::SysReleaseString(url);
+	//	url = nullptr;
+	//}
+
+	//iHTMLDocument2->Release();
+	//iHTMLDocument2 = nullptr;
 }
 void featureProcess::getContents(bool isBrowser, HWND window, std::wstring processName)
 {
@@ -192,6 +251,6 @@ void featureProcess::getContents(bool isBrowser, HWND window, std::wstring proce
 	if (latestContent.compare(currentContent) != 0)
 	{
 		latestContent = currentContent;
-		log->writeUserAction(L"process %s", latestContent.c_str());
+		help->writeUserAction(L"process %s", latestContent.c_str());
 	}
 }

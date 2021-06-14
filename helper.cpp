@@ -1,12 +1,12 @@
-#include "writeLog.h"
+#include "helper.h"
 
-std::wstring writeLog::path = {};
-CRITICAL_SECTION writeLog::cs = {};
-writeLog *writeLog::instance = nullptr;
+std::wstring helper::path = {};
+CRITICAL_SECTION helper::cs;// = {};
+helper *helper::instance = nullptr;
 const std::wstring DATE_FORMAT_ERROR = L"%02d:%02d:%02d.%03d";
 
 #define makeString(x) { x, L#x }
-static std::map<int, std::wstring> errIds =
+static std::map<int, std::wstring> logIds =
 {
 	makeString(debug),
 	makeString(info),
@@ -17,12 +17,12 @@ static std::map<int, std::wstring> errIds =
 //
 // public
 //
-writeLog *writeLog::getInstance()
+helper *helper::getInstance()
 {
 	// single-ton pattern
 	if (instance == nullptr)
 	{
-		instance = new writeLog();
+		instance = new helper();
 		if ((instance == nullptr) || (instance->initialize() == false))
 		{
 			safeDelete(instance);
@@ -32,7 +32,7 @@ writeLog *writeLog::getInstance()
 
 	return instance;
 }
-bool writeLog::initialize()
+bool helper::initialize()
 {
 	// writeLog 파일경로
 	// https://docs.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shgetknownfolderpath
@@ -55,12 +55,12 @@ bool writeLog::initialize()
 
 	return true;
 }
-void writeLog::release()
+void helper::release()
 {
 	::DeleteCriticalSection(&cs);
 	safeDelete(instance);
 }
-void writeLog::write(logId id, std::wstring message, ...)
+void helper::writeLog(logId id, std::wstring message, ...)
 {
 	::EnterCriticalSection(&cs);
 
@@ -80,8 +80,8 @@ void writeLog::write(logId id, std::wstring message, ...)
 	stream.open(filePath, std::ios::app);
 	if (stream.is_open() == true)
 	{
-		std::map<int, std::wstring>::iterator iter = errIds.find(id);
-		if (iter != errIds.end())
+		std::map<int, std::wstring>::iterator iter = logIds.find(id);
+		if (iter != logIds.end())
 		{
 
 			// 가변인자 포함한 문자열 만들기
@@ -110,7 +110,7 @@ void writeLog::write(logId id, std::wstring message, ...)
 
 	::LeaveCriticalSection(&cs);
 }
-void writeLog::writeUserAction(std::wstring message, ...)
+void helper::writeUserAction(std::wstring message, ...)
 {
 	::EnterCriticalSection(&cs);
 
@@ -153,4 +153,8 @@ void writeLog::writeUserAction(std::wstring message, ...)
 	}
 
 	::LeaveCriticalSection(&cs);
+}
+void helper::toLower(std::wstring &source)
+{
+	std::transform(source.begin(), source.end(), source.begin(), ::tolower);
 }

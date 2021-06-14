@@ -22,7 +22,7 @@
     <ClInclude Include="application.h" />
     <ClInclude Include="featureAFK.h" />
     <ClInclude Include="context.h" />
-    <ClInclude Include="writeLog.h" />
+    <ClInclude Include="helper.h" />
     <ClInclude Include="extern\rapidJson\allocators.h" />
     <ClInclude Include="extern\rapidJson\cursorstreamwrapper.h" />
     <ClInclude Include="extern\rapidJson\document.h" />
@@ -72,7 +72,7 @@
     <ClCompile Include="application.cpp" />
     <ClCompile Include="featureAFK.cpp" />
     <ClCompile Include="context.cpp" />
-    <ClCompile Include="writeLog.cpp" />
+    <ClCompile Include="helper.cpp" />
     <ClCompile Include="extern\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="featureFileIo.cpp" />
     <ClCompile Include="featurePrint.cpp" />

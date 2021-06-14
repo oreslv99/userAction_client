@@ -15,9 +15,6 @@
     <Filter Include="Source Files\contexts\features">
       <UniqueIdentifier>{31514b99-00e0-4eb2-85c4-9db266e1a985}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\helper">
-      <UniqueIdentifier>{20bbba45-0071-495f-a265-fe47ae2020e8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\extern">
       <UniqueIdentifier>{7b092591-7278-4a50-8d96-0e553be6f987}</UniqueIdentifier>
     </Filter>
@@ -159,9 +156,6 @@
     <ClInclude Include="context.h">
       <Filter>Source Files\contexts</Filter>
     </ClInclude>
-    <ClInclude Include="winSock.h">
-      <Filter>Source Files\helper</Filter>
-    </ClInclude>
     <ClInclude Include="featureAFK.h">
       <Filter>Source Files\contexts\features</Filter>
     </ClInclude>
@@ -171,14 +165,17 @@
     <ClInclude Include="featureProcess.h">
       <Filter>Source Files\contexts\features</Filter>
     </ClInclude>
-    <ClInclude Include="rules.h">
-      <Filter>Source Files\contexts\features</Filter>
-    </ClInclude>
     <ClInclude Include="featureFileIo.h">
       <Filter>Source Files\contexts\features</Filter>
     </ClInclude>
-    <ClInclude Include="writeLog.h">
-      <Filter>Source Files\helper</Filter>
+    <ClInclude Include="helper.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="winSock.h">
+      <Filter>Source Files\contexts</Filter>
+    </ClInclude>
+    <ClInclude Include="rules.h">
+      <Filter>Source Files\contexts</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -192,9 +189,6 @@
     <ClCompile Include="context.cpp">
       <Filter>Source Files\contexts</Filter>
     </ClCompile>
-    <ClCompile Include="winSock.cpp">
-      <Filter>Source Files\helper</Filter>
-    </ClCompile>
     <ClCompile Include="featureAFK.cpp">
       <Filter>Source Files\contexts\features</Filter>
     </ClCompile>
@@ -204,14 +198,17 @@
     <ClCompile Include="featureProcess.cpp">
       <Filter>Source Files\contexts\features</Filter>
     </ClCompile>
-    <ClCompile Include="rules.cpp">
-      <Filter>Source Files\contexts\features</Filter>
-    </ClCompile>
     <ClCompile Include="featureFileIo.cpp">
       <Filter>Source Files\contexts\features</Filter>
     </ClCompile>
-    <ClCompile Include="writeLog.cpp">
-      <Filter>Source Files\helper</Filter>
+    <ClCompile Include="helper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="winSock.cpp">
+      <Filter>Source Files\contexts</Filter>
+    </ClCompile>
+    <ClCompile Include="rules.cpp">
+      <Filter>Source Files\contexts</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -17,7 +17,7 @@ bool featureAFK::initialize(const rules &rule)
 	this->event = ::CreateEventW(nullptr, FALSE, FALSE, nullptr);
 	if (this->event == INVALID_HANDLE_VALUE)
 	{
-		log->write(logId::warning, L"[%s:%03d] code[%d] CreateEventW is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+		help->writeLog(logId::warning, L"[%s:%03d] code[%d] CreateEventW is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 		return false;
 	}
 
@@ -42,7 +42,7 @@ bool featureAFK::watch()
 
 		if (::GetLastInputInfo(&lastInputInfo) == FALSE)
 		{
-			log->write(logId::error, L"[%s:%03d] err[%05d] GetLastInputInfo is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+			help->writeLog(logId::error, L"[%s:%03d] err[%05d] GetLastInputInfo is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
 			return 0;
 		}
 
@@ -74,7 +74,7 @@ bool featureAFK::watch()
 			startAfkTime = ::GetTickCount();	// 시간 초기화
 			::ResetEvent(this->event);
 			result = false;
-			log->writeUserAction(L"out afk");
+			help->writeUserAction(L"out afk");
 		}
 	}
 	else
@@ -85,7 +85,7 @@ bool featureAFK::watch()
 
 			// 자리비움 상태
 			result = true;
-			log->writeUserAction(L"in afk");
+			help->writeUserAction(L"in afk");
 		}
 	}
 
