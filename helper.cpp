@@ -15,6 +15,13 @@ static std::map<int, std::wstring> logIds =
 	makeString(warning),
 	makeString(error),
 };
+static std::map<int, std::wstring> featureIds =
+{
+	makeString(afk),
+	makeString(fileIo),
+	makeString(print),
+	makeString(process),
+};
 
 //
 // public
@@ -114,7 +121,7 @@ void helper::writeLog(logId id, std::wstring message, ...)
 
 	::LeaveCriticalSection(&cs);
 }
-void helper::writeUserAction(std::wstring message, ...)
+void helper::writeUserAction(featureId id, std::wstring message, ...)
 {
 	::EnterCriticalSection(&cs);
 
@@ -134,32 +141,37 @@ void helper::writeUserAction(std::wstring message, ...)
 	stream.open(filePath, std::ios::app);
 	if (stream.is_open() == true)
 	{
-		// 가변인자 포함한 문자열 만들기
-		va_list args;
-		va_start(args, message);
-		size_t length = 0;
+		std::map<int, std::wstring>::iterator iter = featureIds.find(id);
+		if (iter != featureIds.end())
+		{
+			// 가변인자 포함한 문자열 만들기
+			va_list args;
+			va_start(args, message);
+			size_t length = 0;
 
-		std::wstring buffer;
-		length = ::_vscwprintf(message.c_str(), args);
-		length++;
-		buffer.resize(length);
+			std::wstring buffer;
+			length = ::_vscwprintf(message.c_str(), args);
+			length++;
+			buffer.resize(length);
 
-		::vswprintf_s(const_cast<wchar_t*>(buffer.data()), length, message.c_str(), args);
-		va_end(args);
+			::vswprintf_s(const_cast<wchar_t*>(buffer.data()), length, message.c_str(), args);
+			va_end(args);
 
-		// 파일 기록
-		std::wstring timestamp;
-		timestamp.resize(12);
-		::wsprintfW(const_cast<wchar_t*>(timestamp.data()), FORMAT_DATE.c_str(), localTime.wHour, localTime.wMinute, localTime.wSecond, localTime.wMilliseconds);
-		stream << timestamp + L"\t";
-		stream << buffer;
-		stream << std::endl;
-		stream.close();
+			// 파일 기록
+			std::wstring timestamp;
+			timestamp.resize(12);
+			::wsprintfW(const_cast<wchar_t*>(timestamp.data()), FORMAT_DATE.c_str(), localTime.wHour, localTime.wMinute, localTime.wSecond, localTime.wMilliseconds);
+			stream << timestamp + L"\t";
+			stream << iter->second + L"\t\t";
+			stream << buffer;
+			stream << std::endl;
+			stream.close();
+		}
 	}
 
 	::LeaveCriticalSection(&cs);
 }
-//void helper::toLower(std::wstring &source)
-//{
-//	std::transform(source.begin(), source.end(), source.begin(), ::tolower);
-//}
+void helper::toLower(std::wstring &source)
+{
+	std::transform(source.begin(), source.end(), source.begin(), ::tolower);
+}

@@ -259,7 +259,7 @@ bool rules::deserializeRule(jsonDocumentW &document)
 							if ((excludesIter->IsString() == true) && (excludesIter->GetStringLength() > 0))
 							{
 								temp = excludesIter->GetString();
-								//help->toLower(temp);
+								help->toLower(temp);
 								this->process->excludes.push_back(temp);
 							}
 						}
@@ -275,7 +275,7 @@ bool rules::deserializeRule(jsonDocumentW &document)
 							if ((browsersIter->IsString() == true) && (browsersIter->GetStringLength() > 0))
 							{
 								temp = browsersIter->GetString();
-								//help->toLower(temp);
+								help->toLower(temp);
 								this->process->browsers.push_back(temp);
 							}
 						}
@@ -291,7 +291,7 @@ bool rules::deserializeRule(jsonDocumentW &document)
 							if ((privatesIter->IsString() == true) && (privatesIter->GetStringLength() > 0))
 							{
 								temp = privatesIter->GetString();
-								//help->toLower(temp);
+								help->toLower(temp);
 								this->process->privates.push_back(temp);
 							}
 						}
@@ -307,7 +307,7 @@ bool rules::deserializeRule(jsonDocumentW &document)
 							if ((duplicatesIter->IsString() == true) && (duplicatesIter->GetStringLength() > 0))
 							{
 								temp = duplicatesIter->GetString();
-								//help->toLower(temp);
+								help->toLower(temp);
 								this->process->duplicates.push_back(temp);
 							}
 						}
@@ -339,7 +339,7 @@ bool rules::deserializeRule(jsonDocumentW &document)
 							if ((excludesIter->IsString() == true) && (excludesIter->GetStringLength() > 0))
 							{
 								temp = excludesIter->GetString();
-								//help->toLower(temp);
+								help->toLower(temp);
 								this->fileIo->excludes.push_back(temp);
 							}
 						}
@@ -355,7 +355,7 @@ bool rules::deserializeRule(jsonDocumentW &document)
 							if ((extensionsIter->IsString() == true) && (extensionsIter->GetStringLength() > 0))
 							{
 								temp = extensionsIter->GetString();
-								//help->toLower(temp);
+								help->toLower(temp);
 								this->fileIo->extensions.push_back(temp);
 							}
 						}

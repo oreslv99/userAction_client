@@ -131,9 +131,7 @@ void featureProcess::getProcessName(DWORD processId, std::wstring *processName, 
 		{
 			// 확장명을 포함한 프로세스 이름만
 			*processName = processName->substr(processName->rfind('\\') + 1);
-
-			// 소문자
-			std::transform(processName->begin(), processName->end(), processName->begin(), ::tolower);
+			help->toLower(*processName);
 		}
 	}
 
@@ -251,6 +249,6 @@ void featureProcess::getContents(bool isBrowser, HWND window, std::wstring proce
 	if (latestContent.compare(currentContent) != 0)
 	{
 		latestContent = currentContent;
-		help->writeUserAction(L"process %s", latestContent.c_str());
+		help->writeUserAction(featureId::process, L"%s\t%s", processName.c_str(), latestContent.c_str());
 	}
 }

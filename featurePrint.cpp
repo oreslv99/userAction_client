@@ -166,24 +166,13 @@ void featurePrint::parseDocument(tinyxml2::XMLDocument *document)
 	std::string filePath = documentPrinted->FirstChildElement("Param6")->GetText();
 	std::string copies = documentPrinted->FirstChildElement("Param8")->GetText();
 	
-	// 로그형태
+	// 로그
 	std::string logFormat;
 	logFormat.resize(1024);
-
-	// jsondata 에서는 \ >> \\ 로 변경해야함 (경로)
-	size_t startPos = 0;
-	while ((startPos = filePath.find("\\", startPos)) != std::string::npos)
-	{
-		filePath.replace(startPos, 1, "\\\\");
-		startPos += 2;
-	}
-
-	// jsondata 포맷
-	::wsprintfA(const_cast<char*>(logFormat.data()), "{\"eventTime\":\"%s\", \"printerName\":\"%s\", \"filePath\":\"%s\", \"copies\":%s}", 
-		eventTime.c_str(), printerName.c_str(), filePath.c_str(), copies.c_str());
+	::wsprintfA(const_cast<char*>(logFormat.data()), "time: %s printerName: %s copies: %s filePath: %s", eventTime.c_str(), printerName.c_str(), copies.c_str(), filePath.c_str());
 
 	//// 아래와 같이 c++ string 클래스를 이용한 변환시 깨져서 기록됨
-	//std::string logFormatW;
+	//std::wstring logFormatW;
 	//logFormatW.assign(logFormat.begin(), logFormat.end());
 
 	// 2021-06-03 : c 스타일로 변환하여 출력
@@ -192,7 +181,7 @@ void featurePrint::parseDocument(tinyxml2::XMLDocument *document)
 	wchar_t *logFormatW = (wchar_t*)::calloc(length, sizeof(wchar_t*));
 	::MultiByteToWideChar(CP_ACP, 0, logFormat.c_str(), -1, logFormatW, length);
 	
-	help->writeUserAction(L"print %s", logFormatW);
+	help->writeUserAction(featureId::print, L"%s", logFormatW);
 	safeFree(logFormatW);
 
 	// 기록이 완료됬으면 이전 이벤트 뷰어 데이터 삭제

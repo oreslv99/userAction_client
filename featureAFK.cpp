@@ -74,7 +74,7 @@ bool featureAFK::watch()
 			startAfkTime = ::GetTickCount();	// 시간 초기화
 			::ResetEvent(this->event);
 			result = false;
-			help->writeUserAction(L"out afk");
+			help->writeUserAction(featureId::afk, L"awake");
 		}
 	}
 	else
@@ -85,7 +85,7 @@ bool featureAFK::watch()
 
 			// 자리비움 상태
 			result = true;
-			help->writeUserAction(L"in afk");
+			help->writeUserAction(featureId::afk, L"in");
 		}
 	}
 

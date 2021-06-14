@@ -9,7 +9,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 	//::_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-	//help->writeLog(logId::info, L"Start application.");
+	help->writeLog(logId::info, L"Start application.");
 
 	application app;
 	if (app.initialize(hInstance) == false)

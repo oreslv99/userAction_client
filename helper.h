@@ -12,6 +12,13 @@ enum logId
 	warning,
 	error,
 };
+enum featureId
+{
+	afk = 0,
+	fileIo,
+	print,
+	process
+};
 class helper
 {
 public:
@@ -19,8 +26,8 @@ public:
 	static bool initialize();
 	static void release();
 	static void writeLog(logId id, std::wstring message, ...);
-	static void writeUserAction(std::wstring message, ...);
-	//static void toLower(std::wstring &source);
+	static void writeUserAction(featureId id, std::wstring message, ...);
+	static void toLower(std::wstring &source);
 
 private:
 	static std::wstring path;		// 저장경로
