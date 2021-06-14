@@ -21,10 +21,11 @@ private:
 	void getProcessName(DWORD processId, std::wstring *processName, DWORD length);
 	
 	static BOOL CALLBACK wndEnumProc(HWND hwnd, LPARAM lParam); 
-	void execScript(IHTMLDocument2 *);
+	//void execScript(IHTMLDocument2 *);
 	void getUrlFromIHTMLDocument(HWND window, std::wstring &content);
-	void getUrlFromIAccessible();
-	void getUrlFromUIAutomation();
+	void getUrlRecursively(IAccessible *accessible);
+	void getUrlFromIAccessible(HWND window);
+	void getUrlFromUIAutomation(HWND window);
 	void getContents(bool isBrowser, HWND window, std::wstring processName);
 
 };

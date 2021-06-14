@@ -138,60 +138,60 @@ void featureProcess::getProcessName(DWORD processId, std::wstring *processName, 
 
 	safeCloseHandle(process);
 }
-void featureProcess::execScript(IHTMLDocument2 * iHtmlDocument2)
-{
-	// internal url 확인하기 위해 javascript 실행
-	IHTMLWindow2 *iHtmlWindow2 = nullptr;
-	if (SUCCEEDED(iHtmlDocument2->get_parentWindow(&iHtmlWindow2)))
-	{
-		CComPtr<IDispatch> spScript;
-		iHtmlDocument2->get_Script(&spScript);
-		//CComBSTR bstrMember(L"alert(document.getElementById('mainFrame').contentWindow.eval('location').href)");
-		CComBSTR bstrMember(L"InternalUrl");
-		DISPID dispid = NULL;
-		CComVariant vaResult;
-		BOOL bRes = FALSE;
-		HRESULT res = spScript->GetIDsOfNames(IID_NULL, &bstrMember, 1, LOCALE_USER_DEFAULT, &dispid);
-		if (SUCCEEDED(res))
-		{
-			//Putting parameters  
-			DISPPARAMS dispparams;
-			memset(&dispparams, 0, sizeof dispparams);
-			dispparams.cArgs = 0;
-			dispparams.rgvarg = new VARIANT[dispparams.cArgs];
-			dispparams.cNamedArgs = 0;
-
-			EXCEPINFO excepInfo;
-			memset(&excepInfo, 0, sizeof excepInfo);
-			UINT nArgErr = (UINT)-1;  // initialize to invalid arg
-
-			//Call JavaScript function         
-			res = spScript->Invoke(dispid, IID_NULL, 0, DISPATCH_METHOD, &dispparams, &vaResult, &excepInfo, &nArgErr);
-			if (SUCCEEDED(res))
-			{
-				//Done!
-				bRes = TRUE;
-			}
-
-			//Free mem
-			delete[] dispparams.rgvarg;
-
-
-			////CComBSTR script = L"";
-			////CComBSTR language = L"javascript";
-			////CComVariant var;
-			////iHtmlWindow2->execScript(script, language, &var);
-			////hresult = ::VariantChangeType(&var, &var, 0, VT_BSTR);
-			//////ATL::CComDispatchDriver dispatchDriver = nullptr;
-			//////iHtmlDocument2->QueryInterface(&dispatchDriver);
-			//////dispatchDriver.Invoke1(L"eval", &CComVariant(script), &var);
-			//////var.ChangeType(VT_BSTR);
-
-			//help->writeLog(logId::debug, L"[%s:%03d] internal url: %s", __FUNCTIONW__, __LINE__, var.bstrVal);
-		}
-	}
-
-}
+////void featureProcess::execScript(IHTMLDocument2 * iHtmlDocument2)
+////{
+////	// internal url 확인하기 위해 javascript 실행
+////	IHTMLWindow2 *iHtmlWindow2 = nullptr;
+////	if (SUCCEEDED(iHtmlDocument2->get_parentWindow(&iHtmlWindow2)))
+////	{
+////		CComPtr<IDispatch> spScript;
+////		iHtmlDocument2->get_Script(&spScript);
+////		//CComBSTR bstrMember(L"alert(document.getElementById('mainFrame').contentWindow.eval('location').href)");
+////		CComBSTR bstrMember(L"InternalUrl");
+////		DISPID dispid = NULL;
+////		CComVariant vaResult;
+////		BOOL bRes = FALSE;
+////		HRESULT res = spScript->GetIDsOfNames(IID_NULL, &bstrMember, 1, LOCALE_USER_DEFAULT, &dispid);
+////		if (SUCCEEDED(res))
+////		{
+////			//Putting parameters  
+////			DISPPARAMS dispparams;
+////			memset(&dispparams, 0, sizeof dispparams);
+////			dispparams.cArgs = 0;
+////			dispparams.rgvarg = new VARIANT[dispparams.cArgs];
+////			dispparams.cNamedArgs = 0;
+////
+////			EXCEPINFO excepInfo;
+////			memset(&excepInfo, 0, sizeof excepInfo);
+////			UINT nArgErr = (UINT)-1;  // initialize to invalid arg
+////
+////			//Call JavaScript function         
+////			res = spScript->Invoke(dispid, IID_NULL, 0, DISPATCH_METHOD, &dispparams, &vaResult, &excepInfo, &nArgErr);
+////			if (SUCCEEDED(res))
+////			{
+////				//Done!
+////				bRes = TRUE;
+////			}
+////
+////			//Free mem
+////			delete[] dispparams.rgvarg;
+////
+////
+////			////CComBSTR script = L"";
+////			////CComBSTR language = L"javascript";
+////			////CComVariant var;
+////			////iHtmlWindow2->execScript(script, language, &var);
+////			////hresult = ::VariantChangeType(&var, &var, 0, VT_BSTR);
+////			//////ATL::CComDispatchDriver dispatchDriver = nullptr;
+////			//////iHtmlDocument2->QueryInterface(&dispatchDriver);
+////			//////dispatchDriver.Invoke1(L"eval", &CComVariant(script), &var);
+////			//////var.ChangeType(VT_BSTR);
+////
+////			//help->writeLog(logId::debug, L"[%s:%03d] internal url: %s", __FUNCTIONW__, __LINE__, var.bstrVal);
+////		}
+////	}
+////
+////}
 void featureProcess::getUrlFromIHTMLDocument(HWND window, std::wstring &content)
 {
 	HWND hwndParent = reinterpret_cast<HWND>(::GetWindowLongPtrW(window, GWLP_HWNDPARENT));
@@ -236,11 +236,9 @@ void featureProcess::getUrlFromIHTMLDocument(HWND window, std::wstring &content)
 	HRESULT hresult = ::ObjectFromLresult(result, IID_IHTMLDocument2, static_cast<WPARAM>(0), reinterpret_cast<void**>(&iHtmlDocument2));
 	if (SUCCEEDED(hresult))
 	{
+		//execScript(iHtmlDocument2);
+
 		CComBSTR temp;
-
-		execScript(iHtmlDocument2);
-
-		//
 		result = iHtmlDocument2->get_URL(&temp);
 		if (SUCCEEDED(result))
 		{
@@ -252,6 +250,95 @@ void featureProcess::getUrlFromIHTMLDocument(HWND window, std::wstring &content)
 	}
 
 	safeRelease(iHtmlDocument2);
+}
+void featureProcess::getUrlRecursively(IAccessible *accessible)
+{
+	long countChildren = 0;
+	HRESULT result = accessible->get_accChildCount(&countChildren);
+	if ((FAILED(result)) || (countChildren <= 0))
+	{
+		return;
+	}
+
+	VARIANT	*variants = new VARIANT[countChildren];
+	LONG obtained = 0;
+	result = ::AccessibleChildren(accessible, 0, countChildren, variants, &obtained);
+	if (FAILED(result))
+	{
+		safeDeleteArray(variants);
+		help->writeLog(logId::error, L"[%s:%d] code[%08x] AccessibleChildren is failed.", __FUNCTIONW__, __LINE__, result);
+		return;
+	}
+
+	for (LONG i = 0; i < obtained; i++)
+	{
+		VARIANT childrenVariant = variants[i];
+
+		long role = -1;
+		wchar_t *name = nullptr;
+		wchar_t *value = nullptr;
+		IAccessible *accessibleChildren = nullptr;
+
+		if (childrenVariant.vt == VT_DISPATCH)
+		{
+			IDispatch *dispatch = childrenVariant.pdispVal;
+			result = dispatch->QueryInterface(IID_IAccessible, (void**)&accessibleChildren);
+			if (FAILED(result))
+			{
+				help->writeLog(logId::error, L"[%s:%d] code[%08x] AccessibleChildren is failed.", __FUNCTIONW__, __LINE__, result);
+				return;
+			}
+
+			getName(accessibleChildren, CHILDID_SELF, &name);
+			getRole(accessibleChildren, CHILDID_SELF, &role);
+
+			// Chrome
+			std::wstring url;
+			url.resize(1024);
+			if ((name != nullptr) && ((::_wcsicmp(name, L"주소창 및 검색창") == 0) || (::_wcsicmp(name, L"address and search bar") == 0)) &&
+				(role == ROLE_SYSTEM_TEXT))
+			{
+				getValue(accessibleChildren, CHILDID_SELF, &value);
+				if ((value != nullptr) && (::wcslen(value) > 0))
+				{
+					::wcsncpy_s(buffer, length, value, _TRUNCATE);
+				}
+			}
+
+			// 재귀
+			if (::wcslen(buffer) <= 0)
+			{
+				result = getUrlRecursively(accessibleChildren);
+			}
+		}
+
+		safeRelease(accessibleChildren);
+		safeFree(name);
+		safeFree(value);
+	}
+
+	// 해제
+	for (long i = 0; i < countChildren; i++)
+	{
+		::VariantClear(&variants[i]);
+	}
+	safeDeleteArray(variants);
+
+	return result;
+}
+void featureProcess::getUrlFromIAccessible(HWND window)
+{
+	HWND rootOwner = ::GetAncestor(window, GA_ROOTOWNER);
+	IAccessible *accessible = nullptr;
+	if (FAILED(::AccessibleObjectFromWindow(rootOwner, OBJID_CLIENT, IID_IAccessible, reinterpret_cast<void**>(&accessible))))
+	{
+		help->writeLog(logId::error, L"[%s:%03d] code[%d] AccessibleObjectFromWindow is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+		return;
+	}
+
+	getUrlRecursively(accessible);
+
+	safeRelease(accessible);
 }
 void featureProcess::getContents(bool isBrowser, HWND window, std::wstring processName)
 {
