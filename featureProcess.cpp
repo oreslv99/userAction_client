@@ -1,14 +1,16 @@
 #include "featureProcess.h"
 
+const UINT WM_GETOBJECT_HTML = ::RegisterWindowMessageW(L"WM_HTML_GETOBJECT");
 
 BOOL CALLBACK featureProcess::wndEnumProc(HWND hwnd, LPARAM lParam)
 {
 	std::wstring className;
 	DWORD length = MAX_PATH;
 	className.resize(length);
-
 	::GetClassNameW(hwnd, const_cast<wchar_t*>(className.data()), length);
-	if (className.compare(L"Internet Explorer_Server") == 0)
+	help->toLower(className);
+
+	if (::_wcsicmp(className.c_str(), L"Internet Explorer_Server") == 0)
 	{
 		*(HWND*)lParam = hwnd;
 		return FALSE;
@@ -43,10 +45,10 @@ bool featureProcess::watch()
 		::GetCursorPos(&mousePos);
 
 		// 마우스 아래 윈도우 핸들 확인
-		HWND original = ::WindowFromPoint(mousePos);
+		HWND window = ::WindowFromPoint(mousePos);
 
 		// root owner 윈도우 핸들
-		HWND rootOwner = ::GetAncestor(original, GA_ROOTOWNER);
+		HWND rootOwner = ::GetAncestor(window, GA_ROOTOWNER);
 
 		// pid 확인
 		DWORD processId;
@@ -68,9 +70,8 @@ bool featureProcess::watch()
 		getProcessName(processId, &processName, length);
 		if (::wcslen(processName.c_str()) <= 0)
 		{
-			// string 의 크기를 MAX_PATH 로 지정했기 때문에, wstring.length() 는 실제 데이터가 없더라도 length 가 되어버림
-			// 따라서 wcslen 을 사용
-
+			// string 의 크기를 MAX_PATH 로 지정했기 때문에, string의 메서드들은 오동작하는 경우가 많음
+			// trim 을 하던지 아니면 c 함수로 사용
 			help->writeLog(logId::warning, L"[%s:%03d] Invalid process name.", __FUNCTIONW__, __LINE__);
 			break;
 		}
@@ -103,7 +104,7 @@ bool featureProcess::watch()
 				break;
 			}
 		}
-		getContents(isBrowser, rootOwner, processName);
+		getContents(isBrowser, window, processName);
 
 		break;
 	}
@@ -137,7 +138,61 @@ void featureProcess::getProcessName(DWORD processId, std::wstring *processName, 
 
 	safeCloseHandle(process);
 }
-void featureProcess::getUrlFromIHTMLDocument(HWND window)
+void featureProcess::execScript(IHTMLDocument2 * iHtmlDocument2)
+{
+	// internal url 확인하기 위해 javascript 실행
+	IHTMLWindow2 *iHtmlWindow2 = nullptr;
+	if (SUCCEEDED(iHtmlDocument2->get_parentWindow(&iHtmlWindow2)))
+	{
+		CComPtr<IDispatch> spScript;
+		iHtmlDocument2->get_Script(&spScript);
+		//CComBSTR bstrMember(L"alert(document.getElementById('mainFrame').contentWindow.eval('location').href)");
+		CComBSTR bstrMember(L"InternalUrl");
+		DISPID dispid = NULL;
+		CComVariant vaResult;
+		BOOL bRes = FALSE;
+		HRESULT res = spScript->GetIDsOfNames(IID_NULL, &bstrMember, 1, LOCALE_USER_DEFAULT, &dispid);
+		if (SUCCEEDED(res))
+		{
+			//Putting parameters  
+			DISPPARAMS dispparams;
+			memset(&dispparams, 0, sizeof dispparams);
+			dispparams.cArgs = 0;
+			dispparams.rgvarg = new VARIANT[dispparams.cArgs];
+			dispparams.cNamedArgs = 0;
+
+			EXCEPINFO excepInfo;
+			memset(&excepInfo, 0, sizeof excepInfo);
+			UINT nArgErr = (UINT)-1;  // initialize to invalid arg
+
+			//Call JavaScript function         
+			res = spScript->Invoke(dispid, IID_NULL, 0, DISPATCH_METHOD, &dispparams, &vaResult, &excepInfo, &nArgErr);
+			if (SUCCEEDED(res))
+			{
+				//Done!
+				bRes = TRUE;
+			}
+
+			//Free mem
+			delete[] dispparams.rgvarg;
+
+
+			////CComBSTR script = L"";
+			////CComBSTR language = L"javascript";
+			////CComVariant var;
+			////iHtmlWindow2->execScript(script, language, &var);
+			////hresult = ::VariantChangeType(&var, &var, 0, VT_BSTR);
+			//////ATL::CComDispatchDriver dispatchDriver = nullptr;
+			//////iHtmlDocument2->QueryInterface(&dispatchDriver);
+			//////dispatchDriver.Invoke1(L"eval", &CComVariant(script), &var);
+			//////var.ChangeType(VT_BSTR);
+
+			//help->writeLog(logId::debug, L"[%s:%03d] internal url: %s", __FUNCTIONW__, __LINE__, var.bstrVal);
+		}
+	}
+
+}
+void featureProcess::getUrlFromIHTMLDocument(HWND window, std::wstring &content)
 {
 	HWND hwndParent = reinterpret_cast<HWND>(::GetWindowLongPtrW(window, GWLP_HWNDPARENT));
 	if (hwndParent == nullptr)
@@ -150,31 +205,53 @@ void featureProcess::getUrlFromIHTMLDocument(HWND window)
 	::EnumChildWindows(hwndParent, wndEnumProc, reinterpret_cast<LPARAM>(&ieServer));
 	if (ieServer == nullptr)
 	{
-		return;
+		// ie 가 admin 으로 실행되는 경우, Alternate Modal Top Most 라는 대체 클래스가 생성
+		// 새 process 가 생성 (dialog) 되어 연결되어 owner 가 변경됨
+		// 아래는 reversing 으로 확인한 ieframe.dll 내 소스 코드에서 original ieframe 을 확인하는 방법을 적용
+		std::wstring className;
+		DWORD length = MAX_PATH;
+		className.resize(length);
+		::GetClassNameW(window, const_cast<wchar_t*>(className.data()), length);
+		help->toLower(className);
+
+		help->writeLog(logId::debug, L"[%s:%03d] className: %s", __FUNCTIONW__, __LINE__, className.c_str());
+		if (::_wcsicmp(className.c_str(), L"Alternate Modal Top Most") != 0)
+		{
+			return;
+		}
+
+		// Ghidra reversing 결과 undocumented internal 함수에서 다음과 같이 HWND 확인함
+		window = reinterpret_cast<HWND>(::GetPropW(window, L"FakeModalPartnerFrame"));
+
+		// 다시 확인
+		::EnumChildWindows(window, wndEnumProc, (LPARAM)&ieServer);
 	}
 
-	//// get IHTMLDocument2 object
-	//LRESULT result = 0;
-	//result = ::SendMessageW(ieServer, WM_GETOBJECT_HTML, 0, 0);
-	////::SendMessageTimeoutW(ieServer, WM_GETOBJECT_HTML, static_cast<WPARAM>(0), static_cast<LPARAM>(0), SMTO_ABORTIFHUNG, 1000, reinterpret_cast<PDWORD_PTR>(&result));
+	// get IHTMLDocument2 object
+	LRESULT result = 0;
+	result = ::SendMessageW(ieServer, WM_GETOBJECT_HTML, 0, 0);
+	//::SendMessageTimeoutW(ieServer, WM_GETOBJECT_HTML, static_cast<WPARAM>(0), static_cast<LPARAM>(0), SMTO_ABORTIFHUNG, 1000, reinterpret_cast<PDWORD_PTR>(&result));
 
-	////ATL::CComPtr<IHTMLDocument2> iHTMLDocument2;
-	//IHTMLDocument2 *iHTMLDocument2;
-	//if (SUCCEEDED(::ObjectFromLresult(result, IID_IHTMLDocument2, static_cast<WPARAM>(0), reinterpret_cast<void**>(&iHTMLDocument2))))
-	//{
-	//	//ATL::CComBSTR url;
-	//	BSTR url;
-	//	if (SUCCEEDED(iHTMLDocument2->get_URL(&url)))
-	//	{
-	//		::wcsncpy_s(buffer, length, url, _TRUNCATE);
-	//	}
+	IHTMLDocument2 *iHtmlDocument2 = nullptr;
+	HRESULT hresult = ::ObjectFromLresult(result, IID_IHTMLDocument2, static_cast<WPARAM>(0), reinterpret_cast<void**>(&iHtmlDocument2));
+	if (SUCCEEDED(hresult))
+	{
+		CComBSTR temp;
 
-	//	::SysReleaseString(url);
-	//	url = nullptr;
-	//}
+		execScript(iHtmlDocument2);
 
-	//iHTMLDocument2->Release();
-	//iHTMLDocument2 = nullptr;
+		//
+		result = iHtmlDocument2->get_URL(&temp);
+		if (SUCCEEDED(result))
+		{
+			content = temp;
+		}
+
+		//::SysReleaseString(temp);
+		//temp = nullptr;
+	}
+
+	safeRelease(iHtmlDocument2);
 }
 void featureProcess::getContents(bool isBrowser, HWND window, std::wstring processName)
 {
@@ -184,9 +261,11 @@ void featureProcess::getContents(bool isBrowser, HWND window, std::wstring proce
 
 	if (isBrowser == true)
 	{
-		if (processName.compare(L"iexplore.exe") == 0)
+		//if (processName.compare(std::wstring(L"iexplore.exe")) == 0)
+		if (isMatch(processName.c_str(), L"iexplore.exe") == true)
 		{
 			// IHTMLDocuments2
+			getUrlFromIHTMLDocument(window, currentContent);
 		}
 		else
 		{

@@ -3,7 +3,7 @@
 #include <shlobj_core.h>	// SHGetKnownFolderPath
 #include <map>
 #include <fstream>
-#include <algorithm>
+#include <algorithm> 
 
 enum logId 
 {
