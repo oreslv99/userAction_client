@@ -1,9 +1,11 @@
 #include "helper.h"
 
 std::wstring helper::path = {};
-CRITICAL_SECTION helper::cs;// = {};
+CRITICAL_SECTION helper::cs = {};
 helper *helper::instance = nullptr;
-const std::wstring DATE_FORMAT_ERROR = L"%02d:%02d:%02d.%03d";
+const std::wstring FORMAT_DATE = L"%02d:%02d:%02d.%03d";
+const std::wstring FORMAT_LOG = L"%s\\_err_%04d%02d%02d.log";
+const std::wstring FORMAT_USER = L"%s\\_usr_%04d%02d%02d.log";
 
 #define makeString(x) { x, L#x }
 static std::map<int, std::wstring> logIds =
@@ -71,8 +73,8 @@ void helper::writeLog(logId id, std::wstring message, ...)
 
 	// 파일명 (path + \\%04d%02d%02d.writeLog)
 	std::wstring filePath;
-	filePath.resize(path.length() + 12);
-	::wsprintfW(const_cast<wchar_t*>(filePath.data()), L"%s\\err-%04d%02d%02d.log", path.c_str(), localTime.wYear, localTime.wMonth, localTime.wDay);
+	filePath.resize(path.length() + FORMAT_LOG.length());
+	::wsprintfW(const_cast<wchar_t*>(filePath.data()), FORMAT_LOG.c_str(), path.c_str(), localTime.wYear, localTime.wMonth, localTime.wDay);
 
 	// 파일 열기 (utf-8 인코딩)
 	std::wofstream stream;
@@ -100,12 +102,14 @@ void helper::writeLog(logId id, std::wstring message, ...)
 			// 파일 기록
 			std::wstring timestamp;
 			timestamp.resize(12);
-			::wsprintfW(const_cast<wchar_t*>(timestamp.data()), DATE_FORMAT_ERROR.c_str(), localTime.wHour, localTime.wMinute, localTime.wSecond, localTime.wMilliseconds);
+			::wsprintfW(const_cast<wchar_t*>(timestamp.data()), FORMAT_DATE.c_str(), localTime.wHour, localTime.wMinute, localTime.wSecond, localTime.wMilliseconds);
 			stream << timestamp + L"\t";
 			stream << iter->second + L"\t\t";
 			stream << buffer;
 			stream << std::endl;
 		}
+
+		stream.close();
 	}
 
 	::LeaveCriticalSection(&cs);
@@ -121,8 +125,8 @@ void helper::writeUserAction(std::wstring message, ...)
 
 	// 파일명 (path + \\%04d%02d%02d.writeLog)
 	std::wstring filePath;
-	filePath.resize(path.length() + 12);
-	::wsprintfW(const_cast<wchar_t*>(filePath.data()), L"%s\\usr-%04d%02d%02d.log", path.c_str(), localTime.wYear, localTime.wMonth, localTime.wDay);
+	filePath.resize(path.length() + FORMAT_USER.length());
+	::wsprintfW(const_cast<wchar_t*>(filePath.data()), FORMAT_USER.c_str(), path.c_str(), localTime.wYear, localTime.wMonth, localTime.wDay);
 
 	// 파일 열기 (utf-8 인코딩)
 	std::wofstream stream;
@@ -146,15 +150,16 @@ void helper::writeUserAction(std::wstring message, ...)
 		// 파일 기록
 		std::wstring timestamp;
 		timestamp.resize(12);
-		::wsprintfW(const_cast<wchar_t*>(timestamp.data()), DATE_FORMAT_ERROR.c_str(), localTime.wHour, localTime.wMinute, localTime.wSecond, localTime.wMilliseconds);
+		::wsprintfW(const_cast<wchar_t*>(timestamp.data()), FORMAT_DATE.c_str(), localTime.wHour, localTime.wMinute, localTime.wSecond, localTime.wMilliseconds);
 		stream << timestamp + L"\t";
 		stream << buffer;
 		stream << std::endl;
+		stream.close();
 	}
 
 	::LeaveCriticalSection(&cs);
 }
-void helper::toLower(std::wstring &source)
-{
-	std::transform(source.begin(), source.end(), source.begin(), ::tolower);
-}
+//void helper::toLower(std::wstring &source)
+//{
+//	std::transform(source.begin(), source.end(), source.begin(), ::tolower);
+//}

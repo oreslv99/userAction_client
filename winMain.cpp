@@ -7,7 +7,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 	UNREFERENCED_PARAMETER(pCmdLine);
 	UNREFERENCED_PARAMETER(nCmdShow);
 
-	help->writeLog(logId::debug, L"Start application.");
+	//::_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+
+	//help->writeLog(logId::info, L"Start application.");
 
 	application app;
 	if (app.initialize(hInstance) == false)
@@ -16,5 +18,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 		return -1;
 	}
 
-	return app.run();
+	int result = app.run();
+	//::_CrtDumpMemoryLeaks();
+
+	return result;
 }
