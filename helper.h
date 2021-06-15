@@ -17,7 +17,9 @@ enum featureId
 	afk = 0,
 	fileIo,
 	print,
-	process
+	process,
+	logon,
+	logoff,
 };
 class helper
 {

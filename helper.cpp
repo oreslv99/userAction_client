@@ -7,7 +7,6 @@ const std::wstring FORMAT_DATE = L"%02d:%02d:%02d.%03d";
 const std::wstring FORMAT_LOG = L"%s\\_err_%04d%02d%02d.log";
 const std::wstring FORMAT_USER = L"%s\\_usr_%04d%02d%02d.log";
 
-#define makeString(x) { x, L#x }
 static std::map<int, std::wstring> logIds =
 {
 	makeString(debug),

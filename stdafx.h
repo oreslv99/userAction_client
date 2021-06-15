@@ -14,6 +14,8 @@
 #define safeRelease(x)				if (x) { (x)->Release(); (x) = nullptr; }
 #define safeCoTaskMemFree(x)		if (x) { ::CoTaskMemFree(x); (x) = nullptr; }
 #define safeCloseHandle(x)			if (x) { ::CloseHandle(x); (x) = INVALID_HANDLE_VALUE; }
+#define makeString(x)				{ x, L#x }
+
 
 #include "helper.h"
 #define help helper::getInstance()

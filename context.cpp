@@ -3,8 +3,23 @@ feature *context::fileIo = nullptr;
 
 LRESULT CALLBACK context::wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	// file io watch 를 위함
-	//fileIo->watch();
+	switch (uMsg)
+	{
+		case WM_FILE_IO:
+		{
+			paramsFileIo *params = new paramsFileIo{ hWnd, wParam, lParam };
+			fileIo->watch(static_cast<void*>(params));
+			safeDelete(params);
+		}
+		break;
+		case WM_ENDSESSION:
+		{
+			// https://docs.microsoft.com/en-us/windows/win32/shutdown/wm-endsession
+			help->writeUserAction(featureId::logoff, L"");
+		}
+		break;
+	}
+	help->writeLog(logId::debug, L"[%03d]", uMsg);
 	return ::DefWindowProcW(hWnd, uMsg, wParam, lParam);
 }
 
@@ -88,14 +103,19 @@ bool context::initialize()
 	}
 
 	// 감시기능 - 파일io
-	feature *fileIo = new featureFileIo();
+	fileIo = new featureFileIo();
 	if (fileIo != nullptr)
 	{
-		if (fileIo->initialize(this->rule) == true)
-		{
-			this->features.push_back(fileIo);
-		}
-		else
+		// wndProc 에서 message callback 처리를 하기때문에 loop 에서 처리하지 않음
+		//if (fileIo->initialize(this->rule) == true)
+		//{
+		//	this->features.push_back(fileIo);
+		//}
+		//else
+		//{
+		//	safeDelete(fileIo);
+		//}
+		if (fileIo->initialize(this->rule) == false)
 		{
 			safeDelete(fileIo);
 		}
