@@ -138,60 +138,7 @@ void featureProcess::getProcessName(DWORD processId, std::wstring *processName, 
 
 	safeCloseHandle(process);
 }
-////void featureProcess::execScript(IHTMLDocument2 * iHtmlDocument2)
-////{
-////	// internal url 확인하기 위해 javascript 실행
-////	IHTMLWindow2 *iHtmlWindow2 = nullptr;
-////	if (SUCCEEDED(iHtmlDocument2->get_parentWindow(&iHtmlWindow2)))
-////	{
-////		CComPtr<IDispatch> spScript;
-////		iHtmlDocument2->get_Script(&spScript);
-////		//CComBSTR bstrMember(L"alert(document.getElementById('mainFrame').contentWindow.eval('location').href)");
-////		CComBSTR bstrMember(L"InternalUrl");
-////		DISPID dispid = NULL;
-////		CComVariant vaResult;
-////		BOOL bRes = FALSE;
-////		HRESULT res = spScript->GetIDsOfNames(IID_NULL, &bstrMember, 1, LOCALE_USER_DEFAULT, &dispid);
-////		if (SUCCEEDED(res))
-////		{
-////			//Putting parameters  
-////			DISPPARAMS dispparams;
-////			memset(&dispparams, 0, sizeof dispparams);
-////			dispparams.cArgs = 0;
-////			dispparams.rgvarg = new VARIANT[dispparams.cArgs];
-////			dispparams.cNamedArgs = 0;
-////
-////			EXCEPINFO excepInfo;
-////			memset(&excepInfo, 0, sizeof excepInfo);
-////			UINT nArgErr = (UINT)-1;  // initialize to invalid arg
-////
-////			//Call JavaScript function         
-////			res = spScript->Invoke(dispid, IID_NULL, 0, DISPATCH_METHOD, &dispparams, &vaResult, &excepInfo, &nArgErr);
-////			if (SUCCEEDED(res))
-////			{
-////				//Done!
-////				bRes = TRUE;
-////			}
-////
-////			//Free mem
-////			delete[] dispparams.rgvarg;
-////
-////
-////			////CComBSTR script = L"";
-////			////CComBSTR language = L"javascript";
-////			////CComVariant var;
-////			////iHtmlWindow2->execScript(script, language, &var);
-////			////hresult = ::VariantChangeType(&var, &var, 0, VT_BSTR);
-////			//////ATL::CComDispatchDriver dispatchDriver = nullptr;
-////			//////iHtmlDocument2->QueryInterface(&dispatchDriver);
-////			//////dispatchDriver.Invoke1(L"eval", &CComVariant(script), &var);
-////			//////var.ChangeType(VT_BSTR);
-////
-////			//help->writeLog(logId::debug, L"[%s:%03d] internal url: %s", __FUNCTIONW__, __LINE__, var.bstrVal);
-////		}
-////	}
-////
-////}
+// iexplore
 void featureProcess::getUrlFromIHTMLDocument(HWND window, std::wstring &content)
 {
 	HWND hwndParent = reinterpret_cast<HWND>(::GetWindowLongPtrW(window, GWLP_HWNDPARENT));
@@ -200,7 +147,7 @@ void featureProcess::getUrlFromIHTMLDocument(HWND window, std::wstring &content)
 		return;
 	}
 
-	// get window handle for "Internet Explore_Server" class name
+	// Internet Explore_Server 클래스 확인
 	HWND ieServer = nullptr;
 	::EnumChildWindows(hwndParent, wndEnumProc, reinterpret_cast<LPARAM>(&ieServer));
 	if (ieServer == nullptr)
@@ -227,7 +174,7 @@ void featureProcess::getUrlFromIHTMLDocument(HWND window, std::wstring &content)
 		::EnumChildWindows(window, wndEnumProc, (LPARAM)&ieServer);
 	}
 
-	// get IHTMLDocument2 object
+	// IHTMLDocument2 객체 확인
 	LRESULT result = 0;
 	result = ::SendMessageW(ieServer, WM_GETOBJECT_HTML, 0, 0);
 	//::SendMessageTimeoutW(ieServer, WM_GETOBJECT_HTML, static_cast<WPARAM>(0), static_cast<LPARAM>(0), SMTO_ABORTIFHUNG, 1000, reinterpret_cast<PDWORD_PTR>(&result));
@@ -236,22 +183,61 @@ void featureProcess::getUrlFromIHTMLDocument(HWND window, std::wstring &content)
 	HRESULT hresult = ::ObjectFromLresult(result, IID_IHTMLDocument2, static_cast<WPARAM>(0), reinterpret_cast<void**>(&iHtmlDocument2));
 	if (SUCCEEDED(hresult))
 	{
-		//execScript(iHtmlDocument2);
-
-		CComBSTR temp;
+		BSTR temp;
 		result = iHtmlDocument2->get_URL(&temp);
 		if (SUCCEEDED(result))
 		{
 			content = temp;
 		}
-
-		//::SysReleaseString(temp);
-		//temp = nullptr;
 	}
 
 	safeRelease(iHtmlDocument2);
 }
-void featureProcess::getUrlRecursively(IAccessible *accessible)
+// chromium
+void featureProcess::getName(IAccessible *childrenAccessible, VARIANT childrentVariant, std::wstring &buffer)
+{
+	BSTR name = nullptr;
+	if (SUCCEEDED(childrenAccessible->get_accName(childrentVariant, &name)) && (name != nullptr))
+	{
+		//buffer.assign(name);
+		buffer = name;
+	}
+
+	if (name != nullptr)
+	{
+		::SysFreeString(name);
+		name = nullptr;
+	}
+
+	// 테스트
+	buffer;
+};
+void featureProcess::getRole(IAccessible *childrenAccessible, VARIANT childrentVariant, long *buffer)
+{
+	VARIANT role;
+	if (SUCCEEDED(childrenAccessible->get_accRole(childrentVariant, &role)))
+	{
+		//*buffer = role.lVal;
+		::memcpy_s(buffer, sizeof(long), &role.lVal, sizeof(role.lVal));
+	}
+
+	::VariantClear(&role);
+};
+void featureProcess::getValue(IAccessible *childrenAccessible, VARIANT childrentVariant, std::wstring &buffer)
+{
+	BSTR value = nullptr;
+	if (SUCCEEDED(childrenAccessible->get_accValue(childrentVariant, &value)) && (value != nullptr))
+	{
+		buffer = value;
+	}
+
+	if (value != nullptr)
+	{
+		::SysFreeString(value);
+		value = nullptr;
+	}
+};
+void featureProcess::getUrlRecursively(IAccessible *accessible, std::wstring &content)
 {
 	long countChildren = 0;
 	HRESULT result = accessible->get_accChildCount(&countChildren);
@@ -272,11 +258,16 @@ void featureProcess::getUrlRecursively(IAccessible *accessible)
 
 	for (LONG i = 0; i < obtained; i++)
 	{
+		if (::wcslen(content.c_str()) > 0)
+		{
+			break;
+		}
+
 		VARIANT childrenVariant = variants[i];
 
 		long role = -1;
-		wchar_t *name = nullptr;
-		wchar_t *value = nullptr;
+		std::wstring name;
+		std::wstring value;
 		IAccessible *accessibleChildren = nullptr;
 
 		if (childrenVariant.vt == VT_DISPATCH)
@@ -289,44 +280,42 @@ void featureProcess::getUrlRecursively(IAccessible *accessible)
 				return;
 			}
 
-			getName(accessibleChildren, CHILDID_SELF, &name);
-			getRole(accessibleChildren, CHILDID_SELF, &role);
+			VARIANT var;
+			var.vt = VT_I4;
+			var.intVal = CHILDID_SELF;
+
+			getName(accessibleChildren, var, name);
+			getRole(accessibleChildren, var, &role);
 
 			// Chrome
-			std::wstring url;
-			url.resize(1024);
-			if ((name != nullptr) && ((::_wcsicmp(name, L"주소창 및 검색창") == 0) || (::_wcsicmp(name, L"address and search bar") == 0)) &&
+			if (((::_wcsicmp(name.c_str(), L"주소창 및 검색창") == 0) || (::_wcsicmp(name.c_str(), L"address and search bar") == 0)) &&
 				(role == ROLE_SYSTEM_TEXT))
 			{
-				getValue(accessibleChildren, CHILDID_SELF, &value);
-				if ((value != nullptr) && (::wcslen(value) > 0))
+				getValue(accessibleChildren, var, value);
+				if (::wcslen(value.c_str()) > 0)
 				{
-					::wcsncpy_s(buffer, length, value, _TRUNCATE);
+					content = value;
 				}
 			}
 
-			// 재귀
-			if (::wcslen(buffer) <= 0)
+			// recursively
+			if (::wcslen(content.c_str()) <= 0)
 			{
-				result = getUrlRecursively(accessibleChildren);
+				getUrlRecursively(accessibleChildren, content);
 			}
 		}
 
 		safeRelease(accessibleChildren);
-		safeFree(name);
-		safeFree(value);
 	}
 
-	// 해제
+	// release
 	for (long i = 0; i < countChildren; i++)
 	{
 		::VariantClear(&variants[i]);
 	}
 	safeDeleteArray(variants);
-
-	return result;
 }
-void featureProcess::getUrlFromIAccessible(HWND window)
+void featureProcess::getUrlFromIAccessible(HWND window, std::wstring &content)
 {
 	HWND rootOwner = ::GetAncestor(window, GA_ROOTOWNER);
 	IAccessible *accessible = nullptr;
@@ -336,7 +325,7 @@ void featureProcess::getUrlFromIAccessible(HWND window)
 		return;
 	}
 
-	getUrlRecursively(accessible);
+	getUrlRecursively(accessible, content);
 
 	safeRelease(accessible);
 }
@@ -348,7 +337,7 @@ void featureProcess::getContents(bool isBrowser, HWND window, std::wstring proce
 
 	if (isBrowser == true)
 	{
-		//if (processName.compare(std::wstring(L"iexplore.exe")) == 0)
+		// iexplore 외 나머지는 accessible 이나 uiautomation 으로 
 		if (isMatch(processName.c_str(), L"iexplore.exe") == true)
 		{
 			// IHTMLDocuments2
@@ -358,6 +347,7 @@ void featureProcess::getContents(bool isBrowser, HWND window, std::wstring proce
 		{
 			// IAccessible
 			// UIAutomation
+			getUrlFromIAccessible(window, currentContent);
 		}
 	}
 	else

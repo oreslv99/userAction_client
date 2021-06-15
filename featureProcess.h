@@ -4,6 +4,7 @@
 #include <Mshtml.h>		// IHTMLDocument2
 #include <OleAcc.h>		// ObjectFromLresult, IAccessible
 #pragma comment (lib, "Oleacc.lib")
+
 #include <atlbase.h>
 
 class featureProcess : public feature
@@ -22,9 +23,15 @@ private:
 	
 	static BOOL CALLBACK wndEnumProc(HWND hwnd, LPARAM lParam); 
 	//void execScript(IHTMLDocument2 *);
-	void getUrlFromIHTMLDocument(HWND window, std::wstring &content);
-	void getUrlRecursively(IAccessible *accessible);
-	void getUrlFromIAccessible(HWND window);
+	void getUrlFromIHTMLDocument(HWND window, std::wstring &content);			// iexplore
+	
+	// chromium
+	void getName(IAccessible *childrenAccessible, VARIANT childrentVariant, std::wstring &buffer);
+	void getRole(IAccessible *childrenAccessible, VARIANT childrentVariant, long *buffer);
+	void getValue(IAccessible *childrenAccessible, VARIANT childrentVariant, std::wstring &buffer);
+	void getUrlRecursively(IAccessible *accessible, std::wstring &content);
+	void getUrlFromIAccessible(HWND window, std::wstring &content);
+
 	void getUrlFromUIAutomation(HWND window);
 	void getContents(bool isBrowser, HWND window, std::wstring processName);
 
