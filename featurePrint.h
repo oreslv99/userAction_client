@@ -12,7 +12,7 @@ public:
 	featurePrint();
 	~featurePrint();
 	bool initialize(const rules &rule) final;
-	bool watch() final;
+	bool watch(void* parameters = nullptr) final;
 	//featureType getFeatureType() final;
 
 private:

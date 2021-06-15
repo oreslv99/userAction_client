@@ -23,7 +23,7 @@ bool featureAFK::initialize(const rules &rule)
 
 	return true;
 }
-bool featureAFK::watch()
+bool featureAFK::watch(void* parameters)
 {
 	::Sleep(1);
 

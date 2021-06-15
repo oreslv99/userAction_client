@@ -33,7 +33,7 @@ bool featurePrint::initialize(const rules &rule)
 
 	return true;
 }
-bool featurePrint::watch()
+bool featurePrint::watch(void* parameters)
 {
 	::Sleep(1);
 

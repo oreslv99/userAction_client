@@ -14,7 +14,7 @@ bool featureFileIo::initialize(const rules &rule)
 	this->rule = rule.getFileIoRule();
 	return true;
 }
-bool featureFileIo::watch()
+bool featureFileIo::watch(void* parameters)
 {
 	//////(HWND hWnd, WPARAM wParam, LPARAM lParam)
 

@@ -34,7 +34,7 @@ bool featureProcess::initialize(const rules &rule)
 	this->rule = rule.getProcessRule();
 	return true;
 }
-bool featureProcess::watch()
+bool featureProcess::watch(void* parameters)
 {
 	while (true)
 	{
