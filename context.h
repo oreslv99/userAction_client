@@ -8,6 +8,8 @@
 #include "featureProcess.h"
 #include <vector>
 
+////LRESULT CALLBACK wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+
 class context
 {
 public:

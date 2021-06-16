@@ -7,15 +7,16 @@ LRESULT CALLBACK context::wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 	{
 		case WM_FILE_IO:
 		{
-			paramsFileIo *params = new paramsFileIo{ hWnd, wParam, lParam };
-			fileIo->watch(static_cast<void*>(params));
-			safeDelete(params);
+			//paramsFileIo *params = new paramsFileIo{ hWnd, wParam, lParam };
+			//fileIo->watch(static_cast<void*>(params));
+			//safeDelete(params);
+			help->writeUserAction(featureId::fileIo, L"TEST #1");
 		}
 		break;
 		case WM_ENDSESSION:
 		{
 			// https://docs.microsoft.com/en-us/windows/win32/shutdown/wm-endsession
-			help->writeUserAction(featureId::logoff, L"");
+			help->writeUserAction(featureId::logoff, L"TEST #2");
 		}
 		break;
 	}
@@ -150,8 +151,13 @@ int context::tickTock()
 	}
 
 	// 메시지 루프
-	while (true)
+	MSG message;
+	while (::PeekMessageW(&message, nullptr, 0, 0, PM_NOREMOVE) == TRUE)
+	// while (true) fileIo 를 감시하기 위해 wndProc 를 사용하려면 윈도우 메시지 루프를 추가해야함
 	{
+		::TranslateMessage(&message);
+		::DispatchMessageW(&message);
+
 		watch(watchTimer);
 
 		if (retryTimer != INVALID_HANDLE_VALUE)

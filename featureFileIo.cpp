@@ -86,6 +86,8 @@ bool featureFileIo::initialize(const rules &rule)
 		entires[i].fRecursive = TRUE;
 		pidls.push_back(pidl);
 
+		WM_NULL;
+
 		safeRelease(shellItem);
 	}
 
