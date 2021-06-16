@@ -19,7 +19,7 @@ application::~application()
 bool application::initialize(HINSTANCE instance)
 {
 	// 프로그램 이름
-	size_t size = MAX_PATH;
+	DWORD size = MAX_PATH;
 	std::wstring programName;
 	programName.resize(size);
 	::GetModuleFileNameW(nullptr, const_cast<wchar_t*>(programName.data()), size);
@@ -31,6 +31,12 @@ bool application::initialize(HINSTANCE instance)
 		help->writeLog(logId::error, L"[%s:%03d] Application is already running now.", __FUNCTIONW__, __LINE__);
 		return false;
 	}
+
+	// 사용자 정보
+	std::wstring userName;
+	userName.resize(size);
+	::GetUserNameW(const_cast<wchar_t*>(userName.data()), &size);
+	this->appContext.setUserName((::wcslen(userName.c_str()) <= 0) ? L"testUser" : userName);
 
 	// window 생성
 	if (createWindow(instance, programName, &this->appContext) == false)

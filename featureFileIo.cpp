@@ -10,6 +10,27 @@ static std::map<int, std::wstring> driveTypeIds =
 	makeString(DRIVE_CDROM),
 	makeString(DRIVE_RAMDISK),
 };
+static std::map<long, featureId> mappedEventIds =
+{
+	// SHCNE_RENAMEITEM
+	{ SHCNE_CREATE, file },
+	// SHCNE_DELETE
+	// SHCNE_MKDIR
+	// SHCNE_RMDIR
+	// SHCNE_ATTRIBUTES
+	// SHCNE_UPDATEDIR
+	// SHCNE_UPDATEITEM
+	// SHCNE_SERVERDISCONNECT
+	// SHCNE_DRIVEADDGUI
+	// SHCNE_RENAMEFOLDER
+	// SHCNE_FREESPACE
+	{ SHCNE_MEDIAINSERTED, devConn },
+	{ SHCNE_DRIVEADD, devConn },
+	{ SHCNE_NETSHARE, devConn },
+	{ SHCNE_MEDIAREMOVED, devDisConn },
+	{ SHCNE_DRIVEREMOVED, devDisConn },
+	{ SHCNE_NETUNSHARE, devDisConn },
+};
 
 //
 // public
@@ -86,8 +107,6 @@ bool featureFileIo::initialize(const rules &rule)
 		entires[i].fRecursive = TRUE;
 		pidls.push_back(pidl);
 
-		WM_NULL;
-
 		safeRelease(shellItem);
 	}
 
@@ -147,26 +166,79 @@ bool featureFileIo::watch(void* parameters)
 	paramsFileIo *params = reinterpret_cast<paramsFileIo*>(parameters);
 
 	PIDLIST_ABSOLUTE *pidl = nullptr;
-	long id = 0;
-	HANDLE lock = ::SHChangeNotification_Lock(reinterpret_cast<HANDLE>(params->wparam), static_cast<DWORD>(params->lparam), &pidl, &id);
+	long eventId = 0;
+	HANDLE lock = ::SHChangeNotification_Lock(reinterpret_cast<HANDLE>(params->wparam), static_cast<DWORD>(params->lparam), &pidl, &eventId);
 	if (lock != INVALID_HANDLE_VALUE)
 	{
-		//// https://docs.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shchangenotify
-		//if ((id & SHCNE_ASSOCCHANGED | SHCNE_SERVERDISCONNECT) != 0)
-		//{
-		//	IShellItem2 *shellItem2 = nullptr;
-		//	HRESULT result;
-		//	if (pidl[0] != nullptr)
-		//	{
-		//		result = ::SHCreateItemFromIDList(pidl[0], IID_PPV_ARGS(&shellItem2));
-		//		if (FAILED(result))
-		//		{
-		//		}
+		// https://docs.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shchangenotify
+		if ((id & SHCNE_ASSOCCHANGED | SHCNE_SERVERDISCONNECT) != 0)
+		{
+			if (pidl[0] != nullptr)
+			{
+				IShellItem2 *item = nullptr;
+				if (SUCCEEDED(::SHCreateItemFromIDList(pidl[0], IID_PPV_ARGS(&item))))
+				{
+					std::wstring itemName;
+					getItemName(item, itemName);
 
-		//		wchar_t *itemName0 = nullptr;
-		//		getIdListName(item0, &itemName0);
-		//	}
-		//}
+					if (::wcslen(itemName.c_str()) > 0)
+					{
+						bool isDevice = ((::wcslen(itemName.c_str()) == 3) && (itemName[1] == ':') && (itemName[1] == '\\'));
+						bool isIncludedExtension = false;
+						bool isExcludedPath = false;
+
+						if (isDevice == false)
+						{
+							// 대상 확장명 (모든 파일을 다 기록에 남길 필요가 없음)
+							std::wstring extension = itemName.substr(itemName.rfind('.') + 1);
+							std::list<std::wstring>::iterator iter;
+							for (iter = const_cast<ruleFileIo*>(this->rule)->extensions.begin(); iter != this->rule->extensions.end(); iter++)
+							{
+								if (isMatch(extension.c_str(), (*iter).c_str()) == true)
+								{
+									// 수집하고자 하는 파일의 확장명
+									isIncludedExtension = true;
+									break;
+								}
+							}
+
+							// 예외 경로 (시스템 io 까지 감지되기 때문에 필요함)
+							for (iter = const_cast<ruleFileIo*>(this->rule)->excludes.begin(); iter != this->rule->excludes.end(); iter++)
+							{
+								if (isMatch(itemName.c_str(), (*iter).c_str()) == true)
+								{
+									// 예외 경로
+									isExcludedPath = true;
+									break;
+								}
+							}
+						}
+
+						if ((isDevice == true) ||
+							((isIncludedExtension == true) && (isExcludedPath == false)))
+						{
+							std::map<long, featureId>::iterator iter = mappedEventIds.find(eventId);
+							if (iter != mappedEventIds.end())
+							{
+								featureId id = iter->second;
+								switch (id)
+								{
+								case featureId::devConn:
+								case featureId::devDisConn:
+									//initialize();
+									break;
+								case featureId::file:
+									break;
+								}
+							}
+						}
+					}
+
+				}
+
+				safeRelease(item);
+			}
+		}
 	}
 
 	::SHChangeNotification_Unlock(lock);
@@ -181,3 +253,7 @@ bool featureFileIo::watch(void* parameters)
 //
 // private
 //
+void featureFileIo::getItemName(IShellItem2 *item, std::wstring &itemName)
+{
+
+}

@@ -335,8 +335,12 @@ void featureProcess::getContents(bool isBrowser, HWND window, std::wstring proce
 	DWORD length = 1024;
 	currentContent.resize(length);
 
+	featureId id;
+
 	if (isBrowser == true)
 	{
+		id = featureId::browser;
+
 		// iexplore 외 나머지는 accessible 이나 uiautomation 으로 
 		if (isMatch(processName.c_str(), L"iexplore.exe") == true)
 		{
@@ -346,12 +350,13 @@ void featureProcess::getContents(bool isBrowser, HWND window, std::wstring proce
 		else
 		{
 			// IAccessible
-			// UIAutomation
 			getUrlFromIAccessible(window, currentContent);
 		}
 	}
 	else
 	{
+		id = featureId::application;
+
 		// 개인 사생활 또는 비밀유지에 관련된 caption 을 갖을 수 있는 프로세스에 대한 예외처리
 		bool isPrivate = false;
 		std::list<std::wstring>::iterator iter;
@@ -405,6 +410,6 @@ void featureProcess::getContents(bool isBrowser, HWND window, std::wstring proce
 	if (latestContent.compare(currentContent) != 0)
 	{
 		latestContent = currentContent;
-		help->writeUserAction(featureId::process, L"%s\t%s", processName.c_str(), latestContent.c_str());
+		help->writeUserAction(id, L"%s\t%s", processName.c_str(), latestContent.c_str());
 	}
 }

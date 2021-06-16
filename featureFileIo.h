@@ -27,15 +27,14 @@ private:
 	std::list<std::pair<std::wstring, UINT>> watches;
 	SHChangeNotifyEntry *entires;
 
+	void getItemName(IShellItem2 *item, std::wstring &itemName);
+
+	// TODO: iter »ý¼º
 	class CItemIterator
 	{
 	public:
 		CItemIterator(IShellItem *psi)
-			: _hr(SHGetIDListFromObject(psi, &_pidlFull)), _psfCur(nullptr)
-		{
-			_Init();
-		}
-		CItemIterator(PCIDLIST_ABSOLUTE pidl) : _hr(SHILCloneFull(pidl, &_pidlFull)), _psfCur(nullptr)
+			: _hr(::SHGetIDListFromObject(psi, &_pidlFull)), _psfCur(nullptr)
 		{
 			_Init();
 		}
@@ -99,8 +98,6 @@ private:
 
 			return _hr;
 		}
-		HRESULT GetResult() const { return _hr; }
-		PCUIDLIST_RELATIVE GetRelativeIDList() const { return _pidlRel; }
 
 	private:
 		void _Init()
@@ -111,11 +108,6 @@ private:
 			{
 				_hr = ::SHGetDesktopFolder(&_psfCur);
 			}
-		}
-		HRESULT SHILCloneFull(PCUIDLIST_ABSOLUTE pidl, PIDLIST_ABSOLUTE *ppidl)
-		{
-			*ppidl = ILCloneFull(pidl);
-			return ((*ppidl != nullptr) ? S_OK : E_OUTOFMEMORY);
 		}
 
 		HRESULT _hr;

@@ -7,20 +7,20 @@ LRESULT CALLBACK context::wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 	{
 		case WM_FILE_IO:
 		{
-			//paramsFileIo *params = new paramsFileIo{ hWnd, wParam, lParam };
-			//fileIo->watch(static_cast<void*>(params));
-			//safeDelete(params);
+			paramsFileIo *params = new paramsFileIo{ hWnd, wParam, lParam };
+			fileIo->watch(static_cast<void*>(params));
+			safeDelete(params);
 			help->writeUserAction(featureId::fileIo, L"TEST #1");
 		}
 		break;
 		case WM_ENDSESSION:
 		{
 			// https://docs.microsoft.com/en-us/windows/win32/shutdown/wm-endsession
-			help->writeUserAction(featureId::logoff, L"TEST #2");
+			help->writeUserAction(featureId::logoff, L"pc is logoff");
 		}
 		break;
 	}
-	help->writeLog(logId::debug, L"[%03d]", uMsg);
+	
 	return ::DefWindowProcW(hWnd, uMsg, wParam, lParam);
 }
 
@@ -28,7 +28,7 @@ LRESULT CALLBACK context::wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 // public
 //
 context::context()
-	:rule(), window(nullptr), socket(nullptr), callback(wndProc), features()
+	:userName(), rule(), window(nullptr), socket(nullptr), callback(wndProc), features()
 {
 }
 context::~context()
@@ -38,6 +38,10 @@ context::~context()
 WNDPROC context::getWndProc()
 {
 	return this->callback;
+}
+void context::setUserName(std::wstring userName)
+{
+	this->userName = userName;
 }
 void context::setWindow(HWND window)
 {
@@ -149,6 +153,9 @@ int context::tickTock()
 			return -1;
 		}
 	}
+
+	// 
+	help->writeUserAction(featureId::logon, L"user is logon.");
 
 	// 메시지 루프
 	MSG message;

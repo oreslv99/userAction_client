@@ -15,9 +15,13 @@ enum logId
 enum featureId
 {
 	afk = 0,
-	fileIo,
+	file,			// fileIo
+	devFile,		// fileIo
+	devConn,		// fileIo
+	devDisConn,		// fileIo
 	print,
-	process,
+	application,	// process
+	browser,		// process
 	logon,
 	logoff,
 };
