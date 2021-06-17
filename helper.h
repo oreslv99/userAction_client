@@ -20,7 +20,7 @@ enum featureId
 	devConn,		// fileIo
 	devDisConn,		// fileIo
 	print,
-	application,	// process
+	program,		// process
 	browser,		// process
 	logon,
 	logoff,

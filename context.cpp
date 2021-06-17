@@ -10,7 +10,6 @@ LRESULT CALLBACK context::wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 			paramsFileIo *params = new paramsFileIo{ hWnd, wParam, lParam };
 			fileIo->watch(static_cast<void*>(params));
 			safeDelete(params);
-			help->writeUserAction(featureId::fileIo, L"TEST #1");
 		}
 		break;
 		case WM_ENDSESSION:

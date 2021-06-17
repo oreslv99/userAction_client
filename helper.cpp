@@ -17,9 +17,15 @@ static std::map<int, std::wstring> logIds =
 static std::map<int, std::wstring> featureIds =
 {
 	makeString(afk),
-	makeString(fileIo),
+	makeString(file),
+	makeString(devFile),
+	makeString(devConn),
+	makeString(devDisConn),
 	makeString(print),
-	makeString(process),
+	makeString(program),
+	makeString(browser),
+	makeString(logon),
+	makeString(logoff),
 };
 
 //

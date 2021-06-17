@@ -355,7 +355,7 @@ void featureProcess::getContents(bool isBrowser, HWND window, std::wstring proce
 	}
 	else
 	{
-		id = featureId::application;
+		id = featureId::program;
 
 		// 개인 사생활 또는 비밀유지에 관련된 caption 을 갖을 수 있는 프로세스에 대한 예외처리
 		bool isPrivate = false;

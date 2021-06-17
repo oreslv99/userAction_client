@@ -27,93 +27,87 @@ private:
 	std::list<std::pair<std::wstring, UINT>> watches;
 	SHChangeNotifyEntry *entires;
 
-	void getItemName(IShellItem2 *item, std::wstring &itemName);
-
-	// TODO: iter 생성
-	class CItemIterator
+	HRESULT getCurrentItem(PUIDLIST_RELATIVE *pidl, IShellFolder *current, REFIID riid, void **ppv)
 	{
-	public:
-		CItemIterator(IShellItem *psi)
-			: _hr(::SHGetIDListFromObject(psi, &_pidlFull)), _psfCur(nullptr)
-		{
-			_Init();
-		}
-		~CItemIterator()
-		{
-			safeCoTaskMemFree(_pidlFull);
-			safeRelease(_psfCur);
-		}
-		bool MoveNext()
-		{
-			bool fMoreItems = false;
+		// IShellItem2 인스턴스 (riid, ppv) 의 메서드인 GetDisplayName + SIGDN_FILESYSPATH 호출할 예정
+		//	>> 전체경로 (상위경로 + display 이름) 생성하기 위함
+		//	>> SHCreateItemWithParent 을 이용해 pidl 에 상위경로와 display 이름을 갖는 shell item 을 생성
 
-			if (SUCCEEDED(_hr))
+		*ppv = nullptr;
+		
+		// 다음 pidl
+		PUIDLIST_RELATIVE next = ILNext(*pidl);
+		
+		// pidl child 생성하기 위해 이전 값 잠시 저장 및 초기화
+		USHORT latest = next->mkid.cb;
+		next->mkid.cb = 0;             
+
+		// pidl child 생성과 기존 값 부여
+		HRESULT result = ::SHCreateItemWithParent(nullptr, current, reinterpret_cast<PCUITEMID_CHILD>(*pidl), riid, ppv);
+		next->mkid.cb = latest;
+
+		return result;
+	}
+	bool moveNext(PUIDLIST_RELATIVE *pidl, IShellFolder **current, IShellItem2 *item)
+	{
+		bool result = false;
+		if (*pidl == nullptr)
+		{
+			// item 으로부터 pidl 확인
+			PIDLIST_ABSOLUTE pidlAbs;
+			if (SUCCEEDED(::SHGetIDListFromObject(item, &pidlAbs)))
 			{
-				if (_pidlRel == nullptr)
+				*pidl = pidlAbs;
+				result = true;
+			}
+		}
+		else if (ILIsEmpty(*pidl) == false)
+		{
+			// pidl 이 비어있지 않음
+
+			PCUITEMID_CHILD child = reinterpret_cast<PCUITEMID_CHILD>(*pidl);  // save the current segment for binding
+			*pidl = ILNext(*pidl);
+
+			// if we are not at the end setup for the next itteration
+			if (ILIsEmpty(*pidl) == false)
+			{
+				USHORT latest = (*pidl)->mkid.cb;  // avoid cloning for the child by truncating temporarily
+				(*pidl)->mkid.cb = 0;                  // make this a child
+
+				IShellFolder *folder;
+				if (SUCCEEDED((*current)->BindToObject(child, nullptr, IID_PPV_ARGS(&folder))))
 				{
-					fMoreItems = true;
-					_pidlRel = _pidlFull;   // first item, might be empty if it is the desktop
+					(*current)->Release();
+					(*current) = folder;   // transfer ownership
+					result = true;
 				}
-				else if (!ILIsEmpty(_pidlRel))
+
+				(*pidl)->mkid.cb = latest; // restore previous ID size
+			}
+		}
+
+		return result;
+	}
+	void getItemName(IShellItem2 *item, std::wstring &itemName)
+	{
+		// desktop
+		IShellFolder *currentFolder = nullptr;
+		if (SUCCEEDED(::SHGetDesktopFolder(&currentFolder)))
+		{
+			PUIDLIST_RELATIVE next = nullptr;
+			while (moveNext(&next, &currentFolder, item) == true)
+			{
+				IShellItem2 *currentItem = nullptr;
+				if (SUCCEEDED(getCurrentItem(&next, currentFolder, IID_PPV_ARGS(&currentItem))))
 				{
-					PCUITEMID_CHILD pidlChild = (PCUITEMID_CHILD)_pidlRel;  // save the current segment for binding
-					_pidlRel = ILNext(_pidlRel);
-
-					// if we are not at the end setup for the next itteration
-					if (!ILIsEmpty(_pidlRel))
+					wchar_t *temp = nullptr;
+					if (SUCCEEDED(currentItem->GetDisplayName(SIGDN_FILESYSPATH, &temp)))
 					{
-						const WORD cbSave = _pidlRel->mkid.cb;  // avoid cloning for the child by truncating temporarily
-						_pidlRel->mkid.cb = 0;                  // make this a child
-
-						IShellFolder *psfNew;
-						_hr = _psfCur->BindToObject(pidlChild, nullptr, IID_PPV_ARGS(&psfNew));
-						if (SUCCEEDED(_hr))
-						{
-							_psfCur->Release();
-							_psfCur = psfNew;   // transfer ownership
-							fMoreItems = true;
-						}
-
-						_pidlRel->mkid.cb = cbSave; // restore previous ID size
+						itemName = temp;
+						safeCoTaskMemFree(temp);
 					}
 				}
 			}
-
-			return fMoreItems;
 		}
-		HRESULT GetCurrent(REFIID riid, void **ppv)
-		{
-			*ppv = nullptr;
-			if (SUCCEEDED(_hr))
-			{
-				// create teh childID by truncating _pidlRel temporarily
-				PUIDLIST_RELATIVE pidlNext = ILNext(_pidlRel);
-				const WORD cbSave = pidlNext->mkid.cb;  // save old cb
-				pidlNext->mkid.cb = 0;                  // make _pidlRel a child
-
-				_hr = ::SHCreateItemWithParent(nullptr, _psfCur, (PCUITEMID_CHILD)_pidlRel, riid, ppv);
-
-				pidlNext->mkid.cb = cbSave;             // restore old cb
-			}
-
-			return _hr;
-		}
-
-	private:
-		void _Init()
-		{
-			_pidlRel = nullptr;
-
-			if (SUCCEEDED(_hr))
-			{
-				_hr = ::SHGetDesktopFolder(&_psfCur);
-			}
-		}
-
-		HRESULT _hr;
-		PIDLIST_ABSOLUTE _pidlFull;
-		PUIDLIST_RELATIVE _pidlRel;
-		IShellFolder *_psfCur;
-	};
-
+	}
 };

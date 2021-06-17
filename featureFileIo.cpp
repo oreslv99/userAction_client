@@ -187,6 +187,7 @@ bool featureFileIo::watch(void* parameters)
 						bool isIncludedExtension = false;
 						bool isExcludedPath = false;
 
+						// 일반 file io
 						if (isDevice == false)
 						{
 							// 대상 확장명 (모든 파일을 다 기록에 남길 필요가 없음)
@@ -239,6 +240,8 @@ bool featureFileIo::watch(void* parameters)
 				safeRelease(item);
 			}
 		}
+
+		systemCall = ::GetTickCount();
 	}
 
 	::SHChangeNotification_Unlock(lock);
@@ -253,7 +256,3 @@ bool featureFileIo::watch(void* parameters)
 //
 // private
 //
-void featureFileIo::getItemName(IShellItem2 *item, std::wstring &itemName)
-{
-
-}
