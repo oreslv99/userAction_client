@@ -8,7 +8,7 @@ class featureAFK : public feature
 public:
 	featureAFK();
 	~featureAFK();
-	bool initialize(const rules &rule) final;
+	bool initialize(void *rule, DWORD size) final;
 	bool watch(void* parameters = nullptr) final;
 	//featureType getFeatureType() final;
 

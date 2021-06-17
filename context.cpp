@@ -68,7 +68,7 @@ bool context::initialize()
 	feature *afk = new featureAFK();
 	if (afk != nullptr)
 	{
-		if (afk->initialize(this->rule) == true)
+		if (afk->initialize(this->rule.getAFKRule(), sizeof(ruleAFK)) == true)
 		{
 			this->features.push_back(afk);
 		}
@@ -82,7 +82,7 @@ bool context::initialize()
 	feature *proc = new featureProcess();
 	if (proc != nullptr)
 	{
-		if (proc->initialize(this->rule) == true)
+		if (proc->initialize(this->rule.getProcessRule(), sizeof(ruleProcess)) == true)
 		{
 			this->features.push_back(proc);
 		}
@@ -96,7 +96,7 @@ bool context::initialize()
 	feature *prn = new featurePrint();
 	if (prn != nullptr)
 	{
-		if (prn->initialize(this->rule) == true)
+		if (prn->initialize(this->rule.getPrintRule(), sizeof(rulePrint)) == true)
 		{
 			this->features.push_back(prn);
 		}
@@ -119,7 +119,7 @@ bool context::initialize()
 		//{
 		//	safeDelete(fileIo);
 		//}
-		if (fileIo->initialize(this->rule) == false)
+		if (fileIo->initialize(this->rule.getFileIoRule(), sizeof(ruleFileIo)) == false)
 		{
 			safeDelete(fileIo);
 		}

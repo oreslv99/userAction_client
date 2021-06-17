@@ -41,12 +41,26 @@ featureFileIo::featureFileIo()
 featureFileIo::~featureFileIo()
 {
 }
-bool featureFileIo::initialize(const rules &rule)
+bool featureFileIo::initialize(void *rule, DWORD size)
 {
-	// 저장장치 "연결/해제" 에 따라서 초기화가 추가 호출됨
-	if (this->rule == nullptr)
+	if ((rule == nullptr) && (size == -1)) 
 	{
-		this->rule = rule.getFileIoRule();
+		// refresh
+		help->writeLog(logId::debug, L"[%s:%03d] Refresh watches.", __FUNCTIONW__, __LINE__);
+	}
+	else
+	{
+		if (size != sizeof(ruleFileIo))
+		{
+			help->writeLog(logId::error, L"[%s:%03d] Invalid parameter.", __FUNCTIONW__, __LINE__);
+			return false;
+		}
+
+		// 저장장치 "연결/해제" 에 따라서 초기화가 추가 호출됨
+		if (this->rule == nullptr)
+		{
+			this->rule = reinterpret_cast<ruleFileIo*>(rule);
+		}
 	}
 	
 	// 이전 
@@ -190,8 +204,10 @@ bool featureFileIo::watch(void* parameters)
 						// 일반 file io
 						if (isDevice == false)
 						{
-							// 대상 확장명 (모든 파일을 다 기록에 남길 필요가 없음)
-							std::wstring extension = itemName.substr(itemName.rfind('.') + 1);
+							// 대상 확장명 
+							//	모든 파일을 다 기록에 남길 필요가 없음
+							//	'.' 포함
+							std::wstring extension = itemName.substr(itemName.rfind('.'));
 							std::list<std::wstring>::iterator iter;
 							for (iter = const_cast<ruleFileIo*>(this->rule)->extensions.begin(); iter != this->rule->extensions.end(); iter++)
 							{
@@ -226,9 +242,18 @@ bool featureFileIo::watch(void* parameters)
 								{
 								case featureId::devConn:
 								case featureId::devDisConn:
-									//initialize();
+									initialize(nullptr, -1);
 									break;
-								case featureId::file:
+									case featureId::file:
+									{
+										std::wstring fileSize = getFileSize(itemName);
+
+										// 파일이 막 생성된 시점? 찰나? 에 실패하여 -1 을 반환하는 경우가 있음
+										if (::_wcsicmp(fileSize.c_str(), L"-1") != 0)
+										{
+											help->writeUserAction(id, L"%s\t%s kb", itemName.c_str(), fileSize.c_str());
+										}
+									}
 									break;
 								}
 							}
@@ -256,3 +281,89 @@ bool featureFileIo::watch(void* parameters)
 //
 // private
 //
+HRESULT featureFileIo::getCurrentItem(PUIDLIST_RELATIVE *pidl, IShellFolder *current, REFIID riid, void **ppv)
+{
+	*ppv = nullptr;
+
+	// 다음 pidl
+	PUIDLIST_RELATIVE next = ILNext(*pidl);
+
+	// pidl child 생성하기 위해 이전 값 잠시 저장 및 초기화
+	USHORT latest = next->mkid.cb;
+	next->mkid.cb = 0;
+
+	// pidl child 생성과 기존 값 부여 (상위경로와 display 이름을 갖는 shell item)
+	HRESULT result = ::SHCreateItemWithParent(nullptr, current, reinterpret_cast<PCUITEMID_CHILD>(*pidl), riid, ppv);
+	next->mkid.cb = latest;
+
+	return result;
+}
+bool featureFileIo::moveNext(PUIDLIST_RELATIVE *pidl, IShellFolder **current, IShellItem2 *item)
+{
+	bool result = false;
+
+	// 처음은 item 으로부터 pidl 확인
+	if (*pidl == nullptr)
+	{
+		PIDLIST_ABSOLUTE pidlAbs;
+		if (SUCCEEDED(::SHGetIDListFromObject(item, &pidlAbs)))
+		{
+			*pidl = pidlAbs;
+			result = true;
+		}
+	}
+	// pidl 이 비어있지 않음
+	else if (ILIsEmpty(*pidl) == false)
+	{
+		// 다음 pidl 이 비어있지 않은경우, 하위 폴더에 binding 하기위해서 미리 확인
+		PCUITEMID_CHILD child = reinterpret_cast<PCUITEMID_CHILD>(*pidl);
+		*pidl = ILNext(*pidl);
+
+		// 다음 pidl 이 또 비어있지 않음
+		if (ILIsEmpty(*pidl) == false)
+		{
+			// pidl child 생성하기 위해 이전 값 잠시 저장 및 초기화
+			USHORT latest = (*pidl)->mkid.cb;
+			(*pidl)->mkid.cb = 0;
+
+			IShellFolder *folder;
+			if (SUCCEEDED((*current)->BindToObject(child, nullptr, IID_PPV_ARGS(&folder))))
+			{
+				// 재할당
+				(*current)->Release();
+				(*current) = folder;
+				result = true;
+			}
+
+			// pidl child 생성과 기존 값 부여
+			(*pidl)->mkid.cb = latest;
+		}
+	}
+
+	return result;
+}
+void featureFileIo::getItemName(IShellItem2 *item, std::wstring &itemName)
+{
+	// IShellItem2 인스턴스 (riid, ppv) 의 메서드인 GetDisplayName + SIGDN_FILESYSPATH 호출할 예정
+	//	>> 전체경로 (상위경로 + display 이름) 생성하기 위함
+	//	>> SHCreateItemWithParent 을 이용해 pidl 에 상위경로와 display 이름을 갖는 shell item 을 생성
+	IShellFolder *currentFolder = nullptr;
+	if (SUCCEEDED(::SHGetDesktopFolder(&currentFolder)))
+	{
+		// item 에서 마지막 pidl 까지 돌면서 파일명확인
+		PUIDLIST_RELATIVE next = nullptr;
+		while (moveNext(&next, &currentFolder, item) == true)
+		{
+			IShellItem2 *currentItem = nullptr;
+			if (SUCCEEDED(getCurrentItem(&next, currentFolder, IID_PPV_ARGS(&currentItem))))
+			{
+				wchar_t *temp = nullptr;
+				if (SUCCEEDED(currentItem->GetDisplayName(SIGDN_FILESYSPATH, &temp)))
+				{
+					itemName = temp;
+					safeCoTaskMemFree(temp);
+				}
+			}
+		}
+	}
+}

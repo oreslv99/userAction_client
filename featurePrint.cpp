@@ -14,9 +14,15 @@ featurePrint::featurePrint()
 featurePrint::~featurePrint()
 {
 }
-bool featurePrint::initialize(const rules &rule)
+bool featurePrint::initialize(void *rule, DWORD size)
 {
-	this->rule = rule.getPrintRule();
+	if (size != sizeof(rulePrint))
+	{
+		help->writeLog(logId::error, L"[%s:%03d] Invalid parameter.", __FUNCTIONW__, __LINE__);
+		return false;
+	}
+
+	this->rule = reinterpret_cast<rulePrint*>(rule);
 
 	// 이벤트 뷰어에서 프린트 서비스를 따로 볼 수있게 다음 항목을 등록
 	const std::wstring path = REGISTRY_PATH + EVENTVIEWER_CHANNEL_PATH;

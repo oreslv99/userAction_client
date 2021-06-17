@@ -11,7 +11,7 @@ class featurePrint : public feature
 public:
 	featurePrint();
 	~featurePrint();
-	bool initialize(const rules &rule) final;
+	bool initialize(void *rule, DWORD size) final;
 	bool watch(void* parameters = nullptr) final;
 	//featureType getFeatureType() final;
 

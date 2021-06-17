@@ -16,7 +16,7 @@ class featureFileIo : public feature
 public:
 	featureFileIo();
 	~featureFileIo();
-	bool initialize(const rules &rule) final;
+	bool initialize(void *rule, DWORD size) final;
 	bool watch(void* parameters = nullptr) final;
 	//featureType getFeatureType() final;
 
@@ -27,87 +27,42 @@ private:
 	std::list<std::pair<std::wstring, UINT>> watches;
 	SHChangeNotifyEntry *entires;
 
-	HRESULT getCurrentItem(PUIDLIST_RELATIVE *pidl, IShellFolder *current, REFIID riid, void **ppv)
+	HRESULT getCurrentItem(PUIDLIST_RELATIVE *pidl, IShellFolder *current, REFIID riid, void **ppv);
+	bool moveNext(PUIDLIST_RELATIVE *pidl, IShellFolder **current, IShellItem2 *item);
+	void getItemName(IShellItem2 *item, std::wstring &itemName);
+	std::wstring getFileSize(std::wstring filePath)
 	{
-		// IShellItem2 인스턴스 (riid, ppv) 의 메서드인 GetDisplayName + SIGDN_FILESYSPATH 호출할 예정
-		//	>> 전체경로 (상위경로 + display 이름) 생성하기 위함
-		//	>> SHCreateItemWithParent 을 이용해 pidl 에 상위경로와 display 이름을 갖는 shell item 을 생성
+		std::ifstream stream(filePath, std::ios::ate | std::ios::binary);
+		double fileSize = static_cast<double>(stream.tellg());
 
-		*ppv = nullptr;
-		
-		// 다음 pidl
-		PUIDLIST_RELATIVE next = ILNext(*pidl);
-		
-		// pidl child 생성하기 위해 이전 값 잠시 저장 및 초기화
-		USHORT latest = next->mkid.cb;
-		next->mkid.cb = 0;             
+#define KB ((ULONGLONG)1024)
+#define MB (KB*KB)
+#define GB (KB*KB*KB)
+#define TB (KB*KB*KB*KB)
+#define PB (KB*KB*KB*KB*KB)
 
-		// pidl child 생성과 기존 값 부여
-		HRESULT result = ::SHCreateItemWithParent(nullptr, current, reinterpret_cast<PCUITEMID_CHILD>(*pidl), riid, ppv);
-		next->mkid.cb = latest;
+		static struct {
+			LONGLONG dLimit;
+			double dDivisor;
+			double dNormaliser;
+			int nDecimals;
+			const wchar_t *wPrefix;
+		} data[] = {
+			{ 10 * KB, 10.24, 100.0, 2, L"%s KB" }, /* 10 KB */
+			{ 100 * KB, 102.4, 10.0, 1, L"%s KB" }, /* 100 KB */
+			{ 1000 * KB, 1024.0, 1.0, 0, L"%s KB" }, /* 1000 KB */
+			{ 10 * MB, 10485.76, 100.0, 2, L"%s MB" }, /* 10 MB */
+			{ 100 * MB, 104857.6, 10.0, 1, L"%s MB" }, /* 100 MB */
+			{ 1000 * MB, 1048576.0, 1.0, 0, L"%s MB" }, /* 1000 MB */
+			{ 10 * GB, 10737418.24, 100.0, 2, L"%s GB" }, /* 10 GB */
+			{ 100 * GB, 107374182.4, 10.0, 1, L"%s GB" }, /* 100 GB */
+			{ 1000 * GB, 1073741824.0, 1.0, 0, L"%s GB" }, /* 1000 GB */
+			{ 10 * TB, 10485.76, 100.0, 2, L"%s TB" }, /* 10 TB */
+			{ 100 * TB, 104857.6, 10.0, 1, L"%s TB" }, /* 100 TB */
+			{ 1000 * TB, 1048576.0, 1.0, 0, L"%s TB" }, /* 1000 TB */
+		};
 
-		return result;
+		return L"";
 	}
-	bool moveNext(PUIDLIST_RELATIVE *pidl, IShellFolder **current, IShellItem2 *item)
-	{
-		bool result = false;
-		if (*pidl == nullptr)
-		{
-			// item 으로부터 pidl 확인
-			PIDLIST_ABSOLUTE pidlAbs;
-			if (SUCCEEDED(::SHGetIDListFromObject(item, &pidlAbs)))
-			{
-				*pidl = pidlAbs;
-				result = true;
-			}
-		}
-		else if (ILIsEmpty(*pidl) == false)
-		{
-			// pidl 이 비어있지 않음
 
-			PCUITEMID_CHILD child = reinterpret_cast<PCUITEMID_CHILD>(*pidl);  // save the current segment for binding
-			*pidl = ILNext(*pidl);
-
-			// if we are not at the end setup for the next itteration
-			if (ILIsEmpty(*pidl) == false)
-			{
-				USHORT latest = (*pidl)->mkid.cb;  // avoid cloning for the child by truncating temporarily
-				(*pidl)->mkid.cb = 0;                  // make this a child
-
-				IShellFolder *folder;
-				if (SUCCEEDED((*current)->BindToObject(child, nullptr, IID_PPV_ARGS(&folder))))
-				{
-					(*current)->Release();
-					(*current) = folder;   // transfer ownership
-					result = true;
-				}
-
-				(*pidl)->mkid.cb = latest; // restore previous ID size
-			}
-		}
-
-		return result;
-	}
-	void getItemName(IShellItem2 *item, std::wstring &itemName)
-	{
-		// desktop
-		IShellFolder *currentFolder = nullptr;
-		if (SUCCEEDED(::SHGetDesktopFolder(&currentFolder)))
-		{
-			PUIDLIST_RELATIVE next = nullptr;
-			while (moveNext(&next, &currentFolder, item) == true)
-			{
-				IShellItem2 *currentItem = nullptr;
-				if (SUCCEEDED(getCurrentItem(&next, currentFolder, IID_PPV_ARGS(&currentItem))))
-				{
-					wchar_t *temp = nullptr;
-					if (SUCCEEDED(currentItem->GetDisplayName(SIGDN_FILESYSPATH, &temp)))
-					{
-						itemName = temp;
-						safeCoTaskMemFree(temp);
-					}
-				}
-			}
-		}
-	}
 };

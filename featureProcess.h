@@ -12,7 +12,7 @@ class featureProcess : public feature
 public:
 	featureProcess();
 	~featureProcess();
-	bool initialize(const rules &rule) final;
+	bool initialize(void *rule, DWORD size) final;
 	bool watch(void* parameters = nullptr) final;
 	//featureType getFeatureType() final;
 

@@ -11,9 +11,15 @@ featureAFK::~featureAFK()
 {
 	safeCloseHandle(this->event);
 }
-bool featureAFK::initialize(const rules &rule)
+bool featureAFK::initialize(void *rule, DWORD size)
 {
-	this->rule = rule.getAFKRule();
+	if (size != sizeof(ruleAFK))
+	{
+		help->writeLog(logId::error, L"[%s:%03d] Invalid parameter.", __FUNCTIONW__, __LINE__);
+		return false;
+	}
+
+	this->rule = reinterpret_cast<ruleAFK*>(rule);
 	this->event = ::CreateEventW(nullptr, FALSE, FALSE, nullptr);
 	if (this->event == INVALID_HANDLE_VALUE)
 	{

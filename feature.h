@@ -4,7 +4,7 @@
 class feature
 {
 public:
-	virtual bool initialize(const rules &rule) = 0;
+	virtual bool initialize(void *rule, DWORD size) = 0;
 	virtual bool watch(void* parameters = nullptr) = 0;
 	// 2021-06-12 
 	//	: list 에 순서대로 넣어서 loop

@@ -29,9 +29,15 @@ featureProcess::featureProcess()
 featureProcess::~featureProcess()
 {
 }
-bool featureProcess::initialize(const rules &rule)
+bool featureProcess::initialize(void *rule, DWORD size)
 {
-	this->rule = rule.getProcessRule();
+	if (size != sizeof(ruleProcess))
+	{
+		help->writeLog(logId::error, L"[%s:%03d] Invalid parameter.", __FUNCTIONW__, __LINE__);
+		return false;
+	}
+
+	this->rule = reinterpret_cast<ruleProcess*>(rule);
 	return true;
 }
 bool featureProcess::watch(void* parameters)
