@@ -24,12 +24,12 @@ static std::map<long, featureId> mappedEventIds =
 	// SHCNE_DRIVEADDGUI
 	// SHCNE_RENAMEFOLDER
 	// SHCNE_FREESPACE
-	{ SHCNE_MEDIAINSERTED, devConn },
-	{ SHCNE_DRIVEADD, devConn },
-	{ SHCNE_NETSHARE, devConn },
-	{ SHCNE_MEDIAREMOVED, devDisConn },
-	{ SHCNE_DRIVEREMOVED, devDisConn },
-	{ SHCNE_NETUNSHARE, devDisConn },
+	{ SHCNE_MEDIAINSERTED, devCon },
+	{ SHCNE_DRIVEADD, devCon },
+	{ SHCNE_NETSHARE, devCon },
+	{ SHCNE_MEDIAREMOVED, devDcon },
+	{ SHCNE_DRIVEREMOVED, devDcon },
+	{ SHCNE_NETUNSHARE, devDcon },
 };
 
 //
@@ -147,8 +147,8 @@ bool featureFileIo::initialize(void *rule, DWORD size)
 	*/
 	long events = SHCNE_CREATE |					// 파일 생성
 		SHCNE_MEDIAINSERTED | SHCNE_MEDIAREMOVED |	// 외장 저장장치
-		SHCNE_DRIVEADD | SHCNE_DRIVEREMOVED |		// 외장 저장장치
-		SHCNE_NETSHARE | SHCNE_NETUNSHARE;			// 외장 저장장치
+		SHCNE_DRIVEADD | SHCNE_DRIVEREMOVED |		// 저장장치
+		SHCNE_NETSHARE | SHCNE_NETUNSHARE;			// 네트워크
 	this->id = ::SHChangeNotifyRegister(this->rule->window, flags, events, WM_FILE_IO, static_cast<int>(count), entires);
 	bool result = true;
 	if (this->id == 0)
@@ -197,7 +197,7 @@ bool featureFileIo::watch(void* parameters)
 
 					if (::wcslen(itemName.c_str()) > 0)
 					{
-						bool isDevice = ((::wcslen(itemName.c_str()) == 3) && (itemName[1] == ':') && (itemName[1] == '\\'));
+						bool isDevice = ((::wcslen(itemName.c_str()) == 3) && (itemName[1] == ':') && (itemName[2] == '\\'));
 						bool isIncludedExtension = false;
 						bool isExcludedPath = false;
 
@@ -240,9 +240,12 @@ bool featureFileIo::watch(void* parameters)
 								featureId id = iter->second;
 								switch (id)
 								{
-								case featureId::devConn:
-								case featureId::devDisConn:
-									initialize(nullptr, -1);
+									case featureId::devCon:
+									case featureId::devDcon:
+									{
+										initialize(nullptr, -1);
+										help->writeUserAction(id, L"%s", itemName.c_str());
+									}
 									break;
 									case featureId::file:
 									{

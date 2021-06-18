@@ -59,6 +59,7 @@ bool featureAFK::watch(void* parameters)
 
 	SYSTEMTIME localTime;
 	::memset(&localTime, 0x00, sizeof(SYSTEMTIME));
+	::GetLocalTime(&localTime);
 
 	if (result == true)
 	{
@@ -76,11 +77,13 @@ bool featureAFK::watch(void* parameters)
 
 		if (::WaitForSingleObject(this->event, 1) == WAIT_OBJECT_0)
 		{
+			help->writeUserAction(featureId::afkAwake, L"%02d:%02d:%02d (%dms)", 
+				localTime.wHour, localTime.wMinute, localTime.wSecond, lastInputTime - (startAfkTime - this->rule->awake));
+
 			// 자리비움 해제
 			startAfkTime = ::GetTickCount();	// 시간 초기화
 			::ResetEvent(this->event);
 			result = false;
-			help->writeUserAction(featureId::afk, L"awake");
 		}
 	}
 	else
@@ -91,7 +94,7 @@ bool featureAFK::watch(void* parameters)
 
 			// 자리비움 상태
 			result = true;
-			help->writeUserAction(featureId::afk, L"in");
+			help->writeUserAction(featureId::afkIn, L"%02d:%02d:%02d", localTime.wHour, localTime.wMinute, localTime.wSecond);
 		}
 	}
 
