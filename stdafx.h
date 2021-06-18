@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <string>
 #include <list>
+#include <vector>
 #include <codecvt>					// utf8 ·Î º¯È¯
 #include <algorithm>
 

@@ -84,8 +84,8 @@ bool featureProcess::watch(void* parameters)
 
 		// 예외 프로세스인지 확인
 		bool isExcluded = false;
-		std::list<std::wstring>::iterator iter;
-		for (iter = const_cast<ruleProcess*>(this->rule)->excludes.begin(); iter != this->rule->excludes.end(); iter++)
+		std::list<std::wstring>::const_iterator iter;
+		for (iter = this->rule->excludes.begin(); iter != this->rule->excludes.end(); iter++)
 		{
 			if (isMatch(processName.c_str(), (*iter).c_str()) == true)
 			{
@@ -102,7 +102,7 @@ bool featureProcess::watch(void* parameters)
 		// Contents 확인
 		std::wstring currentContents;
 		bool isBrowser = false;
-		for (iter = const_cast<ruleProcess*>(this->rule)->browsers.begin(); iter != this->rule->browsers.end(); iter++)
+		for (iter = this->rule->browsers.begin(); iter != this->rule->browsers.end(); iter++)
 		{
 			if (isMatch(processName.c_str(), (*iter).c_str()) == true)
 			{
@@ -365,8 +365,8 @@ void featureProcess::getContents(bool isBrowser, HWND window, std::wstring proce
 
 		// 개인 사생활 또는 비밀유지에 관련된 caption 을 갖을 수 있는 프로세스에 대한 예외처리
 		bool isPrivate = false;
-		std::list<std::wstring>::iterator iter;
-		for (iter = const_cast<ruleProcess*>(this->rule)->privates.begin(); iter != this->rule->privates.end(); iter++)
+		std::list<std::wstring>::const_iterator iter;
+		for (iter = this->rule->privates.begin(); iter != this->rule->privates.end(); iter++)
 		{
 			if (isMatch(processName.c_str(), (*iter).c_str()) == true)
 			{
@@ -389,7 +389,7 @@ void featureProcess::getContents(bool isBrowser, HWND window, std::wstring proce
 			// caption 이 실시간으로 변화하는 프로세스인지 확인
 			if (isDuplicated == false)
 			{
-				for (iter = const_cast<ruleProcess*>(this->rule)->duplicates.begin(); iter != this->rule->duplicates.begin(); iter++)
+				for (iter = this->rule->duplicates.begin(); iter != this->rule->duplicates.begin(); iter++)
 				{
 					if (isMatch(processName.c_str(), (*iter).c_str()) == true)
 					{

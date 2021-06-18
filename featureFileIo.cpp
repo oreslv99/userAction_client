@@ -1,6 +1,6 @@
 #include "featureFileIo.h"
 
-static std::map<int, std::wstring> driveTypeIds =
+const std::map<int, std::wstring> driveTypeIds =
 {
 	makeString(DRIVE_UNKNOWN),
 	makeString(DRIVE_NO_ROOT_DIR),
@@ -10,7 +10,7 @@ static std::map<int, std::wstring> driveTypeIds =
 	makeString(DRIVE_CDROM),
 	makeString(DRIVE_RAMDISK),
 };
-static std::map<long, featureId> mappedEventIds =
+const std::map<long, featureId> mappedEventIds =
 {
 	// SHCNE_RENAMEITEM
 	{ SHCNE_CREATE, file },
@@ -30,6 +30,29 @@ static std::map<long, featureId> mappedEventIds =
 	{ SHCNE_MEDIAREMOVED, devDcon },
 	{ SHCNE_DRIVEREMOVED, devDcon },
 	{ SHCNE_NETUNSHARE, devDcon },
+};
+const ULONGLONG KB = static_cast<ULONGLONG>(1024);
+const ULONGLONG MB = KB * KB;
+const ULONGLONG GB = MB * KB;
+const ULONGLONG TB = GB * KB;
+const ULONGLONG PB = TB * KB;
+struct sizeTemplate
+{
+	ULONGLONG limit;
+	double divisor;
+	double normalizer;
+	std::wstring prefix;
+};
+const std::vector<sizeTemplate> sizeTemplates = {
+	{ KB * 10,		10.24,			100.0,	L"KB" },
+	{ KB * 100,		102.4,			10.0,	L"KB" },
+	{ KB * 1000,	1024.0,			1.0,	L"KB" },
+	{ MB * 10,		10485.76,		100.0,	L"MB" },
+	{ MB * 100,		104857.6,		10.0,	L"MB" },
+	{ MB * 1000,	1048576.0,		1.0,	L"MB" },
+	{ GB * 10,		10737418.24,	100.0,	L"GB" },
+	{ GB * 100,		107374182.4,	10.0,	L"GB" },
+	{ GB * 1000,	1073741824.0,	1.0,	L"GB" },
 };
 
 //
@@ -208,8 +231,8 @@ bool featureFileIo::watch(void* parameters)
 							//	모든 파일을 다 기록에 남길 필요가 없음
 							//	'.' 포함
 							std::wstring extension = itemName.substr(itemName.rfind('.'));
-							std::list<std::wstring>::iterator iter;
-							for (iter = const_cast<ruleFileIo*>(this->rule)->extensions.begin(); iter != this->rule->extensions.end(); iter++)
+							std::list<std::wstring>::const_iterator iter;
+							for (iter = this->rule->extensions.begin(); iter != this->rule->extensions.end(); iter++)
 							{
 								if (isMatch(extension.c_str(), (*iter).c_str()) == true)
 								{
@@ -234,7 +257,7 @@ bool featureFileIo::watch(void* parameters)
 						if ((isDevice == true) ||
 							((isIncludedExtension == true) && (isExcludedPath == false)))
 						{
-							std::map<long, featureId>::iterator iter = mappedEventIds.find(eventId);
+							std::map<long, featureId>::const_iterator iter = mappedEventIds.find(eventId);
 							if (iter != mappedEventIds.end())
 							{
 								featureId id = iter->second;
@@ -363,4 +386,42 @@ void featureFileIo::getItemName(IShellItem2 *item, std::wstring &itemName)
 			}
 		}
 	}
+}
+std::wstring featureFileIo::getFileSize(std::wstring filePath)
+{
+	std::ifstream stream(filePath, std::ios::ate | std::ios::binary);
+	ULONGLONG fileSize = static_cast<ULONGLONG>(stream.tellg());
+
+	// 파일이 막 생성되는 경우 ifstream tellg 가 실패하여 -1 리턴함
+	if (fileSize < 0)
+	{
+		fileSize = 0;
+	}
+
+	// 1024 byte 가 안되는 경우, 그냥 1kb 로 표시
+	if (fileSize < 1024)
+	{
+		return std::to_wstring(fileSize) + L"Byte";
+	}
+
+	// template 정보 확인
+	int i;
+	for (i = 0; i < sizeTemplates.size(); i++)
+	{
+		if (fileSize < sizeTemplates[i].limit)
+		{
+			break;
+		}
+	}
+
+	// 윈도우처럼 표기하기 위해 template 에 정의한 값에 맞춰 계산
+	double temp = static_cast<double>(fileSize);
+	temp = ::floor(temp / sizeTemplates[i].divisor) / sizeTemplates[i].normalizer;
+
+	std::wstring result;
+	result = std::to_wstring(temp);
+	result = result.substr(0, result.rfind('.') + 3);	// 소수점 두자리 표시
+	result += sizeTemplates[i].prefix;
+
+	return result;
 }
