@@ -33,11 +33,8 @@ bool application::initialize(HINSTANCE instance)
 	}
 
 	// 사용자 정보
-	std::wstring userName;
-	userName.resize(size);
-	::GetUserNameW(const_cast<wchar_t*>(userName.data()), &size);
-	this->appContext.setUserName((::wcslen(userName.c_str()) <= 0) ? L"testUser" : userName);
-
+	getPCInfos(&this->appContext);
+	
 	// window 생성
 	if (createWindow(instance, programName, &this->appContext) == false)
 	{
@@ -81,6 +78,23 @@ bool application::isAlreadyRunning(std::wstring programName)
 {
 	HANDLE mutex = ::CreateMutexW(nullptr, FALSE, programName.c_str());
 	return ((::GetLastError() == ERROR_ALREADY_EXISTS) ? true : false);
+}
+void application::getPCInfos(context *appContext)
+{
+	DWORD size = MAX_PATH;
+
+	// 이름
+	std::wstring userName;
+	userName.resize(size);
+	::GetUserNameW(const_cast<wchar_t*>(userName.data()), &size);
+	
+	// 컴퓨터 이름
+	size = MAX_PATH;
+	std::wstring computerName;
+	computerName.resize(size);
+	::GetComputerNameW(const_cast<wchar_t*>(computerName.data()), &size);
+
+	appContext->setPCInfo(userName, computerName);
 }
 bool application::createWindow(HINSTANCE instance, std::wstring programName, context *appContext)
 {
@@ -129,8 +143,8 @@ bool application::readEnvironmet(context *appContext)
 	std::wstring port;
 	ip.resize(15);		// xxx.xxx.xxx.xxx
 	port.resize(5);		// xxxxx
-	::GetPrivateProfileStringW(SECTION_SERVER.c_str(), L"ip", nullptr, const_cast<wchar_t*>(ip.data()), ip.length(), iniFilePath.c_str());
-	::GetPrivateProfileStringW(SECTION_SERVER.c_str(), L"port", nullptr, const_cast<wchar_t*>(port.data()), port.length(), iniFilePath.c_str());
+	::GetPrivateProfileStringW(SECTION_SERVER.c_str(), L"ip", L"localhost", const_cast<wchar_t*>(ip.data()), ip.length(), iniFilePath.c_str());
+	::GetPrivateProfileStringW(SECTION_SERVER.c_str(), L"port", L"3000", const_cast<wchar_t*>(port.data()), port.length(), iniFilePath.c_str());
 
 	// context 에 설정
 	appContext->setSocket(ip, port);

@@ -14,6 +14,7 @@ private:
 	context appContext;
 
 	bool isAlreadyRunning(std::wstring programName);
+	void getPCInfos(context *appContext);
 	bool createWindow(HINSTANCE instance, std::wstring programName, context *appContext);
 	bool readEnvironmet(context *appContext);
 

@@ -38,9 +38,10 @@ WNDPROC context::getWndProc()
 {
 	return this->callback;
 }
-void context::setUserName(std::wstring userName)
+void context::setPCInfo(std::wstring userName, std::wstring computerName)
 {
 	this->userName = userName;
+	this->computerName = computerName;
 }
 void context::setWindow(HWND window)
 {
@@ -154,7 +155,7 @@ int context::tickTock()
 	}
 
 	// 
-	help->writeUserAction(featureId::logon, L"user is logon.");
+	help->writeUserAction(featureId::logon, L"%s (%s)", this->userName.c_str(), this->computerName.c_str());
 
 	// 메시지 루프
 	MSG message;

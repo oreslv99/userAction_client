@@ -16,15 +16,16 @@ public:
 	context();
 	~context();
 	WNDPROC getWndProc();
-	void setUserName(std::wstring userName);
+	void setPCInfo(std::wstring userName, std::wstring computerName);
 	void setWindow(HWND window);
 	void setSocket(std::wstring ip, std::wstring port);
 	bool initialize();
 	int tickTock();
 
 private:
-	// user
+	// pc info
 	std::wstring userName;
+	std::wstring computerName;
 
 	// rule
 	rules rule;
