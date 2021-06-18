@@ -77,22 +77,56 @@ void rules::initialize(winSock *socket, HWND window)
 
 	if (result == false)
 	{
-		// TODO : 굳이 사용하지 않는 경우를 대비해서 정책 safeDelete 할 것
-		// 모두 실패시 기본값 적용
+		// 모두 실패시 fallback 기본값 적용
 		this->afk->enabled = true;
-		this->afk->in = 5000;
-		this->afk->awake = 3000;
+		this->afk->in = 60 * 10 * 1000;	// 10분
+		this->afk->awake = 3000;		// 3초
 
 		this->fileIo->enabled = true;
 		this->fileIo->window = window;
-		this->fileIo->excludes = { L"", L"", L"", };
-		this->fileIo->extensions = { L"", L"", L"", };
+		this->fileIo->excludes = {
+			L"*\\$*", 
+			L"*\\program files*", 
+			L"*\\windows\\*", 
+			L"*\\users\\*", 
+			L"*\\system volume information\\*", 
+			L"*\\.userAction\\*", 
+		};
+		this->fileIo->extensions = { 
+			L".log*",
+			L".txt*",
+			L".ppt*",
+			L".doc*",
+			L".xls*",
+			L".htm*",
+			L".iso*",
+		};
 
 		this->process->enabled = true;
-		this->process->excludes = { L"", L"", L"", };
-		this->process->browsers = { L"", L"", L"", };
-		this->process->privates = { L"", L"", L"", };
-		this->process->duplicates = { L"", L"", L"", };
+		this->process->excludes = { 
+			L"explorer.exe",
+			L"*host.exe",
+			L"*broker.exe",
+			L"taskmgr.exe",
+			L"debugview.exe",
+			L"baretail.exe",
+			L"lockapp.exe",
+			L"searchapp.exe",
+		};
+		this->process->browsers = { 
+			L"chrome.exe",
+			L"msedge.exe",
+			L"iexplore.exe",
+			L"whale.exe",
+			L"filefox.exe",
+			L"opera.exe",
+		};
+		this->process->privates = {
+			L"kakaotalk.exe", 
+		};
+		this->process->duplicates = { 
+			L"bandizip.exe", 
+		};
 
 		this->print->enabled = true;
 	}
