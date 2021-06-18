@@ -15,7 +15,7 @@ enum logId
 enum featureId
 {
 	afkIn = 0,		// 자리비움 시작
-	afkAwake,		// 자리비움 해제
+	afkAwk,			// 자리비움 해제
 	file,			// 파일 생성
 	devCon,			// 장치 연결
 	devDcon,		// 장치 해제

@@ -1,29 +1,5 @@
 #include "featureAFK.h"
 
-const ULONGLONG KB = static_cast<ULONGLONG>(1024);
-const ULONGLONG MB = KB * KB;
-const ULONGLONG GB = MB * KB;
-const ULONGLONG TB = GB * KB;
-const ULONGLONG PB = TB * KB;
-struct sizeTemplate
-{
-	ULONGLONG limit;
-	double divisor;
-	double normalizer;
-	std::wstring prefix;
-};
-const std::vector<sizeTemplate> sizeTemplates = {
-	{ KB * 10,		10.24,			100.0,	L"KB" },
-	{ KB * 100,		102.4,			10.0,	L"KB" },
-	{ KB * 1000,	1024.0,			1.0,	L"KB" },
-	{ MB * 10,		10485.76,		100.0,	L"MB" },
-	{ MB * 100,		104857.6,		10.0,	L"MB" },
-	{ MB * 1000,	1048576.0,		1.0,	L"MB" },
-	{ GB * 10,		10737418.24,	100.0,	L"GB" },
-	{ GB * 100,		107374182.4,	10.0,	L"GB" },
-	{ GB * 1000,	1073741824.0,	1.0,	L"GB" },
-};
-
 //
 // public
 //
@@ -101,7 +77,7 @@ bool featureAFK::watch(void* parameters)
 
 		if (::WaitForSingleObject(this->event, 1) == WAIT_OBJECT_0)
 		{
-			help->writeUserAction(featureId::afkAwake, L"%02d:%02d:%02d (%dms)", 
+			help->writeUserAction(featureId::afkAwk, L"%02d:%02d:%02d (%d ms)", 
 				localTime.wHour, localTime.wMinute, localTime.wSecond, lastInputTime - (startAfkTime - this->rule->awake));
 
 			// 자리비움 해제

@@ -110,7 +110,7 @@ bool featureProcess::watch(void* parameters)
 				break;
 			}
 		}
-		getContents(isBrowser, window, processName);
+		getContents(isBrowser, ((isBrowser == true) ? window : rootOwner), processName);
 
 		break;
 	}
