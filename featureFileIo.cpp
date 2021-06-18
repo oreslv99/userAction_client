@@ -246,13 +246,7 @@ bool featureFileIo::watch(void* parameters)
 									break;
 									case featureId::file:
 									{
-										std::wstring fileSize = getFileSize(itemName);
-
-										// 파일이 막 생성된 시점? 찰나? 에 실패하여 -1 을 반환하는 경우가 있음
-										if (::_wcsicmp(fileSize.c_str(), L"-1") != 0)
-										{
-											help->writeUserAction(id, L"%s\t%s kb", itemName.c_str(), fileSize.c_str());
-										}
+										help->writeUserAction(id, L"%s\t%s", itemName.c_str(), getFileSize(itemName).c_str());
 									}
 									break;
 								}

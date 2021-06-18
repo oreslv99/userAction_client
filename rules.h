@@ -47,13 +47,9 @@ public:
 
 private:
 	typedef rapidjson::GenericDocument<rapidjson::UTF16<>> jsonDocumentW;								// wide-char utf16 재정의 Document
-	typedef rapidjson::GenericArray<true, rapidjson::GenericValue<rapidjson::UTF16<>>> jsonCArrayW;		// wide-char utf16 재정의 Const Array
 	typedef rapidjson::GenericArray<false, rapidjson::GenericValue<rapidjson::UTF16<>>> jsonArrayW;		// wide-char utf16 재정의 Array
-	typedef rapidjson::GenericObject<true, rapidjson::GenericValue<rapidjson::UTF16<>>> jsonCObjectW;	// wide-char utf16 재정의 Const Object
 	typedef rapidjson::GenericObject<false, rapidjson::GenericValue<rapidjson::UTF16<>>> jsonObjectW;	// wide-char utf16 재정의 Object
 	typedef rapidjson::GenericValue<rapidjson::UTF16<>> jsonValueW;										// wide-char utf16 재정의 GenericValue<UTF16<>>
-	typedef rapidjson::GenericValue<rapidjson::UTF16<>>::ConstMemberIterator jsonCMemberIteratorW;		// wide-char utf16 재정의 Const MemberIterator
-	typedef rapidjson::GenericValue<rapidjson::UTF16<>>::ConstValueIterator jsonCValueIteratorW;		// wide-char utf16 재정의 Const ValueIterator
 	typedef rapidjson::GenericValue<rapidjson::UTF16<>>::MemberIterator jsonMemberIteratorW;			// wide-char utf16 재정의 MemberIterator
 	typedef rapidjson::GenericValue<rapidjson::UTF16<>>::ValueIterator jsonValueIteratorW;				// wide-char utf16 재정의 ValueIterator
 	typedef rapidjson::GenericDocument<rapidjson::UTF16<>> jsonDocumentForWriteW;						// wide-char utf16 재정의 Document
