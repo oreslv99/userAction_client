@@ -78,9 +78,12 @@ void rules::initialize(winSock *socket, HWND window)
 	if (result == false)
 	{
 		// 모두 실패시 fallback 기본값 적용
+		this->timerInterval = 250;
+		this->serverRetryInterval = 60 * 10 * 1000;	// 10분
+
 		this->afk->enabled = true;
-		this->afk->in = 60 * 10 * 1000;	// 10분
-		this->afk->awake = 3000;		// 3초
+		this->afk->in = 60 * 10 * 1000;				// 10분
+		this->afk->awake = 3000;					// 3초
 
 		this->fileIo->enabled = true;
 		this->fileIo->window = window;
