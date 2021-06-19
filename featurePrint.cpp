@@ -171,7 +171,8 @@ void featurePrint::parseDocument(tinyxml2::XMLDocument *document)
 	std::string printerName = documentPrinted->FirstChildElement("Param5")->GetText();
 	std::string filePath = documentPrinted->FirstChildElement("Param6")->GetText();
 	std::string copies = documentPrinted->FirstChildElement("Param8")->GetText();
-	
+	::OutputDebugStringA(filePath.c_str());
+
 	// 로그
 	std::string logFormat;
 	logFormat.resize(1024);
@@ -184,7 +185,7 @@ void featurePrint::parseDocument(tinyxml2::XMLDocument *document)
 	// 2021-06-03 : c 스타일로 변환하여 출력
 	size_t length = ::MultiByteToWideChar(CP_ACP, 0, logFormat.c_str(), -1, nullptr, 0);
 	length++;
-	wchar_t *logFormatW = (wchar_t*)::calloc(length, sizeof(wchar_t*));
+	wchar_t *logFormatW = (wchar_t*)::calloc(length, sizeof(wchar_t));
 	::MultiByteToWideChar(CP_ACP, 0, logFormat.c_str(), -1, logFormatW, length);
 	
 	help->writeUserAction(featureId::print, L"%s", logFormatW);
@@ -209,16 +210,25 @@ void featurePrint::renderEvent(EVT_HANDLE fragment)
 	::EvtRender(nullptr, fragment, EvtRenderEventXml, bufferSize, const_cast<wchar_t*>(buffer.data()), &bufferSize, &propertyCount);
 	if (buffer.length() > 0)
 	{
-		std::string bufferA;
-		bufferA.assign(buffer.begin(), buffer.end());
+		//std::string bufferA;
+		//bufferA.assign(buffer.begin(), buffer.end());
+
+		// 2021-06-19 : c 스타일로 변환하여 출력
+		BOOL usedDefaultChar = FALSE;
+		size_t length = ::WideCharToMultiByte(CP_ACP, 0, buffer.c_str(), -1, nullptr, 0, nullptr, &usedDefaultChar);
+		length++;
+		char *bufferA = (char*)::calloc(length, sizeof(char));
+		::WideCharToMultiByte(CP_ACP, 0, buffer.c_str(), -1, bufferA, length, nullptr, &usedDefaultChar);
 
 		// xml 파싱
 		tinyxml2::XMLDocument document;
-		tinyxml2::XMLError error = document.Parse(bufferA.c_str());
+		tinyxml2::XMLError error = document.Parse(bufferA);
 		if (error == tinyxml2::XMLError::XML_SUCCESS)
 		{
 			parseDocument(&document);
 		}
+
+		safeFree(bufferA);
 	}
 }
 void featurePrint::seekEvent(EVT_HANDLE queryResult)
