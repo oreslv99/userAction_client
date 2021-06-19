@@ -171,7 +171,6 @@ void featurePrint::parseDocument(tinyxml2::XMLDocument *document)
 	std::string printerName = documentPrinted->FirstChildElement("Param5")->GetText();
 	std::string filePath = documentPrinted->FirstChildElement("Param6")->GetText();
 	std::string copies = documentPrinted->FirstChildElement("Param8")->GetText();
-	::OutputDebugStringA(filePath.c_str());
 
 	// ·Î±×
 	std::string logFormat;
