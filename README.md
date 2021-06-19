@@ -11,7 +11,6 @@
 ### TODO
 - 기록된 데이터를 서버로 전송
 - 기능별 데이터 기록 조건을 설정할 수 있는 back/front-end
-- 기록된 사용자 데이터 활용
 
 ![image](https://user-images.githubusercontent.com/84181696/122645646-4b8f3080-d156-11eb-8c8c-3f45e18dd61f.png)
 ![image](https://user-images.githubusercontent.com/84181696/122645664-6a8dc280-d156-11eb-8a12-7492fe9c322a.png)
