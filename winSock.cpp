@@ -145,9 +145,41 @@ bool winSock::generateHeader(headerData header, bool newLine, std::string *buffe
 	jsonDocumentForWriteA jsonResult;
 	jsonResult.SetObject();
 
-	*buffer = "{ \"id\" : 0, \"param\" : null, \"moreData\": false }";
+	// id
+	jsonValueForWriteA id;
+	id.SetInt(header.id);
+	jsonResult.AddMember("id", id, jsonResult.GetAllocator());
 
-	return result;
+	// param
+	jsonValueForWriteA param;
+	if (header.moreData == true)
+	{
+		// TODO: 사용자 데이터 전송
+	}
+	else
+	{
+		param.SetNull();
+	}
+	jsonResult.AddMember("param", param, jsonResult.GetAllocator());
+
+	// noData
+	jsonValueForWriteA moreData;
+	moreData.SetBool(header.moreData);
+	jsonResult.AddMember("moreData", moreData, jsonResult.GetAllocator());
+
+	// buffer 저장
+	jsonStringBufferA stringBuffer;
+	stringBuffer.Clear();
+	jsonStringWriterA stringWriter(stringBuffer);
+	jsonResult.Accept(stringWriter);
+
+	*buffer += stringBuffer.GetString();
+	if (newLine == true)
+	{
+		*buffer += "\n";
+	}
+
+	return (buffer->empty() == false);
 }
 bool winSock::requestRule(std::wstring *buffer)
 {
@@ -164,8 +196,6 @@ bool winSock::requestRule(std::wstring *buffer)
 		return this->initialized;
 	}
 
-	char *ruleDataA = nullptr;
-	DWORD flags = -1;
 	while (true)
 	{
 		// 연결
@@ -175,31 +205,33 @@ bool winSock::requestRule(std::wstring *buffer)
 			break;
 		}
 
+		int err = 0;
 #pragma region request 전송
-		//// send - overlapped (Async & Non-blocking)
-		//WSAEVENT events_send[1];
-		//events_send[0] = ::WSACreateEvent();
-		//WSAOVERLAPPED overlapped_send;
-		//::memset(&overlapped_send, 0x00, sizeof(WSAOVERLAPPED));
-		//overlapped_send.hEvent = events_send[0];
+		//// overlapped (Async & Non-blocking)
+		//WSAEVENT sendEvents[1];
+		//sendEvents[0] = ::WSACreateEvent();
+		//WSAOVERLAPPED sendOverlapped;
+		//::memset(&sendOverlapped, 0x00, sizeof(WSAOVERLAPPED));
+		//sendOverlapped.hEvent = sendEvents[0];
 
-		// send - data
+		// 헤더
 		headerData header;
 		::memset(&header, 0x00, sizeof(headerData));
 		header.id = socket_command::socket_command_request_rule;
 		header.moreData = false;
 
+		// 서버와 미리 규약해놓은 포맷에 맞춰 헤더생성
 		std::string jsonData;
 		generateHeader(header, false, &jsonData);
 
-		WSABUF send[1];
-		::memset(send, 0x00, sizeof(WSABUF));
-		send[0].len = jsonData.length();
-		send[0].buf = const_cast<char*>(jsonData.c_str());
+		WSABUF sendBuffer[1];
+		::memset(sendBuffer, 0x00, sizeof(WSABUF));
+		sendBuffer[0].len = jsonData.length();
+		sendBuffer[0].buf = const_cast<char*>(jsonData.c_str());
 
-		int err = 0;
+		// 전송
 		DWORD numberOfBytesSent = 0;
-		err = ::WSASend(socket, send, _countof(send), &numberOfBytesSent, 0, nullptr, nullptr);
+		err = ::WSASend(socket, sendBuffer, _countof(sendBuffer), &numberOfBytesSent, 0, nullptr, nullptr);
 		if ((err == SOCKET_ERROR) && (WSA_IO_PENDING != (err = ::WSAGetLastError())))
 		{
 			help->writeLog(logId::error, L"[%s:%03d] code[%d] WSASend is failed.", __FUNCTIONW__, __LINE__, err);
@@ -208,166 +240,48 @@ bool winSock::requestRule(std::wstring *buffer)
 #pragma endregion
 
 #pragma region recv
-		////// recv - overlapped
-		////WSAEVENT events_recv[1];
-		////events_recv[0] = ::WSACreateEvent();
-		////WSAOVERLAPPED overlapped_recv;
-		////::memset(&overlapped_recv, 0x00, sizeof(WSAOVERLAPPED));
-		////overlapped_recv.hEvent = events_recv[0];
+		WSABUF recvBuffer[1];
+		// TODO: 버퍼를 넉넉하게 하는거보다 동적크기로 처리할 수 있는지 확인할 것
+		char buffer_header[2048];
+		::memset(buffer_header, 0x00, sizeof(buffer_header));
+		recvBuffer[0].len = _countof(buffer_header);
+		recvBuffer[0].buf = buffer_header;
 
-		////// recv - data
-		////DWORD numberOfBytesReceived = 0;
-		////flags = 0;
+		bool recieved_header = false;
+		DWORD numberOfBytesReceived = 0;
+		DWORD flags = 0;
+		while (true)
+		{
+			err = ::WSARecv(socket, recvBuffer, _countof(recvBuffer), &numberOfBytesReceived, &flags, nullptr, nullptr);
+			if ((err == SOCKET_ERROR) && (WSA_IO_PENDING != (err = ::WSAGetLastError())))
+			{
+				help->writeLog(logId::error, L"[%s:%03d] code[%d] WSARecv is failed.", __FUNCTIONW__, __LINE__, err);
+				break;
+			}
 
-		////WSABUF recv_buffer[1];
-		////char buffer_header[2048];
-		////::memset(buffer_header, 0x00, sizeof(buffer_header));
-		////recv_buffer[0].len = _countof(buffer_header);
-		////recv_buffer[0].buf = buffer_header;
+			if ((recvBuffer[0].len <= 0) || (recvBuffer[0].buf == nullptr))
+			{
+				help->writeLog(logId::warning, L"[%s:%03d] code[%d] Invalid received data.", __FUNCTIONW__, __LINE__);
+				break;
+			}
 
-		////bool recieved_header = false;
-		////while (true)
-		////{
-		////	err = ::WSARecv(socket, recv_buffer, _countof(recv_buffer), &numberOfBytesReceived, &flags, &overlapped_recv, NULL);
-		////	if ((err == SOCKET_ERROR) && (WSA_IO_PENDING != (err = ::WSAGetLastError())))
-		////	{
-		////		traceW(L"error [%s:%d] code[%d] WSARecv is failed.\n", __FUNCTIONW__, __LINE__, err);
-		////		errLog::getInstance()->write(error, L"[%s:%d] code[%d] WSARecv is failed.", __FUNCTIONW__, __LINE__, err);
-		////		break;
-		////	}
+			// TODO: 서버에서 정책데이터 받아서 생성하기
 
-		////	// 데이터 수신 끝났는지 확인
-		////	err = ::WSAWaitForMultipleEvents(1, &overlapped_recv.hEvent, TRUE, INFINITE, TRUE);
-		////	if (err == WSA_WAIT_FAILED)
-		////	{
-		////		traceW(L"error [%s:%d] code[%d] WSAWaitForMultipleEvents is failed.\n", __FUNCTIONW__, __LINE__, err);
-		////		errLog::getInstance()->write(error, L"[%s:%d] code[%d] WSAWaitForMultipleEvents is failed.", __FUNCTIONW__, __LINE__, err);
-		////		break;
-		////	}
+			// c 스타일로 변환하여 출력
+			size_t length = ::MultiByteToWideChar(CP_ACP, 0, recvBuffer[0].buf, -1, nullptr, 0);
+			length++;
+			buffer->resize(length);
+			::MultiByteToWideChar(CP_ACP, 0, recvBuffer[0].buf, -1, const_cast<wchar_t*>(buffer->data()), length);
 
-		////	// 실제로 수신된 바이트 수 확인
-		////	err = ::WSAGetOverlappedResult(socket, &overlapped_recv, &numberOfBytesReceived, FALSE, &flags);
-		////	if (err == FALSE)
-		////	{
-		////		err = ::WSAGetLastError();
-		////		traceW(L"error [%s:%d] code[%d] WSAGetOverlappedResult is failed.\n", __FUNCTIONW__, __LINE__, err);
-		////		errLog::getInstance()->write(error, L"[%s:%d] code[%d] WSAGetOverlappedResult is failed.", __FUNCTIONW__, __LINE__, err);
-		////		break;
-		////	}
-
-		////	::WSAResetEvent(overlapped_recv.hEvent);
-
-		////	////// TODO
-		////	//////	: 지금은 버퍼크기보다 아래라서 처리할 필요가 없는데, 이거 realloc 으로 변경해서 더 커질경우를 대비해야함
-		////	////traceA("debug [%s:%d] recv-data[%s]\n", __FUNCTION__, __LINE__, recv_buffer[0].buf);
-
-		////	if ((recieved_header == false) && (::strlen(recv_buffer[0].buf) > 0))
-		////	{
-		////		jsonDocumentA recv_header;
-		////		if (getJsonDocumentFromStringA(recv_buffer[0].buf, &recv_header) == false)
-		////		{
-		////			traceW(L"error [%s:%d] getJsonDocumentFromStringA is failed.\n", __FUNCTIONW__, __LINE__, err);
-		////			errLog::getInstance()->write(error, L"[%s:%d] code[%d] WSAGetOverlappedResult is failed.", __FUNCTIONW__, __LINE__, err);
-		////			break;
-		////		}
-
-		////		int command = -1;
-		////		int status = -1;
-		////		if ((recv_header.HasMember("command") == false) || (recv_header["command"].IsInt() == false))
-		////		{
-		////			traceW(L"error [%s:%d] invalid json data. [command]\n", __FUNCTIONW__, __LINE__);
-		////			errLog::getInstance()->write(error, L"[%s:%d] invalid json data. [command]", __FUNCTIONW__, __LINE__);
-		////			break;
-		////		}
-		////		else
-		////		{
-		////			command = recv_header["command"].GetInt();
-		////		}
-
-		////		if ((recv_header.HasMember("status") == false) || (recv_header["status"].IsInt() == false))
-		////		{
-		////			traceW(L"error [%s:%d] invalid json data. [command]\n", __FUNCTIONW__, __LINE__);
-		////			errLog::getInstance()->write(error, L"[%s:%d] invalid json data. [command]", __FUNCTIONW__, __LINE__);
-		////			break;
-		////		}
-		////		else
-		////		{
-		////			status = recv_header["status"].GetInt();
-		////		}
-
-		////		if ((command != socket_command_request_rule) && (status != socket_status_success))
-		////		{
-		////			traceW(L"error [%s:%d] invalid recv.\n", __FUNCTIONW__, __LINE__);
-		////			errLog::getInstance()->write(error, L"[%s:%d] invalid recv.", __FUNCTIONW__, __LINE__);
-		////			break;
-		////		}
-
-		////		recieved_header = true;
-		////	}
-		////	else
-		////	{
-		////		size_t length = ::strlen(recv_buffer[0].buf);
-		////		length++;
-		////		ruleDataA = (char*)::calloc(length, sizeof(char));
-		////		::strcpy_s(ruleDataA, length, recv_buffer[0].buf);
-		////	}
-
-		////	if (numberOfBytesReceived == 0)
-		////	{
-		////		//traceA("debug [%s:%d] end of recv-data.\n", __FUNCTION__, __LINE__);
-		////		break;
-		////	}
-		////}
+			break;
+		}
 #pragma endregion
-
-		result = ((ruleDataA != nullptr) ? (::strlen(ruleDataA) > 0) : false);
 
 		break;
 	}
 
-	// 2020-11-20 orseL 
-	//	: 서버쪽에서도 소켓끊음. 근데 내가먼저 끊어서 오류로 표시됨 (code: 'EPIPE', Error: This socket has been ended by the other party)
+	// 서버쪽에서도 소켓끊음. 근데 내가먼저 끊어서 오류로 표시됨 (code: 'EPIPE', Error: This socket has been ended by the other party)
 	::closesocket(socket);
-
-	////////// 1 : recv data (main)
-	////if (result == true)
-	////{
-	////	size_t length = ::MultiByteToWideChar(CP_ACP, 0, ruleDataA, -1, nullptr, 0);
-	////	length++;
-	////	wchar_t *ruleDataW = (wchar_t*)::calloc(length, sizeof(wchar_t));
-	////	::MultiByteToWideChar(CP_ACP, 0, ruleDataA, -1, ruleDataW, length);
-
-	////	result = deserialize_rules_from_string(ruleDataW, buffer);
-
-	////	// 정책파일로 생성
-	////	if (result == true)
-	////	{
-	////		while (true)
-	////		{
-	////			// 파일 열기 (있으면 삭제하고 다시 만듬)
-	////			std::wofstream rule;
-	////			rule.open(rule_file_name, std::ios::trunc);
-	////			if (rule.is_open() == false)
-	////			{
-	////				traceW(L"error [%s:%d] code[%d] rule.is_open() is failed.\n", __FUNCTIONW__, __LINE__, GetLastError());
-	////				errLog::getInstance()->write(error, L"[%s:%d] rule.is_open() is failed.", __FUNCTIONW__, __LINE__, GetLastError());
-	////				break;
-	////			}
-
-	////			rule << ruleDataW;
-
-	////			// 파일 닫기
-	////			rule.close();
-	////			break;
-	////		}
-	////	}
-
-	////	safeFree(ruleDataW);
-	////}
-
-	////safeFree(ruleDataA);
-
-	////errLog::getInstance()->write(info, L"%s to request rule from server.", ((result == true) ? L"succeeded" : L"failed"));
 
 	return result;
 }
