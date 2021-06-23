@@ -24,6 +24,14 @@ private:
 	std::wstring port;
 	bool initialized;
 	addrinfoW *addrInfo;
+
+	struct headerData
+	{
+		int id;			// request id
+		bool moreData;	// 다음 데이터가 존재
+	};
+
+	bool generateHeader(headerData header, bool newLine, std::string *buffer);
 	bool requestRule(std::wstring *buffer);
 
 

@@ -30,16 +30,31 @@ enum featureId
 	logoff,			// 로그오프
 };
 
+// multi-byte
+typedef rapidjson::GenericDocument<rapidjson::UTF8<>> jsonDocumentForWriteA;						// multibyte-char utf8 재정의 Document
+typedef rapidjson::GenericValue<rapidjson::UTF8<>> jsonValueForWriteA;								// multibyte-char utf8 재정의 GenericValue<UTF8<>>
+typedef rapidjson::GenericStringBuffer<rapidjson::UTF8<>> jsonStringBufferA;						// multibyte-char utf8 재정의 GenericStringBuffer<UTF8<>>
+typedef rapidjson::Writer<jsonStringBufferA, rapidjson::UTF8<>> jsonStringWriterA;
+
+typedef rapidjson::GenericDocument<rapidjson::UTF8<>> jsonDocumentA;								// multibyte-char utf8 재정의 Document
+typedef rapidjson::GenericArray<false, rapidjson::GenericValue<rapidjson::UTF8<>>> jsonArrayA;		// multibyte-char utf8 재정의 Array
+typedef rapidjson::GenericObject<false, rapidjson::GenericValue<rapidjson::UTF8<>>> jsonObjectA;	// multibyte-char utf8 재정의 Object
+typedef rapidjson::GenericValue<rapidjson::UTF8<>> jsonValueA;										// multibyte-char utf8 재정의 GenericValue<UTF16<>>
+typedef rapidjson::GenericValue<rapidjson::UTF8<>>::MemberIterator jsonMemberIteratorA;				// multibyte-char utf8 재정의 MemberIterator
+typedef rapidjson::GenericValue<rapidjson::UTF8<>>::ValueIterator jsonValueIteratorA;
+
+// wide-char
+typedef rapidjson::GenericDocument<rapidjson::UTF16<>> jsonDocumentForWriteW;						// wide-char utf16 재정의 Document
+typedef rapidjson::GenericValue<rapidjson::UTF16<>> jsonValueForWriteW;								// wide-char utf16 재정의 GenericValue<UTF16<>>
+typedef rapidjson::GenericStringBuffer<rapidjson::UTF16<>> jsonStringBufferW;						// wide-char utf16 재정의 GenericStringBuffer<UTF16<>>
+typedef rapidjson::Writer<jsonStringBufferW, rapidjson::UTF16<>> jsonStringWriterW;					// Document에서 wchar_t로 serialize
+
 typedef rapidjson::GenericDocument<rapidjson::UTF16<>> jsonDocumentW;								// wide-char utf16 재정의 Document
 typedef rapidjson::GenericArray<false, rapidjson::GenericValue<rapidjson::UTF16<>>> jsonArrayW;		// wide-char utf16 재정의 Array
 typedef rapidjson::GenericObject<false, rapidjson::GenericValue<rapidjson::UTF16<>>> jsonObjectW;	// wide-char utf16 재정의 Object
 typedef rapidjson::GenericValue<rapidjson::UTF16<>> jsonValueW;										// wide-char utf16 재정의 GenericValue<UTF16<>>
 typedef rapidjson::GenericValue<rapidjson::UTF16<>>::MemberIterator jsonMemberIteratorW;			// wide-char utf16 재정의 MemberIterator
 typedef rapidjson::GenericValue<rapidjson::UTF16<>>::ValueIterator jsonValueIteratorW;				// wide-char utf16 재정의 ValueIterator
-typedef rapidjson::GenericDocument<rapidjson::UTF16<>> jsonDocumentForWriteW;						// wide-char utf16 재정의 Document
-typedef rapidjson::GenericValue<rapidjson::UTF16<>> jsonValueForWriteW;								// wide-char utf16 재정의 GenericValue<UTF16<>>
-typedef rapidjson::GenericStringBuffer<rapidjson::UTF16<>> jsonStringBufferW;						// wide-char utf16 재정의 GenericStringBuffer<UTF16<>>
-typedef rapidjson::Writer<jsonStringBufferW, rapidjson::UTF16<>> jsonStringWriterW;					// Document에서 wchar_t로 serialize
 
 class helper
 {
