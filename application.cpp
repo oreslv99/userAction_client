@@ -141,10 +141,10 @@ bool application::readEnvironmet(context *appContext)
 
 	std::wstring ip;
 	std::wstring port;
-	ip.resize(15);		// xxx.xxx.xxx.xxx
-	port.resize(5);		// xxxxx
+	ip.resize(16);		// xxx.xxx.xxx.xxx
+	port.resize(6);		// xxxxx
 	::GetPrivateProfileStringW(SECTION_SERVER.c_str(), L"ip", L"localhost", const_cast<wchar_t*>(ip.data()), ip.length(), iniFilePath.c_str());
-	::GetPrivateProfileStringW(SECTION_SERVER.c_str(), L"port", L"3000", const_cast<wchar_t*>(port.data()), port.length(), iniFilePath.c_str());
+	::GetPrivateProfileStringW(SECTION_SERVER.c_str(), L"port", L"30002", const_cast<wchar_t*>(port.data()), port.length(), iniFilePath.c_str());
 
 	// context ¿¡ ¼³Á¤
 	appContext->setSocket(ip, port);

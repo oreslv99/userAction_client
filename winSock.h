@@ -24,5 +24,7 @@ private:
 	std::wstring port;
 	bool initialized;
 	addrinfoW *addrInfo;
+	bool requestRule(std::wstring *buffer);
+
 
 };

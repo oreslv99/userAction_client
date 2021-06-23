@@ -180,3 +180,38 @@ void helper::toLower(std::wstring &source)
 {
 	std::transform(source.begin(), source.end(), source.begin(), ::tolower);
 }
+bool helper::getJsonDocumentFromFile(const std::wstring filePath, jsonDocumentW *buffer)
+{
+	if ((filePath.length() < 0) || (buffer == nullptr))
+	{
+		help->writeLog(logId::error, L"[%s:%03d] Invalid parameter.", __FUNCTIONW__, __LINE__);
+		return false;
+	}
+
+	// 파일 핸들
+	std::wifstream fileStream(filePath);
+	if (fileStream.is_open() == false)
+	{
+		help->writeLog(logId::error, L"[%s:%03d] Can not open: %s", __FUNCTIONW__, __LINE__, filePath.c_str());
+		return false;
+	}
+
+	// 파일의 인코딩 타입을 utf8 로 설정
+	fileStream.imbue(std::locale(fileStream.getloc(), new std::codecvt_utf8<wchar_t, 0x10ffff, std::consume_header>));
+	rapidjson::WIStreamWrapper streamWrapper(fileStream);
+	buffer->ParseStream(streamWrapper);
+
+	return true;
+}
+bool helper::getJsonDocumentFromString(const std::wstring jsonString, jsonDocumentW *buffer)
+{
+	if ((jsonString.length() < 0) || (buffer == nullptr))
+	{
+		help->writeLog(logId::error, L"[%s:%03d] Invalid parameter.", __FUNCTIONW__, __LINE__);
+		return false;
+	}
+
+	// TODO: json 이 아닌경우 어떻게 되는지 확인
+	buffer->Parse(jsonString.c_str());
+	return buffer->IsObject();
+}
