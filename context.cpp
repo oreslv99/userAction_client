@@ -1,4 +1,5 @@
 #include "context.h"
+
 feature *context::fileIo = nullptr;
 
 LRESULT CALLBACK context::wndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -65,6 +66,8 @@ bool context::initialize()
 	// 정책 확인
 	this->rule.initialize(this->socket, this->window);
 	
+	// TODO: 프로그램 종료로 업로드되지 못한 데이터 재전송 (threading 처리해서 따로 병렬처리할 것)
+
 	// 감시기능 - 자리비움 (** 반드시 처음 리스트에 포함 **)
 	feature *afk = new featureAFK();
 	if (afk != nullptr)

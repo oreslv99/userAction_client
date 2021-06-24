@@ -1,5 +1,8 @@
 #include "winSock.h"
 
+const int REQUEST_DOWNLOAD_RULEDATA = 0;
+const int REQUEST_UPLOAD_USERDATA	= 1;
+
 //
 // public
 //
@@ -112,31 +115,6 @@ bool winSock::request(requestId id, std::wstring *buffer)
 //
 // private
 //
-enum socket_status
-{
-	socket_status_error = 0,
-	socket_status_success,
-	socket_status_warning,
-};
-enum socket_command
-{
-	socket_command_request_rule = 0,
-	socket_command_store_file,
-};
-enum socket_file_type
-{
-	socket_file_type_log = 0,
-	socket_file_type_detection_result,
-	socket_file_type_error_report,
-};
-struct socket_header_param
-{
-	socket_file_type fileType;
-	char *fileName;
-	int fileSize;
-	const char *addPath;
-};
-
 bool winSock::generateHeader(headerData header, bool newLine, std::string *buffer)
 {
 	bool result = false;
@@ -185,6 +163,7 @@ bool winSock::requestRule(std::wstring *buffer)
 {
 	bool result = false;
 
+#pragma region 연결
 	// 소켓
 	SOCKET socket = ::WSASocketW(
 		this->addrInfo->ai_family,
@@ -204,6 +183,7 @@ bool winSock::requestRule(std::wstring *buffer)
 			help->writeLog(logId::error, L"[%s:%03d] code[%d] connect is failed.", __FUNCTIONW__, __LINE__, ::WSAGetLastError());
 			break;
 		}
+#pragma endregion
 
 		int err = 0;
 
@@ -218,7 +198,7 @@ bool winSock::requestRule(std::wstring *buffer)
 		// 헤더
 		headerData header;
 		::memset(&header, 0x00, sizeof(headerData));
-		header.id = socket_command::socket_command_request_rule;
+		header.id = REQUEST_DOWNLOAD_RULEDATA;
 		header.moreData = false;
 
 		// 서버와 미리 규약해놓은 포맷에 맞춰 헤더생성
@@ -271,7 +251,7 @@ bool winSock::requestRule(std::wstring *buffer)
 			length++;
 			buffer->resize(length);
 			::MultiByteToWideChar(CP_ACP, 0, recvBuffer[0].buf, -1, const_cast<wchar_t*>(buffer->data()), length);
-
+			result = (buffer->empty() == false);
 			break;
 		}
 #pragma endregion
@@ -282,5 +262,79 @@ bool winSock::requestRule(std::wstring *buffer)
 	// 서버쪽에서도 소켓끊음. 근데 내가먼저 끊어서 오류로 표시됨 (code: 'EPIPE', Error: This socket has been ended by the other party)
 	::closesocket(socket);
 
-	return (buffer->empty() == false);
+	return result;
+}
+bool winSock::requestUpload(std::wstring path)
+{
+	bool result = false;
+
+#pragma region 연결
+	// 소켓
+	SOCKET socket = ::WSASocketW(
+		this->addrInfo->ai_family,
+		this->addrInfo->ai_socktype,
+		this->addrInfo->ai_protocol, nullptr, 0, WSA_FLAG_OVERLAPPED);
+	if (socket == INVALID_SOCKET)
+	{
+		help->writeLog(logId::error, L"[%s:%03d] code[%d] WSASocketW is failed.", __FUNCTIONW__, __LINE__, ::WSAGetLastError());
+		return this->initialized;
+	}
+
+	while (true)
+	{
+		// 연결
+		if (::connect(socket, this->addrInfo->ai_addr, static_cast<int>(this->addrInfo->ai_addrlen)) == SOCKET_ERROR)
+		{
+			help->writeLog(logId::error, L"[%s:%03d] code[%d] connect is failed.", __FUNCTIONW__, __LINE__, ::WSAGetLastError());
+			break;
+		}
+#pragma endregion
+
+#pragma region 사용자 데이터 확인
+		std::ifstream stream(path, std::ios::in);
+		if (stream.is_open() == false)
+		{
+			help->writeLog(logId::error, L"[%s:%03d] code[%d] is_open is failed.", __FUNCTIONW__, __LINE__, ::GetLastError());
+			return result;
+		}
+
+		// size 확인을 위해 position 이동
+		stream.seekg(0, std::ios::end);
+
+		// 헤더
+		headerData header;
+		::memset(&header, 0x00, sizeof(headerData));
+		header.id = REQUEST_UPLOAD_USERDATA;
+		header.moreData = true;
+		header.param = nullptr;	// TODO: 파일정보에 무엇이 필요한가? (unique name (사용자+@) / 파일크기 (전송크기) 등)
+
+		// 서버와 미리 규약해놓은 포맷에 맞춰 헤더생성
+		std::string jsonData;
+		generateHeader(header, true, &jsonData);
+#pragma endregion
+
+		int err = 0;
+
+#pragma region request 전송
+		WSABUF sendBuffer[1];
+		::memset(sendBuffer, 0x00, sizeof(WSABUF));
+		sendBuffer[0].len = jsonData.length();
+		sendBuffer[0].buf = const_cast<char*>(jsonData.c_str());
+
+		// 전송
+		DWORD numberOfBytesSent = 0;
+		err = ::WSASend(socket, sendBuffer, _countof(sendBuffer), &numberOfBytesSent, 0, nullptr, nullptr);
+		if ((err == SOCKET_ERROR) && (WSA_IO_PENDING != (err = ::WSAGetLastError())))
+		{
+			help->writeLog(logId::error, L"[%s:%03d] code[%d] WSASend is failed.", __FUNCTIONW__, __LINE__, err);
+			break;
+		}
+#pragma endregion
+
+		break;
+	}
+
+	::closesocket(socket);
+
+	return result;
 }
