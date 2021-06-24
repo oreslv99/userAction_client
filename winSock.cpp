@@ -206,6 +206,7 @@ bool winSock::requestRule(std::wstring *buffer)
 		}
 
 		int err = 0;
+
 #pragma region request 전송
 		//// overlapped (Async & Non-blocking)
 		//WSAEVENT sendEvents[1];
@@ -239,7 +240,7 @@ bool winSock::requestRule(std::wstring *buffer)
 		}
 #pragma endregion
 
-#pragma region recv
+#pragma region request return
 		WSABUF recvBuffer[1];
 		// TODO: 버퍼를 넉넉하게 하는거보다 동적크기로 처리할 수 있는지 확인할 것
 		char buffer_header[2048];
@@ -265,8 +266,6 @@ bool winSock::requestRule(std::wstring *buffer)
 				break;
 			}
 
-			// TODO: 서버에서 정책데이터 받아서 생성하기
-
 			// c 스타일로 변환하여 출력
 			size_t length = ::MultiByteToWideChar(CP_ACP, 0, recvBuffer[0].buf, -1, nullptr, 0);
 			length++;
@@ -283,5 +282,5 @@ bool winSock::requestRule(std::wstring *buffer)
 	// 서버쪽에서도 소켓끊음. 근데 내가먼저 끊어서 오류로 표시됨 (code: 'EPIPE', Error: This socket has been ended by the other party)
 	::closesocket(socket);
 
-	return result;
+	return (buffer->empty() == false);
 }
